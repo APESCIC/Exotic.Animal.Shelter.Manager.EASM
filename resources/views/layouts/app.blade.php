@@ -78,6 +78,7 @@
             @if (auth()->user()?->role?->canManageLostFound())
                 · <a href="{{ route('lost-found.create') }}">Add report</a>
             @endif
+            · <a href="{{ route('diary.index') }}">Diary / tasks</a>
         </p>
 
         @if (session('status'))

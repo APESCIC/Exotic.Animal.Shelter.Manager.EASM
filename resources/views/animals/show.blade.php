@@ -171,6 +171,120 @@
         <p><a class="button" href="{{ route('animals.observations.create', $animal) }}">Add observation</a></p>
     @endif
 
+    <h2>Diary / tasks</h2>
+    <p class="hint">Assigned staff tasks with due dates. Open tasks also appear in the <a href="{{ route('diary.index') }}">diary inbox</a>.</p>
+    @if ($animal->diaryTasks->isEmpty())
+        <p class="hint">No diary tasks yet.</p>
+    @else
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Assignee</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($animal->diaryTasks as $task)
+                    <tr>
+                        <td>{{ $task->title }}</td>
+                        <td>{{ $task->assignee?->name ?: '—' }}</td>
+                        <td>{{ $task->due_on ? \App\Support\UkDate::format($task->due_on) : '—' }}</td>
+                        <td>{{ $task->completed_at ? 'Done '.\App\Support\UkDate::format($task->completed_at) : 'Open' }}</td>
+                        <td>
+                            @if (auth()->user()?->role?->canManageDiary())
+                                @if ($task->completed_at)
+                                    <form method="post" action="{{ route('diary.reopen', $task) }}" style="display:inline">
+                                        @csrf
+                                        <button type="submit">Reopen</button>
+                                    </form>
+                                @else
+                                    <form method="post" action="{{ route('diary.complete', $task) }}" style="display:inline">
+                                        @csrf
+                                        <button type="submit">Complete</button>
+                                    </form>
+                                @endif
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    @if (auth()->user()?->role?->canManageDiary())
+        <p><a class="button" href="{{ route('animals.diary.create', $animal) }}">Add diary task</a></p>
+    @endif
+
+    <h2>Media</h2>
+    <p class="hint">Extra photos and PDFs. The primary photo above is separate.</p>
+    @if ($animal->media->isEmpty())
+        <p class="hint">No extra media yet.</p>
+    @else
+        <table>
+            <thead>
+                <tr>
+                    <th>Preview</th>
+                    <th>Name</th>
+                    <th>Kind</th>
+                    <th>Uploaded by</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($animal->media as $item)
+                    <tr>
+                        <td>
+                            @if ($item->isPhoto())
+                                <a href="{{ $item->url() }}" target="_blank" rel="noopener">
+                                    <img class="thumb" src="{{ $item->url() }}" alt="{{ $item->original_name }}">
+                                </a>
+                            @else
+                                <a href="{{ $item->url() }}" target="_blank" rel="noopener">Download PDF</a>
+                            @endif
+                        </td>
+                        <td>{{ $item->original_name }}</td>
+                        <td>{{ $item->kind->label() }}</td>
+                        <td>{{ $item->uploader?->name ?: '—' }}</td>
+                        <td>
+                            @if (auth()->user()?->role?->canManageMedia())
+                                <form method="post" action="{{ route('media.destroy', $item) }}" style="display:inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">Delete</button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    @if (auth()->user()?->role?->canManageMedia())
+        <p><a class="button" href="{{ route('animals.media.create', $animal) }}">Upload media</a></p>
+    @endif
+
+    @php
+        $customValues = $animal->customFieldValues->keyBy('definition_id');
+    @endphp
+    @if (($customFieldDefinitions ?? collect())->isNotEmpty())
+        <h2>Custom fields</h2>
+        <table>
+            @foreach ($customFieldDefinitions as $definition)
+                @php
+                    $stored = $customValues->get($definition->id)?->value;
+                @endphp
+                <tr>
+                    <th>{{ $definition->label }}</th>
+                    <td>{{ $definition->displayValue($stored) }}</td>
+                </tr>
+            @endforeach
+        </table>
+    @endif
+
     @if (auth()->user()?->role?->canManageAnimals())
         <p><a class="button" href="{{ route('animals.edit', $animal) }}">Edit</a></p>
     @endif

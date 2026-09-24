@@ -79,3 +79,38 @@
     <label for="primary_photo">{{ $animal->exists ? 'Replace primary photo' : 'Primary photo' }}</label>
     <input id="primary_photo" name="primary_photo" type="file" accept="image/*">
 </fieldset>
+
+@php
+    use App\Enums\CustomFieldType;
+    $definitions = $customFieldDefinitions ?? collect();
+    $valueMap = $animal->relationLoaded('customFieldValues')
+        ? $animal->customFieldValues->keyBy('definition_id')
+        : collect();
+@endphp
+@if ($definitions->isNotEmpty())
+    <fieldset>
+        <legend>Custom fields</legend>
+        @foreach ($definitions as $definition)
+            @php
+                $fieldName = 'custom_fields['.$definition->id.']';
+                $current = old('custom_fields.'.$definition->id, $valueMap->get($definition->id)?->value);
+                $inputId = 'custom_field_'.$definition->id;
+            @endphp
+            @if ($definition->type === CustomFieldType::Boolean)
+                <label class="check" for="{{ $inputId }}">
+                    <input id="{{ $inputId }}" name="{{ $fieldName }}" type="checkbox" value="1" @checked((string) $current === '1')>
+                    {{ $definition->label }}
+                </label>
+            @elseif ($definition->type === CustomFieldType::Number)
+                <label for="{{ $inputId }}">{{ $definition->label }}</label>
+                <input id="{{ $inputId }}" name="{{ $fieldName }}" type="number" step="any" value="{{ $current }}">
+            @elseif ($definition->type === CustomFieldType::Date)
+                <label for="{{ $inputId }}">{{ $definition->label }}</label>
+                <input id="{{ $inputId }}" name="{{ $fieldName }}" type="date" value="{{ $current }}">
+            @else
+                <label for="{{ $inputId }}">{{ $definition->label }}</label>
+                <input id="{{ $inputId }}" name="{{ $fieldName }}" type="text" value="{{ $current }}">
+            @endif
+        @endforeach
+    </fieldset>
+@endif

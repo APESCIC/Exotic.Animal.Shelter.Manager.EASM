@@ -30,10 +30,16 @@ class LostFoundTest extends TestCase
             'location' => 'Reptile House',
             'deceased_at' => null,
         ]);
-        Animal::factory()->create([
+        // Pin matcher fields so factory randomness (e.g. location=Reptile House)
+        // cannot give this decoy a positive score and show it as a likely match.
+        $nonMatch = Animal::factory()->create([
             'name' => 'Other',
             'species' => 'Corn snake',
+            'colour' => 'albino',
             'identifying_code' => 'EX-9999',
+            'location' => 'Aviary 1',
+            'flags' => null,
+            'breed_type' => null,
             'deceased_at' => null,
         ]);
 
@@ -63,7 +69,7 @@ class LostFoundTest extends TestCase
             ->assertSee('Likely matches', false)
             ->assertSee('Spike', false)
             ->assertSee('Identifying code', false)
-            ->assertDontSee('>Other<', false);
+            ->assertDontSee(route('animals.show', $nonMatch), false);
     }
 
     public function test_recently_adopted_animals_are_included_in_matches(): void
