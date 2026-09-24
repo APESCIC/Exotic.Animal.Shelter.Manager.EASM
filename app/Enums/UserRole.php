@@ -63,4 +63,20 @@ enum UserRole: string
             self::Volunteer, self::Readonly => false,
         };
     }
+
+    public function canManageDiary(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
+
+    public function canManageMedia(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
 }

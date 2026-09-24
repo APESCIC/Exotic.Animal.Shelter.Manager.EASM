@@ -20,6 +20,7 @@
         <h1>Administration</h1>
         <p>Admin-only area for this shelter install.</p>
         <p><a href="{{ route('admin.settings.edit') }}">Organisation settings</a></p>
+        <p><a href="{{ route('admin.custom-fields.index') }}">Custom fields</a></p>
         <p><a href="{{ route('home') }}">Back to home</a></p>
     </body>
 </html>

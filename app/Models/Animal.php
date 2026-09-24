@@ -89,6 +89,34 @@ class Animal extends Model
         return $this->hasMany(AnimalObservation::class)->orderByDesc('observed_on')->orderByDesc('id');
     }
 
+    /**
+     * @return HasMany<DiaryTask, $this>
+     */
+    public function diaryTasks(): HasMany
+    {
+        return $this->hasMany(DiaryTask::class)
+            ->orderByRaw('completed_at is not null')
+            ->orderByRaw('due_on is null')
+            ->orderBy('due_on')
+            ->orderByDesc('id');
+    }
+
+    /**
+     * @return HasMany<AnimalMedia, $this>
+     */
+    public function media(): HasMany
+    {
+        return $this->hasMany(AnimalMedia::class)->orderByDesc('id');
+    }
+
+    /**
+     * @return HasMany<CustomFieldValue, $this>
+     */
+    public function customFieldValues(): HasMany
+    {
+        return $this->hasMany(CustomFieldValue::class);
+    }
+
     public function primaryPhotoUrl(): ?string
     {
         if ($this->primary_photo_path === null || $this->primary_photo_path === '') {
@@ -121,7 +149,10 @@ class Animal extends Model
                 ->orWhere('colour', 'like', $like)
                 ->orWhere('enclosure', 'like', $like)
                 ->orWhere('cites', 'like', $like)
-                ->orWhere('dwa', 'like', $like);
+                ->orWhere('dwa', 'like', $like)
+                ->orWhereHas('customFieldValues', function (Builder $values) use ($like): void {
+                    $values->where('value', 'like', $like);
+                });
         });
     }
 

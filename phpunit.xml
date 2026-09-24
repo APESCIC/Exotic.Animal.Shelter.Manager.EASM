@@ -21,7 +21,7 @@
         <env name="APP_ENV" value="testing"/>
         <env name="APP_INSTALLED" value="true"/>
         <env name="APP_NAME" value="Exotic Animal Shelter Manager"/>
-        <env name="APP_VERSION" value="0.1.0-dev"/>
+        <env name="APP_VERSION" value="0.3.0-dev"/>
         <env name="APP_LOCALE" value="en_GB"/>
         <env name="APP_FALLBACK_LOCALE" value="en_GB"/>
         <env name="APP_FAKER_LOCALE" value="en_GB"/>

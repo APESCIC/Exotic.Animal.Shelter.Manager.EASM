@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AnimalSex;
+use App\Enums\CustomFieldType;
 use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
+use App\Models\CustomFieldDefinition;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -59,6 +61,11 @@ class AnimalController extends Controller
 
         return view('animals.create', [
             'animal' => new Animal(['sex' => AnimalSex::Unknown]),
+            'customFieldDefinitions' => CustomFieldDefinition::query()
+                ->active()
+                ->forAnimal()
+                ->ordered()
+                ->get(),
         ]);
     }
 
@@ -71,6 +78,7 @@ class AnimalController extends Controller
         }
 
         $animal = Animal::query()->create($data);
+        $this->syncCustomFieldValues($request, $animal);
 
         return redirect()
             ->route('animals.show', $animal)
@@ -79,10 +87,25 @@ class AnimalController extends Controller
 
     public function show(Animal $animal): View
     {
-        $animal->load(['movements.person', 'medicalRecords', 'diets', 'observations.user']);
+        $animal->load([
+            'movements.person',
+            'medicalRecords',
+            'diets',
+            'observations.user',
+            'diaryTasks.assignee',
+            'media.uploader',
+            'customFieldValues.definition',
+        ]);
+
+        $customFieldDefinitions = CustomFieldDefinition::query()
+            ->active()
+            ->forAnimal()
+            ->ordered()
+            ->get();
 
         return view('animals.show', [
             'animal' => $animal,
+            'customFieldDefinitions' => $customFieldDefinitions,
         ]);
     }
 
@@ -90,8 +113,15 @@ class AnimalController extends Controller
     {
         $this->authorizeManage();
 
+        $animal->load('customFieldValues');
+
         return view('animals.edit', [
             'animal' => $animal,
+            'customFieldDefinitions' => CustomFieldDefinition::query()
+                ->active()
+                ->forAnimal()
+                ->ordered()
+                ->get(),
         ]);
     }
 
@@ -107,6 +137,7 @@ class AnimalController extends Controller
         }
 
         $animal->update($data);
+        $this->syncCustomFieldValues($request, $animal);
 
         return redirect()
             ->route('animals.show', $animal)
@@ -118,10 +149,48 @@ class AnimalController extends Controller
      */
     private function validatedAnimalData(StoreAnimalRequest $request): array
     {
-        $data = $request->safe()->except(['primary_photo']);
+        $data = $request->safe()->except(['primary_photo', 'custom_fields']);
         $data['non_shelter'] = $request->boolean('non_shelter');
 
         return $data;
+    }
+
+    private function syncCustomFieldValues(StoreAnimalRequest $request, Animal $animal): void
+    {
+        $submitted = $request->input('custom_fields', []);
+
+        if (! is_array($submitted)) {
+            $submitted = [];
+        }
+
+        $definitions = CustomFieldDefinition::query()
+            ->active()
+            ->forAnimal()
+            ->get();
+
+        foreach ($definitions as $definition) {
+            $rawValue = $submitted[$definition->id] ?? ($definition->type === CustomFieldType::Boolean ? '0' : null);
+            $value = $definition->normalizeStoredValue($rawValue);
+
+            $existing = $animal->customFieldValues()
+                ->where('definition_id', $definition->id)
+                ->first();
+
+            if ($value === null || $value === '') {
+                $existing?->delete();
+
+                continue;
+            }
+
+            if ($existing !== null) {
+                $existing->update(['value' => $value]);
+            } else {
+                $animal->customFieldValues()->create([
+                    'definition_id' => $definition->id,
+                    'value' => $value,
+                ]);
+            }
+        }
     }
 
     private function authorizeManage(): void

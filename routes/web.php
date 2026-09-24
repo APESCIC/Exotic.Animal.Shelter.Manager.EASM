@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\LostFoundReportController;
@@ -54,6 +57,16 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/animals/{animal}/observations/create', [AnimalObservationController::class, 'create'])->name('animals.observations.create');
     Route::post('/animals/{animal}/observations', [AnimalObservationController::class, 'store'])->name('animals.observations.store');
 
+    Route::get('/animals/{animal}/diary/create', [DiaryTaskController::class, 'create'])->name('animals.diary.create');
+    Route::post('/animals/{animal}/diary', [DiaryTaskController::class, 'store'])->name('animals.diary.store');
+    Route::get('/diary', [DiaryTaskController::class, 'index'])->name('diary.index');
+    Route::post('/diary/{task}/complete', [DiaryTaskController::class, 'complete'])->name('diary.complete');
+    Route::post('/diary/{task}/reopen', [DiaryTaskController::class, 'reopen'])->name('diary.reopen');
+
+    Route::get('/animals/{animal}/media/create', [AnimalMediaController::class, 'create'])->name('animals.media.create');
+    Route::post('/animals/{animal}/media', [AnimalMediaController::class, 'store'])->name('animals.media.store');
+    Route::delete('/media/{medium}', [AnimalMediaController::class, 'destroy'])->name('media.destroy');
+
     Route::get('/people', [PersonController::class, 'index'])->name('people.index');
     Route::get('/people/create', [PersonController::class, 'create'])->name('people.create');
     Route::post('/people', [PersonController::class, 'store'])->name('people.store');
@@ -72,5 +85,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/custom-fields', [CustomFieldDefinitionController::class, 'index'])->name('custom-fields.index');
+        Route::get('/custom-fields/create', [CustomFieldDefinitionController::class, 'create'])->name('custom-fields.create');
+        Route::post('/custom-fields', [CustomFieldDefinitionController::class, 'store'])->name('custom-fields.store');
+        Route::get('/custom-fields/{customField}/edit', [CustomFieldDefinitionController::class, 'edit'])->name('custom-fields.edit');
+        Route::put('/custom-fields/{customField}', [CustomFieldDefinitionController::class, 'update'])->name('custom-fields.update');
     });
 });

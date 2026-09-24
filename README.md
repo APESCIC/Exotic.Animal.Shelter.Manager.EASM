@@ -48,7 +48,7 @@ Then:
 1. Create an empty MySQL or MariaDB database in the host panel.
 2. Point the vhost document root at `public/`.
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
-4. Run `php artisan storage:link` so primary animal photos are publicly reachable.
+4. Run `php artisan storage:link` so primary animal photos and extra media under `storage/app/public` are publicly reachable.
 5. Open the site in a browser. You are redirected to `/install`.
 6. Enter database credentials, organisation name, timezone, and the first admin user.
 
@@ -56,11 +56,19 @@ The wizard writes `.env`, runs migrations, creates that admin (role `admin`), an
 
 Sign in at `/login` with the admin email and password. Roles are admin, staff, volunteer, and readonly. Only admins can open `/admin` and change organisation settings (name, locale, timezone). Dates display as `dd/mm/yyyy`. Successful logins are written to `login_events`.
 
-Admin and staff can manage animal records at `/animals` (free-text species, primary photo, enclosure/CITES/DWA, find/filter, shelter view by location). Run `php artisan storage:link` once so primary photos are served.
+Admin and staff can manage animal records at `/animals` (free-text species, primary photo, enclosure/CITES/DWA, find/filter, shelter view by location). Run `php artisan storage:link` once so primary photos and animal media are served.
 
 Admin and staff can manage people/contacts at `/people` (categories, banned and homechecked flags, find/filter).
 
 Admin and staff can record movements on an animal (intake, hold, quarantine, foster, trial adoption, adoption, reclaim, transfer, deceased) with history on the animal record. A deceased movement updates the animal’s deceased date and death reason. Optional contact links use people from `/people`.
+
+Admin and staff can record medical care on an animal (vaccinations, tests, treatments, diets, daily observations) from the animal record.
+
+Admin and staff can create and complete diary tasks from an animal record or the shared inbox at `/diary`.
+
+Admin and staff can upload extra photos and PDFs onto an animal (Media section). This is separate from the primary photo.
+
+Admins define custom husbandry fields under `/admin/custom-fields` (text, number, date, yes/no). Staff fill them on animal create/edit; animal search also matches those values.
 
 Open `/health`. You should see JSON with `"status":"ok"` and a `version` field.
 
