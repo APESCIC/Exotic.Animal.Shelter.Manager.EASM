@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>@yield('title', config('app.name'))</title>
+        <title>@yield('title', $organisationName ?? config('app.name'))</title>
         <style>
             :root { color-scheme: light dark; }
             body {
@@ -15,13 +15,13 @@
             }
             a { color: #1b4332; }
             label { display: block; margin: 0.75rem 0 0.25rem; font-weight: 500; }
-            input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"], input[type="file"], select, textarea {
+            input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select, textarea {
                 width: 100%;
                 box-sizing: border-box;
                 padding: 0.45rem 0.5rem;
                 font: inherit;
             }
-            textarea { min-height: 4rem; }
+            textarea { min-height: 5rem; }
             button, .button {
                 display: inline-block;
                 margin-top: 0.75rem;
@@ -47,40 +47,35 @@
                 margin: 1rem 0;
             }
             .hint { margin: 0 0 1rem; color: #444; }
-            .check { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.85rem; font-weight: 400; }
-            .check input { width: auto; }
+            .photo { max-width: 16rem; height: auto; margin: 0.75rem 0; }
+            .thumb { max-width: 6rem; height: auto; }
             table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
             th, td { text-align: left; padding: 0.4rem 0.35rem; border-bottom: 1px solid #ccc; vertical-align: top; }
-            .photo { max-width: 12rem; height: auto; margin: 0.75rem 0; }
-            .thumb { max-width: 3.5rem; height: auto; }
-            nav { margin: 1rem 0; }
             fieldset { border: 1px solid #ccc; margin: 1.25rem 0; padding: 1rem 1.1rem 1.15rem; }
             legend { padding: 0 0.35rem; font-weight: 600; }
-            .filters { display: grid; gap: 0.75rem; margin: 1rem 0; }
+            .grid { display: grid; gap: 1.25rem; }
             @media (min-width: 40rem) {
-                .filters { grid-template-columns: 1fr 1fr auto; align-items: end; }
-                .filters button { margin-top: 0; }
+                .grid.cards { grid-template-columns: 1fr 1fr; }
             }
+            .card {
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 1rem;
+            }
+            header { margin-bottom: 1.5rem; }
+            header nav a { margin-right: 0.75rem; }
         </style>
+        @stack('head')
     </head>
     <body>
-        <p><a href="{{ route('home') }}">{{ config('app.name') }}</a>
-            · <a href="{{ route('animals.index') }}">Animals</a>
-            · <a href="{{ route('animals.shelter') }}">Shelter view</a>
-            @if (auth()->user()?->role?->canManageAnimals())
-                · <a href="{{ route('animals.create') }}">Add animal</a>
-            @endif
-            · <a href="{{ route('people.index') }}">People</a>
-            @if (auth()->user()?->role?->canManagePeople())
-                · <a href="{{ route('people.create') }}">Add contact</a>
-            @endif
-            · <a href="{{ route('lost-found.index') }}">Lost &amp; found</a>
-            @if (auth()->user()?->role?->canManageLostFound())
-                · <a href="{{ route('lost-found.create') }}">Add report</a>
-            @endif
-            · <a href="{{ route('diary.index') }}">Diary / tasks</a>
-            · <a href="{{ route('applications.index') }}">Applications</a>
-        </p>
+        @unless (!empty($embed))
+            <header>
+                <p><strong>{{ $organisationName ?? config('app.name') }}</strong></p>
+                <nav>
+                    <a href="{{ route('public.adopt.index') }}">Adoptable animals</a>
+                    <a href="{{ route('public.apply.index') }}">Apply</a>
+                </nav>
+            </header>
+        @endunless
 
         @if (session('status'))
             <div class="status" role="status">{{ session('status') }}</div>

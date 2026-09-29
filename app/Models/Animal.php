@@ -32,6 +32,7 @@ class Animal extends Model
         'bonded_animals',
         'entry_reason',
         'non_shelter',
+        'is_adoptable',
         'deceased_at',
         'death_reason',
         'enclosure',
@@ -50,8 +51,30 @@ class Animal extends Model
             'date_of_birth' => 'date',
             'deceased_at' => 'date',
             'non_shelter' => 'boolean',
+            'is_adoptable' => 'boolean',
             'age_years' => 'integer',
         ];
+    }
+
+    /**
+     * Public listing: staff opted in, not deceased, not a non-shelter record.
+     *
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeAdoptable(Builder $query): Builder
+    {
+        return $query
+            ->where('is_adoptable', true)
+            ->whereNull('deceased_at')
+            ->where('non_shelter', false);
+    }
+
+    public function isPubliclyAdoptable(): bool
+    {
+        return $this->is_adoptable
+            && $this->deceased_at === null
+            && ! $this->non_shelter;
     }
 
     /**

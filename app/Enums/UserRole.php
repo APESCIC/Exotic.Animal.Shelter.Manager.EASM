@@ -79,4 +79,12 @@ enum UserRole: string
             self::Volunteer, self::Readonly => false,
         };
     }
+
+    public function canManageApplications(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
 }

@@ -60,6 +60,11 @@
         <input id="non_shelter" name="non_shelter" type="checkbox" value="1" @checked(old('non_shelter', $animal->non_shelter))>
         Non-shelter animal
     </label>
+
+    <label class="check" for="is_adoptable">
+        <input id="is_adoptable" name="is_adoptable" type="checkbox" value="1" @checked(old('is_adoptable', $animal->is_adoptable))>
+        Listed for public adoption
+    </label>
 </fieldset>
 
 <fieldset>

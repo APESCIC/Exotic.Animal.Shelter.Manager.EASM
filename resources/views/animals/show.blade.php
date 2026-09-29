@@ -4,7 +4,9 @@
 
 @section('content')
     <h1>{{ $animal->name }}</h1>
-    <p class="hint">{{ $animal->species }}@if ($animal->breed_type) · {{ $animal->breed_type }}@endif</p>
+    <p class="hint">{{ $animal->species }}@if ($animal->breed_type) · {{ $animal->breed_type }}@endif
+        @if ($animal->isPubliclyAdoptable()) · Available for adoption @endif
+    </p>
 
     @if ($animal->primaryPhotoUrl())
         <img class="photo" src="{{ $animal->primaryPhotoUrl() }}" alt="Primary photo of {{ $animal->name }}">
@@ -24,6 +26,7 @@
         <tr><th>Entry reason</th><td>{{ $animal->entry_reason ?: '—' }}</td></tr>
         <tr><th>Flags</th><td>{{ $animal->flags ?: '—' }}</td></tr>
         <tr><th>Non-shelter</th><td>{{ $animal->non_shelter ? 'Yes' : 'No' }}</td></tr>
+        <tr><th>Listed for public adoption</th><td>{{ $animal->is_adoptable ? 'Yes' : 'No' }}</td></tr>
         <tr><th>Deceased</th><td>{{ $animal->deceased_at ? \App\Support\UkDate::format($animal->deceased_at) : '—' }}</td></tr>
         <tr><th>Death reason</th><td>{{ $animal->death_reason ?: '—' }}</td></tr>
     </table>

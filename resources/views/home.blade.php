@@ -49,6 +49,7 @@
                 · <a href="{{ route('lost-found.create') }}">Add report</a>
             @endif
             · <a href="{{ route('diary.index') }}">Diary / tasks</a>
+            · <a href="{{ route('applications.index') }}">Applications</a>
             @if (auth()->user()->role->isAdmin())
                 · <a href="{{ route('admin.dashboard') }}">Administration</a>
                 · <a href="{{ route('admin.settings.edit') }}">Settings</a>
@@ -59,5 +60,6 @@
                 <button type="submit" class="linkish">Sign out</button>
             </form>
         </nav>
+        <p class="hint" style="margin-top:1.5rem"><a href="{{ route('public.adopt.index') }}">Public adoptable site</a> · <a href="{{ route('public.apply.index') }}">Public applications</a></p>
     </body>
 </html>

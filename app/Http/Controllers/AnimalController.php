@@ -151,6 +151,7 @@ class AnimalController extends Controller
     {
         $data = $request->safe()->except(['primary_photo', 'custom_fields']);
         $data['non_shelter'] = $request->boolean('non_shelter');
+        $data['is_adoptable'] = $request->boolean('is_adoptable');
 
         return $data;
     }

@@ -35,6 +35,7 @@ class StoreAnimalRequest extends FormRequest
             'bonded_animals' => ['nullable', 'string', 'max:255'],
             'entry_reason' => ['nullable', 'string', 'max:255'],
             'non_shelter' => ['sometimes', 'boolean'],
+            'is_adoptable' => ['sometimes', 'boolean'],
             'deceased_at' => ['nullable', 'date'],
             'death_reason' => ['nullable', 'string', 'max:255'],
             'enclosure' => ['nullable', 'string', 'max:255'],
@@ -48,6 +49,7 @@ class StoreAnimalRequest extends FormRequest
     {
         $this->merge([
             'non_shelter' => $this->boolean('non_shelter'),
+            'is_adoptable' => $this->boolean('is_adoptable'),
         ]);
     }
 }
