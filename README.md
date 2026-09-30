@@ -70,6 +70,10 @@ Admin and staff can upload extra photos and PDFs onto an animal (Media section).
 
 Admins define custom husbandry fields under `/admin/custom-fields` (text, number, date, yes/no). Staff fill them on animal create/edit; animal search also matches those values.
 
+Guests can browse animals staff have marked **Listed for public adoption** at `/adopt` (detail at `/adopt/{id}`, embeddable list at `/adopt/embed`). A read-only JSON API is available at `GET /api/v1/adoptable` and `GET /api/v1/adoptable/{id}` (public-safe fields only; no authentication). Petfinder / AdoptAPet publishing is not included.
+
+Guests can submit fixed online forms at `/apply` (adopter, volunteer, foster). Prefer an animal with `/adopt/{id}/apply`. Staff review the queue at `/applications`; accepting an application creates a Person contact only (no Animal create from applications).
+
 Open `/health`. You should see JSON with `"status":"ok"` and a `version` field.
 
 Development install uses `composer install` (with dev packages) instead of `--no-dev`.
@@ -146,6 +150,8 @@ GitHub Releases are optional and operator-gated: after a merge to `main`, Cursor
 
 ## What this does not include
 
-- Public site, Cloudron OIDC / MyAPES-Account auth copy
+- Cloudron OIDC / MyAPES-Account auth copy
+- Petfinder / AdoptAPet / partner-site publishing (later milestone)
+- Public lost/found intake forms (staff lost/found matching already ships)
 
 The repository is maintained by [APES CIC](https://github.com/APESCIC).

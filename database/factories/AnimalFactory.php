@@ -30,6 +30,7 @@ class AnimalFactory extends Factory
             'bonded_animals' => fake()->optional()->firstName(),
             'entry_reason' => fake()->optional()->sentence(3),
             'non_shelter' => false,
+            'is_adoptable' => false,
             'deceased_at' => null,
             'death_reason' => null,
             'enclosure' => fake()->optional()->bothify('ENC-##'),

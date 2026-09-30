@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
@@ -14,6 +15,8 @@ use App\Http\Controllers\LostFoundReportController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\PersonController;
+use App\Http\Controllers\Public\AdoptableAnimalController;
+use App\Http\Controllers\Public\PublicApplicationController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +31,21 @@ Route::middleware(RedirectIfAuthenticated::class)->group(function (): void {
 Route::post('/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::get('/adopt', [AdoptableAnimalController::class, 'index'])->name('public.adopt.index');
+Route::get('/adopt/embed', [AdoptableAnimalController::class, 'embed'])->name('public.adopt.embed');
+Route::get('/adopt/{animal}/apply', [PublicApplicationController::class, 'createForAnimal'])->name('public.adopt.apply');
+Route::post('/adopt/{animal}/apply', [PublicApplicationController::class, 'storeForAnimal'])
+    ->middleware('throttle:10,1')
+    ->name('public.adopt.apply.store');
+Route::get('/adopt/{animal}', [AdoptableAnimalController::class, 'show'])->name('public.adopt.show');
+
+Route::get('/apply', [PublicApplicationController::class, 'index'])->name('public.apply.index');
+Route::get('/apply/thanks', [PublicApplicationController::class, 'thanks'])->name('public.apply.thanks');
+Route::get('/apply/{type}', [PublicApplicationController::class, 'create'])->name('public.apply.create');
+Route::post('/apply/{type}', [PublicApplicationController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('public.apply.store');
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/', function () {
@@ -73,6 +91,11 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/people/{person}', [PersonController::class, 'show'])->name('people.show');
     Route::get('/people/{person}/edit', [PersonController::class, 'edit'])->name('people.edit');
     Route::put('/people/{person}', [PersonController::class, 'update'])->name('people.update');
+
+    Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+    Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
+    Route::post('/applications/{application}/accept', [ApplicationController::class, 'accept'])->name('applications.accept');
 
     Route::get('/lost-found', [LostFoundReportController::class, 'index'])->name('lost-found.index');
     Route::get('/lost-found/create', [LostFoundReportController::class, 'create'])->name('lost-found.create');
