@@ -6,7 +6,7 @@ UK-first defaults: locale `en_GB`, timezone `Europe/London`. Display dates as `d
 
 See [AGENTS.md](AGENTS.md) for product constraints and implement order (v0.1.0 through v1.0.0).
 
-Tracked against [issue #13](https://github.com/APESCIC/Exotic-Animal-Shelter-Manager-EASM/issues/13) under [epic #3](https://github.com/APESCIC/Exotic-Animal-Shelter-Manager-EASM/issues/3) / [plan #1](https://github.com/APESCIC/Exotic-Animal-Shelter-Manager-EASM/issues/1).
+Tracked against [issue #13](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/13) under [epic #3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/3) / [plan #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1).
 
 ## Hosting matrix
 
@@ -27,8 +27,8 @@ Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only — not on
 Unzip a release or clone the repository, then run Composer **once**. The web wizard collects database credentials, the first admin user, organisation name, and timezone (default Europe/London).
 
 ```bash
-git clone https://github.com/APESCIC/Exotic-Animal-Shelter-Manager-EASM.git
-cd Exotic-Animal-Shelter-Manager-EASM
+git clone https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM.git
+cd Exotic.Animal.Shelter.Manager.EASM
 
 composer install --no-dev --optimize-autoloader
 ```
