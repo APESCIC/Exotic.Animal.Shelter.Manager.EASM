@@ -7,6 +7,8 @@ use App\Models\Animal;
 use App\Models\Application;
 use App\Models\CustomFieldDefinition;
 use App\Models\Diet;
+use App\Models\Document;
+use App\Models\DocumentTemplate;
 use App\Models\LostFoundReport;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
@@ -34,12 +36,15 @@ class LayoutTest extends TestCase
             'application' => Application::factory()->create(),
             'lostFoundReport' => LostFoundReport::factory()->create(),
             'customField' => CustomFieldDefinition::factory()->create(),
+            'documentTemplate' => DocumentTemplate::factory()->create(),
+            'document' => Document::factory()->for($animal)->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())
             ->filter(fn (Route $route): bool => in_array('GET', $route->methods(), true)
                 && in_array('auth', $route->gatherMiddleware(), true)
-                && ! str_ends_with((string) $route->getName(), '.json'));
+                && ! str_ends_with((string) $route->getName(), '.json')
+                && ! str_ends_with((string) $route->getName(), '.pdf'));
 
         $this->assertGreaterThan(20, $routes->count());
 

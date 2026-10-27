@@ -69,6 +69,8 @@ Admin and staff can create and complete diary tasks from an animal record or the
 
 Admin and staff can upload extra photos and PDFs onto an animal (Media section). This is separate from the primary photo.
 
+Admin and staff can generate documents (adoption contract, invoice, enclosure card) from an animal's Documents tab or a person's record, collect a mouse or touch signature, and download them as PDF. Signed documents are archived as PDF under `storage/app/private/documents` and cannot be changed. Admins edit the templates under `/admin/document-templates`; the default contract wording is a starting point to check with your own legal adviser.
+
 Admins define custom husbandry fields under `/admin/custom-fields` (text, number, date, yes/no). Staff fill them on animal create/edit; animal search also matches those values.
 
 Guests can browse animals staff have marked **Listed for public adoption** at `/adopt` (detail at `/adopt/{id}`, embeddable list at `/adopt/embed`). A read-only JSON API is available at `GET /api/v1/adoptable` and `GET /api/v1/adoptable/{id}` (public-safe fields only; no authentication). Petfinder / AdoptAPet publishing is not included.

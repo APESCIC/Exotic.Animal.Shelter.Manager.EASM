@@ -54,6 +54,25 @@ class Person extends Model
         return $this->hasMany(Movement::class);
     }
 
+    /**
+     * @return HasMany<Document, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class)->orderByDesc('id');
+    }
+
+    public function addressLine(): string
+    {
+        return implode(', ', array_filter([
+            $this->address_line1,
+            $this->address_line2,
+            $this->town_city,
+            $this->county,
+            $this->postcode,
+        ]));
+    }
+
     public function categoryLabel(): string
     {
         if ($this->category === PersonCategory::Custom && filled($this->category_custom)) {
