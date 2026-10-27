@@ -98,6 +98,8 @@ On Windows, prefer **[Laragon](https://laragon.org/)** (Apache + MySQL + PHP) in
 composer install
 ```
 
+The script uses the newest Laragon PHP folder that has a `php.ini` (builds without one load no extensions, so Composer and tests fail). Set `$env:LARAGON_PHP` to a folder name such as `php-8.3.33-Win32-vs16-x64` to pin a version, and select the same version in Laragon’s PHP menu for Apache.
+
 3. Point a site at this clone’s `public/` directory. Easiest: a directory junction so Laragon’s auto-host works:
 
 ```powershell
