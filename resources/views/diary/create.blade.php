@@ -6,12 +6,12 @@
     <h1>Add diary task</h1>
     <p class="hint">{{ $animal->name }} · {{ $animal->species }}. Assign a staff task with an optional due date.</p>
 
-    <form method="post" action="{{ route('animals.diary.store', $animal) }}">
+    <form method="post" action="{{ route('animals.diary.store', $animal) }}" data-dirty-guard>
         @csrf
         @include('diary._form')
         <p>
             <button type="submit">Save diary task</button>
-            <a class="button" href="{{ route('animals.show', $animal) }}">Cancel</a>
+            <a class="button" href="{{ \App\Enums\AnimalTab::Diary->url($animal) }}">Cancel</a>
         </p>
     </form>
 @endsection

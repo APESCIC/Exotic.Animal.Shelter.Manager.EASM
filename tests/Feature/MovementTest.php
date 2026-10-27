@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AnimalTab;
 use App\Enums\MovementType;
 use App\Enums\UserRole;
 use App\Models\Animal;
@@ -28,7 +29,7 @@ class MovementTest extends TestCase
                 'reason' => 'Surrender',
                 'notes' => 'Arrived in carrier',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Movements->url($animal));
 
         $this->actingAs($staff)
             ->post(route('animals.movements.store', $animal), [
@@ -36,7 +37,7 @@ class MovementTest extends TestCase
                 'moved_at' => '2026-08-01',
                 'reason' => 'Exotic intake quarantine',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Movements->url($animal));
 
         $this->actingAs($staff)
             ->post(route('animals.movements.store', $animal), [
@@ -45,12 +46,12 @@ class MovementTest extends TestCase
                 'person_id' => $foster->id,
                 'notes' => 'Two-week foster',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Movements->url($animal));
 
         $this->assertSame(3, Movement::query()->where('animal_id', $animal->id)->count());
 
         $this->actingAs($staff)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Movements->url($animal))
             ->assertOk()
             ->assertSee('Movements', false)
             ->assertSee('Intake', false)
@@ -76,14 +77,14 @@ class MovementTest extends TestCase
                 'reason' => 'Natural causes',
                 'notes' => 'Found overnight',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Movements->url($animal));
 
         $animal->refresh();
         $this->assertSame('2026-08-20', $animal->deceased_at?->format('Y-m-d'));
         $this->assertSame('Natural causes', $animal->death_reason);
 
         $this->actingAs($staff)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Movements->url($animal))
             ->assertOk()
             ->assertSee('Deceased', false)
             ->assertSee('Natural causes', false);
@@ -108,7 +109,7 @@ class MovementTest extends TestCase
 
             $this->actingAs($staff)
                 ->post(route('animals.movements.store', $animal), $payload)
-                ->assertRedirect(route('animals.show', $animal));
+                ->assertRedirect(AnimalTab::Movements->url($animal));
         }
 
         $this->assertSame(count(MovementType::cases()), Movement::query()->where('animal_id', $animal->id)->count());
@@ -136,7 +137,7 @@ class MovementTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($readonly)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Movements->url($animal))
             ->assertOk()
             ->assertSee('Hold', false)
             ->assertSee('Pending vet check', false)

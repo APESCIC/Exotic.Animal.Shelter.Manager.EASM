@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AnimalTab;
 use App\Models\Animal;
 use App\Models\DiaryTask;
 use App\Models\User;
@@ -25,7 +26,7 @@ class DiaryTaskTest extends TestCase
                 'assigned_to' => $assignee->id,
                 'due_on' => '2026-09-25',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Diary->url($animal));
 
         $task = DiaryTask::query()->where('animal_id', $animal->id)->first();
         $this->assertNotNull($task);
@@ -36,15 +37,15 @@ class DiaryTaskTest extends TestCase
 
         $this->actingAs($staff)
             ->post(route('diary.complete', $task))
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Diary->url($animal));
 
         $task->refresh();
         $this->assertNotNull($task->completed_at);
 
         $this->actingAs($staff)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Diary->url($animal))
             ->assertOk()
-            ->assertSee('Diary / tasks', false)
+            ->assertSee('data-active-tab="diary"', false)
             ->assertSee('Check heat mat', false)
             ->assertSee('Sam Assignee', false);
     }
@@ -71,7 +72,7 @@ class DiaryTaskTest extends TestCase
 
         $this->actingAs($staff)
             ->post(route('diary.complete', $task))
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Diary->url($animal));
 
         $this->actingAs($staff)
             ->get(route('diary.index'))
@@ -109,7 +110,7 @@ class DiaryTaskTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($readonly)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Diary->url($animal))
             ->assertOk()
             ->assertSee('Visible task', false)
             ->assertDontSee('Add diary task', false);

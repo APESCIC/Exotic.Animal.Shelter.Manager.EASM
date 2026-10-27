@@ -6,13 +6,13 @@
     <h1>Edit diet</h1>
     <p class="hint">{{ $animal->name }} · {{ $animal->species }}</p>
 
-    <form method="post" action="{{ route('diets.update', $diet) }}">
+    <form method="post" action="{{ route('diets.update', $diet) }}" data-dirty-guard>
         @csrf
         @method('PUT')
         @include('diets._form')
         <p>
             <button type="submit">Save changes</button>
-            <a class="button" href="{{ route('animals.show', $animal) }}">Cancel</a>
+            <a class="button" href="{{ \App\Enums\AnimalTab::Husbandry->url($animal) }}">Cancel</a>
         </p>
     </form>
 @endsection

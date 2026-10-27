@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AnimalTab;
 use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -59,8 +60,10 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/animals/shelter', [AnimalController::class, 'shelter'])->name('animals.shelter');
     Route::get('/animals/create', [AnimalController::class, 'create'])->name('animals.create');
     Route::post('/animals', [AnimalController::class, 'store'])->name('animals.store');
-    Route::get('/animals/{animal}', [AnimalController::class, 'show'])->name('animals.show');
     Route::get('/animals/{animal}/edit', [AnimalController::class, 'edit'])->name('animals.edit');
+    Route::get('/animals/{animal}/{tab?}', [AnimalController::class, 'show'])
+        ->whereIn('tab', AnimalTab::values())
+        ->name('animals.show');
     Route::put('/animals/{animal}', [AnimalController::class, 'update'])->name('animals.update');
     Route::get('/animals/{animal}/movements/create', [MovementController::class, 'create'])->name('animals.movements.create');
     Route::post('/animals/{animal}/movements', [MovementController::class, 'store'])->name('animals.movements.store');

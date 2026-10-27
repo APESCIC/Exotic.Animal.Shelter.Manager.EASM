@@ -6,7 +6,7 @@
     <h1>Add observation</h1>
     <p class="hint">{{ $animal->name }} · {{ $animal->species }}. Daily journal notes for this animal.</p>
 
-    <form method="post" action="{{ route('animals.observations.store', $animal) }}">
+    <form method="post" action="{{ route('animals.observations.store', $animal) }}" data-dirty-guard>
         @csrf
 
         <label for="observed_on">Date</label>
@@ -17,7 +17,7 @@
 
         <p>
             <button type="submit">Save observation</button>
-            <a class="button" href="{{ route('animals.show', $animal) }}">Cancel</a>
+            <a class="button" href="{{ \App\Enums\AnimalTab::Log->url($animal) }}">Cancel</a>
         </p>
     </form>
 @endsection

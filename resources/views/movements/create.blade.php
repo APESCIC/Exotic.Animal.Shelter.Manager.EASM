@@ -6,7 +6,7 @@
     <h1>Record movement</h1>
     <p class="hint">{{ $animal->name }} · {{ $animal->species }}</p>
 
-    <form method="post" action="{{ route('animals.movements.store', $animal) }}">
+    <form method="post" action="{{ route('animals.movements.store', $animal) }}" data-dirty-guard>
         @csrf
 
         <label for="type">Type</label>
@@ -41,7 +41,7 @@
 
         <p>
             <button type="submit">Save movement</button>
-            <a class="button" href="{{ route('animals.show', $animal) }}">Cancel</a>
+            <a class="button" href="{{ \App\Enums\AnimalTab::Movements->url($animal) }}">Cancel</a>
         </p>
     </form>
 @endsection

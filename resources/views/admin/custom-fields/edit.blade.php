@@ -6,7 +6,7 @@
     <h1>Edit custom field</h1>
     <p class="hint">Slug: <code>{{ $definition->slug }}</code> (updates when the label changes).</p>
 
-    <form method="post" action="{{ route('admin.custom-fields.update', $definition) }}">
+    <form method="post" action="{{ route('admin.custom-fields.update', $definition) }}" data-dirty-guard>
         @csrf
         @method('PUT')
         @include('admin.custom-fields._form')

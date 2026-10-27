@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AnimalMediaKind;
+use App\Enums\AnimalTab;
 use App\Http\Requests\StoreAnimalMediaRequest;
 use App\Models\Animal;
 use App\Models\AnimalMedia;
@@ -41,7 +42,7 @@ class AnimalMediaController extends Controller
         ]);
 
         return redirect()
-            ->route('animals.show', $animal)
+            ->to(AnimalTab::Media->url($animal))
             ->with('status', 'Media uploaded.');
     }
 
@@ -58,7 +59,7 @@ class AnimalMediaController extends Controller
         $medium->delete();
 
         return redirect()
-            ->route('animals.show', $animalId)
+            ->to(AnimalTab::Media->url($animalId))
             ->with('status', 'Media removed.');
     }
 

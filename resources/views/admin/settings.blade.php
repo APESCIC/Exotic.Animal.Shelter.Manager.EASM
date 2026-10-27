@@ -7,7 +7,7 @@
     <p class="hint">Shelter name, UK locale, and timezone. Dates display as dd/mm/yyyy. One shelter per install.</p>
     <p>Today: <strong>{{ \App\Support\UkDate::format(now()) }}</strong></p>
 
-    <form method="post" action="{{ route('admin.settings.update') }}">
+    <form method="post" action="{{ route('admin.settings.update') }}" data-dirty-guard>
         @csrf
         @method('PUT')
 

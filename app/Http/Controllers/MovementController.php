@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AnimalTab;
 use App\Enums\MovementType;
 use App\Http\Requests\StoreMovementRequest;
 use App\Models\Animal;
@@ -44,7 +45,7 @@ class MovementController extends Controller
         });
 
         return redirect()
-            ->route('animals.show', $animal)
+            ->to(AnimalTab::Movements->url($animal))
             ->with('status', 'Movement recorded.');
     }
 

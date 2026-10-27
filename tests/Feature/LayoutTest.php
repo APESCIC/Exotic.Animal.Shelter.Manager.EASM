@@ -46,6 +46,9 @@ class LayoutTest extends TestCase
         foreach ($routes as $route) {
             $bindings = [];
             foreach ($route->parameterNames() as $name) {
+                if (str_contains($route->uri(), '{'.$name.'?}')) {
+                    continue;
+                }
                 $this->assertArrayHasKey($name, $parameters, "No test model for route parameter {$name} on {$route->uri()}");
                 $bindings[$name] = $parameters[$name];
             }

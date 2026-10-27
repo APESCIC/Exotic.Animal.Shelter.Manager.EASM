@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AnimalTab;
 use App\Enums\MedicalRecordType;
 use App\Enums\UserRole;
 use App\Models\Animal;
@@ -27,7 +28,7 @@ class MedicalCareTest extends TestCase
                 'due_on' => '2026-09-05',
                 'notes' => 'Dose 1 of 3',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Health->url($animal));
 
         $record = MedicalRecord::query()->where('animal_id', $animal->id)->first();
         $this->assertNotNull($record);
@@ -43,13 +44,13 @@ class MedicalCareTest extends TestCase
                 'expires_on' => '',
                 'notes' => 'Dose 1 of 3 given',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Health->url($animal));
 
         $record->refresh();
         $this->assertSame('2026-09-05', $record->given_on?->format('Y-m-d'));
 
         $this->actingAs($staff)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Health->url($animal))
             ->assertOk()
             ->assertSee('Medical', false)
             ->assertSee('Ivermectin course', false)
@@ -70,7 +71,7 @@ class MedicalCareTest extends TestCase
                 'given_on' => '2026-09-01',
                 'expires_on' => '2027-09-01',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Health->url($animal));
 
         $this->actingAs($staff)
             ->post(route('animals.medical.store', $animal), [
@@ -78,7 +79,7 @@ class MedicalCareTest extends TestCase
                 'name' => 'Cloacal swab',
                 'due_on' => '2026-09-02',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Health->url($animal));
 
         $this->actingAs($staff)
             ->post(route('animals.diets.store', $animal), [
@@ -86,24 +87,32 @@ class MedicalCareTest extends TestCase
                 'details' => 'Morning pellets, afternoon greens',
                 'started_on' => '2026-09-01',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Husbandry->url($animal));
 
         $this->actingAs($staff)
             ->post(route('animals.observations.store', $animal), [
                 'observed_on' => '2026-09-03',
                 'body' => 'Bright, eating well, droppings normal',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Log->url($animal));
 
         $this->assertSame(2, MedicalRecord::query()->where('animal_id', $animal->id)->count());
         $this->assertSame(1, Diet::query()->where('animal_id', $animal->id)->count());
 
         $this->actingAs($staff)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Health->url($animal))
             ->assertOk()
             ->assertSee('PBFD vaccine', false)
-            ->assertSee('Cloacal swab', false)
-            ->assertSee('Pellet + fresh veg', false)
+            ->assertSee('Cloacal swab', false);
+
+        $this->actingAs($staff)
+            ->get(AnimalTab::Husbandry->url($animal))
+            ->assertOk()
+            ->assertSee('Pellet + fresh veg', false);
+
+        $this->actingAs($staff)
+            ->get(AnimalTab::Log->url($animal))
+            ->assertOk()
             ->assertSee('Bright, eating well', false)
             ->assertSee('Alex Staff', false);
     }
@@ -127,7 +136,7 @@ class MedicalCareTest extends TestCase
                 'ended_on' => '2026-09-01',
                 'notes' => 'Switched to pellets',
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Husbandry->url($animal));
 
         $diet->refresh();
         $this->assertSame('2026-09-01', $diet->ended_on?->format('Y-m-d'));
@@ -155,7 +164,7 @@ class MedicalCareTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($readonly)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Health->url($animal))
             ->assertOk()
             ->assertSee('Visible vax', false)
             ->assertDontSee('Add medical record', false);
