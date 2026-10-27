@@ -73,6 +73,8 @@ Admin and staff can generate documents (adoption contract, invoice, enclosure ca
 
 Admin and staff record donations, adoption fees and sponsorship payments in the ledger at `/finance`, against a person and/or animal, with totals by type and date. People can carry Gift Aid declarations, and animals show their current sponsors. `/finance/gift-aid` lists eligible donations for a date range (default: the current UK tax year), flags any that cannot be claimed, and downloads a **draft** schedule laid out like the HMRC Charities Online spreadsheet. Check the draft against current HMRC guidance before claiming. Read-only users can view the ledger; volunteers cannot see finance. There is no card or online payment processing.
 
+Staff track food, medical and other supplies at `/stock`: each item has a unit, quantity, reorder level and location. Every change (delivery, use, waste, stocktake count) is kept as history. Adding a medical record can take the stock used off at the same time. Items at or below their reorder level raise a **Low stock** alert on the dashboard. Volunteers can record deliveries and usage; staff manage the item list.
+
 Admins define custom husbandry fields under `/admin/custom-fields` (text, number, date, yes/no). Staff fill them on animal create/edit; animal search also matches those values.
 
 Guests can browse animals staff have marked **Listed for public adoption** at `/adopt` (detail at `/adopt/{id}`, embeddable list at `/adopt/embed`). A read-only JSON API is available at `GET /api/v1/adoptable` and `GET /api/v1/adoptable/{id}` (public-safe fields only; no authentication).

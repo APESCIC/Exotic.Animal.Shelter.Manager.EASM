@@ -15,6 +15,7 @@
         ],
         'Care' => [
             ['label' => 'Diary and tasks', 'route' => 'diary.index', 'active' => ['diary.*']],
+            ['label' => 'Stock', 'route' => 'stock.index', 'active' => ['stock.*']],
         ],
     ];
 

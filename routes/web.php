@@ -28,6 +28,8 @@ use App\Http\Controllers\Public\PartnerFeedController;
 use App\Http\Controllers\Public\PublicApplicationController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SponsorshipController;
+use App\Http\Controllers\StockItemController;
+use App\Http\Controllers\StockMovementController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -109,6 +111,14 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::post('/documents/{document}/sign', [DocumentController::class, 'sign'])->name('documents.sign');
     Route::get('/documents/{document}/pdf', [DocumentController::class, 'pdf'])->name('documents.pdf');
+
+    Route::get('/stock', [StockItemController::class, 'index'])->name('stock.index');
+    Route::get('/stock/create', [StockItemController::class, 'create'])->name('stock.create');
+    Route::post('/stock', [StockItemController::class, 'store'])->name('stock.store');
+    Route::get('/stock/{stockItem}', [StockItemController::class, 'show'])->name('stock.show');
+    Route::get('/stock/{stockItem}/edit', [StockItemController::class, 'edit'])->name('stock.edit');
+    Route::put('/stock/{stockItem}', [StockItemController::class, 'update'])->name('stock.update');
+    Route::post('/stock/{stockItem}/movements', [StockMovementController::class, 'store'])->name('stock.movements.store');
 
     Route::get('/finance', [PaymentController::class, 'index'])->name('finance.index');
     Route::get('/finance/payments/create', [PaymentController::class, 'create'])->name('payments.create');

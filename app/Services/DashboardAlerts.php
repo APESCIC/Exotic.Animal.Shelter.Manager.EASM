@@ -6,6 +6,7 @@ use App\Enums\AnimalListFilter;
 use App\Enums\DiaryDueFilter;
 use App\Models\Animal;
 use App\Models\DiaryTask;
+use App\Models\StockItem;
 
 class DashboardAlerts
 {
@@ -21,7 +22,20 @@ class DashboardAlerts
             $this->tasksDueToday(),
             $this->citesInCare(),
             $this->dwaInCare(),
+            $this->lowStock(),
         ];
+    }
+
+    public function lowStock(): DashboardAlert
+    {
+        return new DashboardAlert(
+            key: 'low_stock',
+            label: 'Low stock',
+            description: 'Food and medical items at or below their reorder level.',
+            count: StockItem::query()->lowStock()->count(),
+            url: route('stock.index', ['filter' => 'low']),
+            tone: 'quarantine',
+        );
     }
 
     public function quarantine(): DashboardAlert

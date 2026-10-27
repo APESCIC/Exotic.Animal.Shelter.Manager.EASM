@@ -96,6 +96,22 @@ enum UserRole: string
         };
     }
 
+    public function canManageStock(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
+
+    public function canRecordStockMovements(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Volunteer => true,
+            self::Readonly => false,
+        };
+    }
+
     public function canViewFinance(): bool
     {
         return match ($this) {
