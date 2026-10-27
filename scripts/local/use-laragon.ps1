@@ -1,6 +1,9 @@
 # Prefer Laragon PHP and Composer on the PATH for this shell session.
 # Usage (from repo root):
 #   . .\scripts\local\use-laragon.ps1
+#
+# Picks the newest PHP under bin\php that has a php.ini (builds without one load no
+# extensions). Set LARAGON_PHP to a folder name or full path to pin a version.
 
 $ErrorActionPreference = 'Stop'
 
@@ -10,14 +13,25 @@ if (-not (Test-Path -LiteralPath $laragonRoot)) {
     Write-Error "Laragon not found at $laragonRoot. Set LARAGON_ROOT or install Laragon."
 }
 
-$phpDirs = @(Get-ChildItem -LiteralPath (Join-Path $laragonRoot 'bin\php') -Directory -ErrorAction SilentlyContinue |
-    Sort-Object Name -Descending)
+$phpRoot = Join-Path $laragonRoot 'bin\php'
 
-if (-not $phpDirs -or $phpDirs.Count -eq 0) {
-    Write-Error "No PHP under $laragonRoot\bin\php"
+if ($env:LARAGON_PHP) {
+    $phpBin = if (Test-Path -LiteralPath $env:LARAGON_PHP) { $env:LARAGON_PHP } else { Join-Path $phpRoot $env:LARAGON_PHP }
+
+    if (-not (Test-Path -LiteralPath (Join-Path $phpBin 'php.ini'))) {
+        Write-Error "LARAGON_PHP=$env:LARAGON_PHP has no php.ini at $phpBin"
+    }
+} else {
+    $phpDirs = @(Get-ChildItem -LiteralPath $phpRoot -Directory -ErrorAction SilentlyContinue |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'php.ini') } |
+        Sort-Object Name -Descending)
+
+    if ($phpDirs.Count -eq 0) {
+        Write-Error "No PHP with a php.ini under $phpRoot. Copy php.ini-development to php.ini in a PHP folder or set LARAGON_PHP."
+    }
+
+    $phpBin = $phpDirs[0].FullName
 }
-
-$phpBin = $phpDirs[0].FullName
 $composerBin = Join-Path $laragonRoot 'bin\composer'
 
 $prepend = @($phpBin)
