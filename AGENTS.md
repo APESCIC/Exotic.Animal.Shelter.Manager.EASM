@@ -1,12 +1,13 @@
 # AGENTS.md
 
-Instructions for Cursor agents working on **Exotic Animal Shelter Manager (EASM)**. Do not invent extra product constraints. This repo may be README-only until the Laravel scaffold lands.
+Instructions for Cursor agents working on **Exotic Animal Shelter Manager (EASM)**. Do not invent extra product constraints.
 
 ## Product constraints
 
 - Self-hosted PHP/MySQL app for ordinary web hosting. One Composer install step. One shelter per install.
 - Stack: **Laravel + PHP 8 + MySQL/MariaDB**.
-- No Cloudron OIDC/staff login in v0.1. Local admin on generic hosting must work on day one. Do **not** copy MyAPES-Account Cloudron auth.
+- APES runs its own instance on Cloudron (packaging: `Dockerfile`, `CloudronManifest.json`, `cloudron/`). That package must not change how ordinary hosting installs work.
+- No Cloudron OIDC/staff login. Local admin must work on day one everywhere, Cloudron included. Do **not** copy MyAPES-Account Cloudron auth.
 - Do **not** fork Animal Shelter Manager (ASM / [sheltermanager.com](https://sheltermanager.com)). Use it as a feature baseline only.
 - Exotic species stay free-text. Animal records get a **primary photo** plus enclosure/CITES/DWA on #12 (do not wait for v0.3 media / #18 for the primary photo).
 - Animal control (#24) is municipal ASM; it must **not** block v1.0.0.
@@ -71,6 +72,28 @@ Finish a milestone before starting the next.
 1. #25 reports/timeline
 2. #26 touch-friendly tasks/rota
 
+### v0.9.0 Install and update system ([milestone/11](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/11), epic #76)
+
+Browser-only install and update on shared hosting (no shell, Composer, cron or Node for shelters).
+
+1. #77 release package workflow (manual publish only)
+2. #78 version and schema tracking
+3. #79 standalone requirements checker (`check.php`)
+4. #80 safe download, verification and pure-PHP extraction
+5. #81 shared-hosting compatibility layer
+6. #82 improved web installer
+7. #83 update check and poor-man's scheduler
+8. #84 resumable web updater
+9. #85 install and upgrade documentation
+10. #86 constrained-host test matrix in CI
+11. #89 update state machine and lock
+12. #90 manual release upload fallback
+13. #91 rollback
+14. #92 standalone recovery page (`recover.php`)
+15. #93 progress UI, redacted logs and maintenance bypass
+
+Optional CLI layers (not blocking): #87 `easm:install`, #88 `easm:update` / `easm:check`.
+
 ### v1.0.0 Production-ready self-host ([milestone/7](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/7), epic #7)
 
 1. #27 backup/security/first production install pack
@@ -92,19 +115,28 @@ Prefer **Laragon** for preview and CLI. See README “Local development” and `
 - Interactive DB: Laragon MySQL on `127.0.0.1`. Do not use Docker hostnames (e.g. `easm-mysql`) for local smoke.
 - Do **not** run Pint / `composer format` / `composer lint` mid-work. Lint once only in the ship-gate pre-commit verification block.
 
-## Ship-gate
+## Ship flow
 
-Work starts and finishes from a Cursor agent request. Follow `.cursor/rules/ship-gate.mdc` and `.cursor/skills/ship-gate/SKILL.md`:
+Work starts and finishes from a Cursor agent request. Follow `.cursor/rules/ship-gate.mdc` and `.cursor/skills/ship-gate/SKILL.md`. While every check is green, run the whole flow without stopping:
 
-1. When a slice is ready, run the **pre-commit verification** (full `composer test`, one `composer lint`, Laragon UI smoke when HTTP was touched). On failure, fix or stop — do **not** present the commit gate.
-2. Only after verification passes, present the **commit gate** (never commit silently).
-3. Open/update the PR; watch CI until green; present the **merge gate**.
-4. After merge on `main`, present the **GitHub Release gate** only as an opt-in — create a release when the operator decides, never silently.
-5. **No deploy gate.** Shelters download/clone and install on their own hosting (Composer + `/install`). Do not invent Cloudron or CI deploy steps.
+1. **Track**: find or create the issue (and sub-issues), set milestone, labels and assignee; comment progress, decisions and blockers as work proceeds.
+2. **Verify**: full `composer test`, one `composer lint`, Laragon UI smoke when HTTP changed, `docker build` when Cloudron packaging changed.
+3. **Commit and PR** on the `cursor/...` branch with `Fixes #<n>`; watch CI until green.
+4. **Merge** to `main` and confirm `main` CI.
+5. **Release**: patch release per merged PR; minor release when a milestone closes (then close the milestone). Bump `APP_VERSION` in the PR.
+6. **Deploy**: the published release triggers `.github/workflows/deploy-cloudron.yml`, which updates Cloudron app `CLOUDRON_APP_ID` (`7afd5173-8880-4e64-9c36-5f978d9c8f64`, `https://easm.intranet.apes.org.uk`). Confirm `/health` shows the new version.
+
+Stop at the first failure, missing secret, first-time Cloudron switch (`first_deploy=true`), or unclear decision. Agents never deploy to shelter hosting.
+
+**Always end with options:** whenever a choice is needed, or the turn ends, give a numbered list of the best next actions and mark **one recommended** option with a short reason.
+
+Deploy needs repo secrets `CLOUDRON_SERVER` and `CLOUDRON_TOKEN` plus variable `CLOUDRON_APP_ID`. If any are missing, stop and ask the user to add them; never invent values.
 
 ## GitHub issues
 
 - Search **this repo** for duplicates. Never open issues in other repos.
-- Prefer `area:` labels if they exist. Do not invent `type:` or `priority:` labels.
+- Prefer `area:` labels if they exist. Do not invent `type:` or `priority:` labels. Use `[Epic]`, `[Story]`, `[Task]`, `[Bug]`, `[Chore]` title prefixes.
+- Every issue gets a milestone from the implement order above (tooling chores may stay unmilestoned). Link sub-issues to their parent epic/story.
 - Branch `cursor/{feature|fix|chore}/<issue-number>-<slug>`. Open PRs with `Fixes #<n>`.
-- Assignee: `bmurphy-apescic` unless another owner is named.
+- Close leaf issues via the PR; close parents and milestones only when all children are closed.
+- Assignee: `apescic-director` unless another owner is named.

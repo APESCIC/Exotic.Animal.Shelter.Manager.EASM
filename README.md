@@ -14,9 +14,10 @@ Tracked against [issue #13](https://github.com/APESCIC/Exotic.Animal.Shelter.Man
 |-----------|-----|----------|---------------|--------|
 | cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | One `composer install`. Do not point the site at the repo root. |
 | Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document-root and Composer step. |
-| VPS (Apache or nginx) | 8.3+ | MySQL or MariaDB | `public/` | HTTPS recommended. No Cloudron packaging or OIDC. |
+| VPS (Apache or nginx) | 8.3+ | MySQL or MariaDB | `public/` | HTTPS recommended. |
+| Cloudron (APES instance) | 8.3 (image) | Cloudron MySQL addon | `public/` | Custom package in this repo; see Releases and deploy. |
 
-Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only — not on every HTTP request. One shelter per install; this is not multi-tenant SaaS. No Cloudron OIDC or staff login in v0.1.
+Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only — not on every HTTP request. One shelter per install; this is not multi-tenant SaaS. No Cloudron OIDC or external SSO; sign-in is the local admin and staff accounts.
 
 ### PHP extensions
 
@@ -144,15 +145,29 @@ composer lint
 
 PHPUnit treats the app as already installed (`APP_INSTALLED=true`) except in installer tests. Agents must not run Pint while editing; lint is for CI and the pre-commit verification gate (see AGENTS.md / ship-gate).
 
-## Releases
+## Releases and deploy
 
-There is no CI or agent deploy to customer hosting. Shelters install from a clone or zip (Composer + `/install`) as above.
+Shelters install from a clone or zip (Composer + `/install`) as above. Nothing deploys to shelter hosting.
 
-GitHub Releases are optional and operator-gated: after a merge to `main`, Cursor agents ask before creating a release (see [AGENTS.md](AGENTS.md) ship-gate). CI (`.github/workflows/ci.yml`) runs tests only.
+Cursor agents ship each merged PR as a GitHub Release: a patch release per PR, a minor release when a milestone closes (see [AGENTS.md](AGENTS.md)). CI (`.github/workflows/ci.yml`) runs tests on every PR and on `main`.
+
+Publishing a release runs `.github/workflows/deploy-cloudron.yml`, which builds `ghcr.io/apescic/easm:<version>` from the `Dockerfile` and updates the APES-owned Cloudron app (`https://easm.intranet.apes.org.uk`). Re-deploy a tag with `gh workflow run "Deploy to Cloudron" -f tag=vX.Y.Z`.
+
+Repository settings the deploy needs (Settings → Secrets and variables → Actions):
+
+| Name | Kind | Value |
+|------|------|-------|
+| `CLOUDRON_APP_ID` | variable | `7afd5173-8880-4e64-9c36-5f978d9c8f64` |
+| `CLOUDRON_SERVER` | secret | Cloudron dashboard domain, e.g. `my.cloudron.apes.org.uk` |
+| `CLOUDRON_TOKEN` | secret | Cloudron API token (Cloudron profile → API Tokens) |
+
+The GHCR `easm` package must be public, or GHCR must be added as a private registry in Cloudron, so Cloudron can pull the image. The first deploy replaces the app's current package and needs a manual run with `first_deploy=true`.
+
+On Cloudron the database comes from the MySQL addon: `cloudron/start.sh` writes `DB_*`, `APP_URL` and mail settings into `/app/data/env` and runs migrations on every start, and the install wizard skips the database step (`EASM_MANAGED_DATABASE=true`). Uploads and the install lock live in `/app/data/storage`.
 
 ## What this does not include
 
-- Cloudron OIDC / MyAPES-Account auth copy
+- Cloudron OIDC / MyAPES-Account auth copy (the Cloudron package uses local accounts)
 - Petfinder / AdoptAPet / partner-site publishing (later milestone)
 - Public lost/found intake forms (staff lost/found matching already ships)
 

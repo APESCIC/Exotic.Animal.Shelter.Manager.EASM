@@ -1,0 +1,21 @@
+{
+  "id": "uk.org.apes.easm",
+  "title": "Exotic Animal Shelter Manager",
+  "author": "APES CIC",
+  "description": "Shelter management for exotic animals: animal records with photo, enclosure, CITES and DWA details, people, movements, medical care, diary tasks, media, and a public adoption site.",
+  "tagline": "Exotic animal shelter management",
+  "website": "https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM",
+  "version": "0.0.0",
+  "healthCheckPath": "/health",
+  "httpPort": 8000,
+  "manifestVersion": 2,
+  "minBoxVersion": "7.6.0",
+  "memoryLimit": 536870912,
+  "addons": {
+    "localstorage": {},
+    "mysql": {},
+    "sendmail": {}
+  },
+  "tags": ["animals", "shelter", "rescue"],
+  "postInstallMessage": "Open the app to finish setup: the install wizard creates the first admin and organisation. The database is provided by Cloudron."
+}

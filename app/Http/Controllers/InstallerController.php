@@ -18,6 +18,7 @@ class InstallerController extends Controller
     {
         return view('installer', [
             'timezones' => timezone_identifiers_list(),
+            'managedDatabase' => (bool) config('easm.managed_database'),
             'dbDefaults' => [
                 'host' => (string) config('database.connections.mysql.host', '127.0.0.1'),
                 'port' => (string) config('database.connections.mysql.port', '3306'),

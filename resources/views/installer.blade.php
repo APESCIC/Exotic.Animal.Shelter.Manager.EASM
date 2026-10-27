@@ -44,7 +44,7 @@
     </head>
     <body>
         <h1>Install Exotic Animal Shelter Manager</h1>
-        <p class="hint">One shelter per install. After Composer install, this wizard writes database settings, creates the first admin, and then locks so it cannot be run again. No Cloudron or extra packages.</p>
+        <p class="hint">One shelter per install. After Composer install, this wizard writes database settings, creates the first admin, and then locks so it cannot be run again.</p>
 
         @if ($errors->any())
             <div class="errors" role="alert">
@@ -59,6 +59,9 @@
         <form method="post" action="{{ route('install.store') }}">
             @csrf
 
+            @if ($managedDatabase)
+            <p class="hint">The hosting platform provides the database, so there are no database settings to enter.</p>
+            @else
             <fieldset>
                 <legend>Database</legend>
                 <p class="hint">Create an empty MySQL or MariaDB database in the host panel, then enter its credentials.</p>
@@ -77,6 +80,7 @@
                 <label for="db_password">Password</label>
                 <input id="db_password" name="db_password" type="password" value="{{ old('db_password') }}" autocomplete="new-password">
             </fieldset>
+            @endif
 
             <fieldset>
                 <legend>Organisation</legend>
