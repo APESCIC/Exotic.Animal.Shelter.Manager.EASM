@@ -4,10 +4,10 @@
     @elseif ($animal->isInQuarantine())
         <x-badge tone="quarantine">Quarantine</x-badge>
     @endif
-    @if ($animal->cites)
+    @if ($animal->hasCitesListing())
         <x-badge tone="cites" title="CITES {{ $animal->cites }}">CITES</x-badge>
     @endif
-    @if ($animal->dwa)
+    @if ($animal->hasDwaListing())
         <x-badge tone="dwa" title="DWA {{ $animal->dwa }}">DWA</x-badge>
     @endif
     @if ($animal->isPubliclyAdoptable())

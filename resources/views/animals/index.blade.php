@@ -15,7 +15,19 @@
         @endif
     </div>
 
+    @if ($filter)
+        <p class="filter-chips">
+            <span class="chip" data-active-filter="{{ $filter->value }}">
+                {{ $filter->label() }}
+                <a href="{{ route('animals.index', array_filter(['q' => $q, 'location' => $location])) }}" aria-label="Remove filter: {{ $filter->label() }}">Remove</a>
+            </span>
+        </p>
+    @endif
+
     <form class="filters" method="get" action="{{ route('animals.index') }}">
+        @if ($filter)
+            <input type="hidden" name="filter" value="{{ $filter->value }}">
+        @endif
         <div>
             <label for="q">Find</label>
             <input id="q" name="q" type="text" value="{{ $q }}">

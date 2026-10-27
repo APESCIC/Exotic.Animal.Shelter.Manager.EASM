@@ -20,6 +20,11 @@ class Animal extends Model
     /**
      * @var list<string>
      */
+    private const NOT_LISTED_VALUES = ['none', 'no', 'n/a', 'na', 'not listed', 'non-cites', '-'];
+
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'species',
@@ -119,6 +124,89 @@ class Animal extends Model
             ->whereHas('latestMovement', function (Builder $movement): void {
                 $movement->where('type', MovementType::Quarantine->value);
             });
+    }
+
+    /**
+     * Living shelter animals that have not been adopted, reclaimed or transferred out.
+     *
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeInCare(Builder $query): Builder
+    {
+        return $query
+            ->whereNull('deceased_at')
+            ->where('non_shelter', false)
+            ->whereDoesntHave('latestMovement', function (Builder $movement): void {
+                $movement->whereIn('type', MovementType::departureValues());
+            });
+    }
+
+    /**
+     * Living animals with a medical record due before today and not yet given.
+     *
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeWithOverdueMedical(Builder $query): Builder
+    {
+        return $query
+            ->whereNull('deceased_at')
+            ->whereHas('medicalRecords', function (Builder $records): void {
+                $records->overdue();
+            });
+    }
+
+    /**
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeCitesListed(Builder $query): Builder
+    {
+        return $this->whereListed($query->inCare(), 'cites');
+    }
+
+    /**
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeDwaListed(Builder $query): Builder
+    {
+        return $this->whereListed($query->inCare(), 'dwa');
+    }
+
+    public function hasCitesListing(): bool
+    {
+        return self::isListedValue($this->cites);
+    }
+
+    public function hasDwaListing(): bool
+    {
+        return self::isListedValue($this->dwa);
+    }
+
+    /**
+     * CITES and DWA are free text, so staff may type a negative instead of leaving them blank.
+     */
+    private static function isListedValue(?string $value): bool
+    {
+        $normalised = strtolower(trim((string) $value));
+
+        return $normalised !== '' && ! in_array($normalised, self::NOT_LISTED_VALUES, true);
+    }
+
+    /**
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    private function whereListed(Builder $query, string $column): Builder
+    {
+        $placeholders = implode(', ', array_fill(0, count(self::NOT_LISTED_VALUES), '?'));
+
+        return $query
+            ->whereNotNull($column)
+            ->whereRaw("lower(trim({$column})) != ''")
+            ->whereRaw("lower(trim({$column})) not in ({$placeholders})", self::NOT_LISTED_VALUES);
     }
 
     /**

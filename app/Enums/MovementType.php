@@ -29,6 +29,28 @@ enum MovementType: string
         };
     }
 
+    /**
+     * Movements after which the animal is no longer in the shelter's care.
+     */
+    public function isDeparture(): bool
+    {
+        return match ($this) {
+            self::Adoption, self::Reclaim, self::Transfer, self::Deceased => true,
+            self::Intake, self::Hold, self::Quarantine, self::Foster, self::TrialAdoption => false,
+        };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function departureValues(): array
+    {
+        return array_values(array_map(
+            fn (self $type): string => $type->value,
+            array_filter(self::cases(), fn (self $type): bool => $type->isDeparture()),
+        ));
+    }
+
     public function typicallyNeedsPerson(): bool
     {
         return match ($this) {

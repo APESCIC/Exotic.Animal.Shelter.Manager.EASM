@@ -10,6 +10,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\LostFoundReportController;
 use App\Http\Controllers\MedicalRecordController;
@@ -48,9 +49,7 @@ Route::post('/apply/{type}', [PublicApplicationController::class, 'store'])
     ->name('public.apply.store');
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/', function () {
-        return view('home');
-    })->name('home');
+    Route::get('/', HomeController::class)->name('home');
 
     Route::get('/animals', [AnimalController::class, 'index'])->name('animals.index');
     Route::get('/animals/shelter', [AnimalController::class, 'shelter'])->name('animals.shelter');
