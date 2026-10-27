@@ -6,7 +6,7 @@ UK-first defaults: locale `en_GB`, timezone `Europe/London`. Display dates as `d
 
 See [docs/roadmap.md](docs/roadmap.md) for product constraints and the milestone order (v0.1.0 through v1.1.0).
 
-Tracked against [issue #13](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/13) under [epic #3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/3) / [plan #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1).
+Planning is tracked in [plan #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) and the [milestones](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all); [docs/roadmap.md](docs/roadmap.md) lists the order.
 
 ## Hosting matrix
 
