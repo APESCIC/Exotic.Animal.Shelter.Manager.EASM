@@ -5,7 +5,7 @@
             ['label' => 'Dashboard', 'route' => 'home', 'active' => ['home']],
         ],
         'Animals' => [
-            ['label' => 'Animals', 'route' => 'animals.index', 'active' => ['animals.index', 'animals.show', 'animals.create', 'animals.edit', 'animals.movements.*', 'animals.medical.*', 'animals.diets.*', 'animals.observations.*', 'animals.media.*', 'animals.diary.*', 'medical.*', 'diets.*']],
+            ['label' => 'Animals', 'route' => 'animals.index', 'active' => ['animals.index', 'animals.show', 'animals.create', 'animals.edit', 'animals.movements.*', 'animals.medical.*', 'animals.diets.*', 'animals.observations.*', 'animals.media.*', 'animals.diary.*', 'medical.*', 'diets.*', 'documents.*']],
             ['label' => 'Shelter view', 'route' => 'animals.shelter', 'active' => ['animals.shelter']],
             ['label' => 'Lost and found', 'route' => 'lost-found.index', 'active' => ['lost-found.*']],
         ],
@@ -23,6 +23,7 @@
             ['label' => 'Administration', 'route' => 'admin.dashboard', 'active' => ['admin.dashboard']],
             ['label' => 'Settings', 'route' => 'admin.settings.edit', 'active' => ['admin.settings.*']],
             ['label' => 'Custom fields', 'route' => 'admin.custom-fields.index', 'active' => ['admin.custom-fields.*']],
+            ['label' => 'Document templates', 'route' => 'admin.document-templates.index', 'active' => ['admin.document-templates.*']],
         ];
     }
 @endphp

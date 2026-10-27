@@ -12,6 +12,7 @@ enum AnimalTab: string
     case Movements = 'movements';
     case Legal = 'legal';
     case Media = 'media';
+    case Documents = 'documents';
     case Diary = 'diary';
     case Log = 'log';
 
@@ -24,6 +25,7 @@ enum AnimalTab: string
             self::Movements => 'Movements',
             self::Legal => 'Legal',
             self::Media => 'Media',
+            self::Documents => 'Documents',
             self::Diary => 'Diary',
             self::Log => 'Log',
         };
@@ -43,6 +45,7 @@ enum AnimalTab: string
             self::Movements => ['movements.person'],
             self::Legal => [],
             self::Media => ['media.uploader'],
+            self::Documents => ['documents.person'],
             self::Diary => ['diaryTasks.assignee'],
             self::Log => ['observations.user'],
         };
@@ -59,6 +62,7 @@ enum AnimalTab: string
             self::Husbandry => 'diets',
             self::Movements => 'movements',
             self::Media => 'media',
+            self::Documents => 'documents',
             self::Diary => 'diaryTasks',
             self::Log => 'observations',
         };

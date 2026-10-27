@@ -9,6 +9,7 @@ use App\Models\AnimalMedia;
 use App\Models\AnimalObservation;
 use App\Models\DiaryTask;
 use App\Models\Diet;
+use App\Models\Document;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
 use App\Models\User;
@@ -32,6 +33,7 @@ class AnimalTabsTest extends TestCase
             'movements' => [AnimalTab::Movements, ['Tab intake reason', 'Record movement'], ['Tab Ivermectin']],
             'legal' => [AnimalTab::Legal, ['Appendix II', 'DWA-TAB-1'], ['Tab Ivermectin']],
             'media' => [AnimalTab::Media, ['tab-photo.jpg', 'Upload media'], ['Tab Ivermectin']],
+            'documents' => [AnimalTab::Documents, ['Tab contract', 'Generate document'], ['Tab Ivermectin']],
             'diary' => [AnimalTab::Diary, ['Tab weigh-in', 'Add diary task'], ['Tab Ivermectin']],
             'log' => [AnimalTab::Log, ['Tab Bright', 'Add observation'], ['Tab Ivermectin']],
         ];
@@ -67,7 +69,7 @@ class AnimalTabsTest extends TestCase
         }
     }
 
-    public function test_tab_bar_lists_all_eight_tabs_with_counts(): void
+    public function test_tab_bar_lists_all_nine_tabs_with_counts(): void
     {
         $animal = $this->animalWithRecords();
 
@@ -75,7 +77,7 @@ class AnimalTabsTest extends TestCase
             ->get(route('animals.show', $animal))
             ->assertOk();
 
-        $this->assertCount(8, AnimalTab::cases());
+        $this->assertCount(9, AnimalTab::cases());
         foreach (AnimalTab::cases() as $tab) {
             $response->assertSee('href="'.$tab->url($animal).'" data-tab="'.$tab->value.'"', false);
         }
@@ -153,6 +155,7 @@ class AnimalTabsTest extends TestCase
         AnimalMedia::factory()->for($animal)->create(['original_name' => 'tab-photo.jpg']);
         DiaryTask::factory()->for($animal)->create(['title' => 'Tab weigh-in', 'body' => null]);
         AnimalObservation::factory()->for($animal)->create(['body' => 'Tab Bright and alert']);
+        Document::factory()->for($animal)->create(['title' => 'Tab contract']);
 
         return $animal;
     }

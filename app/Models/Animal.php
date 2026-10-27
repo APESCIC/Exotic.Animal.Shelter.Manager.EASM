@@ -257,6 +257,14 @@ class Animal extends Model
     }
 
     /**
+     * @return HasMany<Document, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class)->orderByDesc('id');
+    }
+
+    /**
      * @return HasMany<CustomFieldValue, $this>
      */
     public function customFieldValues(): HasMany

@@ -3,6 +3,7 @@
 use App\Enums\AnimalTab;
 use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AnimalMediaController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\LostFoundReportController;
@@ -91,6 +93,12 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/animals/{animal}/media', [AnimalMediaController::class, 'store'])->name('animals.media.store');
     Route::delete('/media/{medium}', [AnimalMediaController::class, 'destroy'])->name('media.destroy');
 
+    Route::get('/documents/create', [DocumentController::class, 'create'])->name('documents.create');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
+    Route::post('/documents/{document}/sign', [DocumentController::class, 'sign'])->name('documents.sign');
+    Route::get('/documents/{document}/pdf', [DocumentController::class, 'pdf'])->name('documents.pdf');
+
     Route::get('/people', [PersonController::class, 'index'])->name('people.index');
     Route::get('/people/create', [PersonController::class, 'create'])->name('people.create');
     Route::post('/people', [PersonController::class, 'store'])->name('people.store');
@@ -119,5 +127,10 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/custom-fields', [CustomFieldDefinitionController::class, 'store'])->name('custom-fields.store');
         Route::get('/custom-fields/{customField}/edit', [CustomFieldDefinitionController::class, 'edit'])->name('custom-fields.edit');
         Route::put('/custom-fields/{customField}', [CustomFieldDefinitionController::class, 'update'])->name('custom-fields.update');
+        Route::get('/document-templates', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
+        Route::get('/document-templates/create', [DocumentTemplateController::class, 'create'])->name('document-templates.create');
+        Route::post('/document-templates', [DocumentTemplateController::class, 'store'])->name('document-templates.store');
+        Route::get('/document-templates/{documentTemplate}/edit', [DocumentTemplateController::class, 'edit'])->name('document-templates.edit');
+        Route::put('/document-templates/{documentTemplate}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
     });
 });

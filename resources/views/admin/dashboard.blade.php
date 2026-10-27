@@ -16,6 +16,7 @@
             <h2>Custom fields</h2>
             <p class="hint">Extra husbandry fields for animal records.</p>
             <a class="button" href="{{ route('admin.custom-fields.index') }}">Custom fields</a>
+            <a class="button" href="{{ route('admin.document-templates.index') }}">Document templates</a>
         </section>
     </div>
 @endsection
