@@ -97,13 +97,14 @@
             return;
         }
 
+        var form = dialog.querySelector('[data-palette-form]');
         var input = dialog.querySelector('[data-palette-input]');
         var results = dialog.querySelector('[data-palette-results]');
         var status = dialog.querySelector('[data-palette-status]');
         var searchUrl = dialog.getAttribute('data-search-url');
-        var resultsUrl = dialog.getAttribute('data-results-url');
         var minLength = 2;
         var options = [];
+        var optionUrls = [];
         var activeIndex = -1;
         var timer = null;
         var controller = null;
@@ -135,9 +136,17 @@
             }
         }
 
+        function navigateTo(url) {
+            var target = new URL(url, window.location.href);
+            if (target.origin === window.location.origin) {
+                window.location.assign(target.pathname + target.search);
+            }
+        }
+
         function render(groups) {
             results.textContent = '';
             options = [];
+            optionUrls = [];
 
             groups.forEach(function (group) {
                 var wrapper = document.createElement('div');
@@ -157,7 +166,6 @@
                     option.className = 'palette-option';
                     option.setAttribute('role', 'option');
                     option.setAttribute('aria-selected', 'false');
-                    option.setAttribute('data-url', item.url);
 
                     var title = document.createElement('span');
                     title.className = 'palette-option-title';
@@ -173,11 +181,12 @@
 
                     option.addEventListener('mousedown', function (event) {
                         event.preventDefault();
-                        window.location.href = item.url;
+                        navigateTo(item.url);
                     });
 
                     wrapper.appendChild(option);
                     options.push(option);
+                    optionUrls.push(item.url);
                 });
 
                 results.appendChild(wrapper);
@@ -292,11 +301,17 @@
                 setActive(options.length - 1);
             } else if (event.key === 'Enter') {
                 event.preventDefault();
-                if (activeIndex >= 0 && options[activeIndex]) {
-                    window.location.href = options[activeIndex].getAttribute('data-url');
+                if (activeIndex >= 0 && optionUrls[activeIndex]) {
+                    navigateTo(optionUrls[activeIndex]);
                 } else if (input.value.trim() !== '') {
-                    window.location.href = resultsUrl + '?q=' + encodeURIComponent(input.value.trim());
+                    form.requestSubmit();
                 }
+            }
+        });
+
+        form.addEventListener('submit', function (event) {
+            if (input.value.trim() === '') {
+                event.preventDefault();
             }
         });
 

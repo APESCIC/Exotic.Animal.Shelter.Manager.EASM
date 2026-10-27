@@ -67,17 +67,17 @@
                 </main>
 
                 <dialog class="palette" id="command-palette" aria-label="Quick search" data-palette
-                        data-search-url="{{ route('search.json') }}" data-results-url="{{ route('search') }}">
-                    <div class="palette-box">
+                        data-search-url="{{ route('search.json') }}">
+                    <form class="palette-box" method="get" action="{{ route('search') }}" role="search" data-palette-form>
                         <label class="visually-hidden" for="palette-input">Search animals and people</label>
-                        <input id="palette-input" type="search" autocomplete="off" spellcheck="false"
+                        <input id="palette-input" name="q" type="search" autocomplete="off" spellcheck="false"
                                placeholder="Animal, person, microchip or CITES reference"
                                role="combobox" aria-expanded="false" aria-autocomplete="list"
                                aria-controls="palette-results" aria-activedescendant="" data-palette-input>
                         <div id="palette-results" class="palette-results" role="listbox" aria-label="Search results" data-palette-results></div>
                         <p class="palette-status" role="status" aria-live="polite" data-palette-status>Type at least 2 characters.</p>
                         <p class="palette-help"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close</p>
-                    </div>
+                    </form>
                 </dialog>
 
                 <footer class="app-footer">
