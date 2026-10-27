@@ -32,3 +32,23 @@
 
 <label for="notes">Notes</label>
 <textarea id="notes" name="notes" maxlength="5000">{{ old('notes', $record->notes) }}</textarea>
+
+@isset($stockItems)
+    @if ($stockItems->isNotEmpty())
+        <fieldset class="fieldset">
+            <legend>Stock used (optional)</legend>
+            <label for="stock_item_id">Stock item</label>
+            <select id="stock_item_id" name="stock_item_id">
+                <option value="">— None —</option>
+                @foreach ($stockItems as $stockItem)
+                    <option value="{{ $stockItem->id }}" @selected((string) old('stock_item_id') === (string) $stockItem->id)>
+                        {{ $stockItem->name }} ({{ $stockItem->category->label() }}, {{ $stockItem->formattedQuantity() }} left)
+                    </option>
+                @endforeach
+            </select>
+            <label for="stock_quantity">Quantity used</label>
+            <input id="stock_quantity" type="text" name="stock_quantity" inputmode="decimal" value="{{ old('stock_quantity') }}" maxlength="12">
+            <p class="hint">Takes the amount off stock when you save.</p>
+        </fieldset>
+    @endif
+@endisset

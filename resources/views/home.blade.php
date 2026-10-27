@@ -52,6 +52,7 @@
             <h2>Care</h2>
             <ul class="link-list">
                 <li><a href="{{ route('diary.index') }}">Diary and tasks</a></li>
+                <li><a href="{{ route('stock.index') }}">Stock</a></li>
             </ul>
         </section>
     </div>

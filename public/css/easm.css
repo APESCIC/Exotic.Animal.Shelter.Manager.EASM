@@ -882,6 +882,23 @@ textarea {
     min-height: 5rem;
 }
 
+.fieldset {
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.fieldset legend {
+    padding: 0 var(--space-1);
+    font-weight: 600;
+}
+
+.quantity-negative {
+    color: var(--color-danger-text);
+    font-weight: 600;
+}
+
 .field-label {
     margin: var(--space-3) 0 var(--space-1);
     font-weight: 500;

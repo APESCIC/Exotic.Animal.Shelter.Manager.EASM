@@ -14,6 +14,7 @@ use App\Models\MedicalRecord;
 use App\Models\Movement;
 use App\Models\Payment;
 use App\Models\Person;
+use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
@@ -40,6 +41,7 @@ class LayoutTest extends TestCase
             'documentTemplate' => DocumentTemplate::factory()->create(),
             'document' => Document::factory()->for($animal)->create(),
             'payment' => Payment::factory()->create(),
+            'stockItem' => StockItem::factory()->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())
