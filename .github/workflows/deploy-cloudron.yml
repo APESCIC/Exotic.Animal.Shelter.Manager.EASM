@@ -97,7 +97,7 @@ jobs:
           node-version: '20'
 
       - name: Install Cloudron CLI
-        run: npm install --global cloudron
+        run: npm install --global cloudron@9
 
       - name: Set manifest version
         run: |
@@ -108,7 +108,7 @@ jobs:
         env:
           FIRST_DEPLOY: ${{ inputs.first_deploy }}
         run: |
-          current="$(cloudron status --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Manifest Id/ {print $2}')"
+          current="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Manifest Id/ {print $2}')"
           force=""
           if [ "$current" != "$EASM_MANIFEST_ID" ]; then
             if [ "$FIRST_DEPLOY" != "true" ]; then
@@ -117,12 +117,12 @@ jobs:
             fi
             force="--force"
           fi
-          cloudron update --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" \
-            --app "$CLOUDRON_APP_ID" --image "$IMAGE:${{ steps.tag.outputs.version }}" $force
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" \
+            update --app "$CLOUDRON_APP_ID" --image "$IMAGE:${{ steps.tag.outputs.version }}" $force
 
       - name: Check deployed health
         run: |
-          location="$(cloudron status --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Location/ {print $2}')"
+          location="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Location/ {print $2}')"
           for attempt in 1 2 3 4 5 6; do
             if curl -fsS "https://$location/health" | tee /dev/stderr | grep -q '"version":"${{ steps.tag.outputs.version }}"'; then
               echo "Deployed ${{ steps.tag.outputs.version }} to https://$location"
