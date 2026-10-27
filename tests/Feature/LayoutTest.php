@@ -38,7 +38,8 @@ class LayoutTest extends TestCase
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())
             ->filter(fn (Route $route): bool => in_array('GET', $route->methods(), true)
-                && in_array('auth', $route->gatherMiddleware(), true));
+                && in_array('auth', $route->gatherMiddleware(), true)
+                && ! str_ends_with((string) $route->getName(), '.json'));
 
         $this->assertGreaterThan(20, $routes->count());
 

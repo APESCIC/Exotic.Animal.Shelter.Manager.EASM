@@ -27,9 +27,14 @@
                 <header class="topbar">
                     <button type="button" class="icon-button nav-toggle" data-nav-toggle aria-controls="sidebar" aria-expanded="false">Menu</button>
 
-                    <div class="topbar-search">
-                        @yield('topbar-search')
-                    </div>
+                    <form class="topbar-search" method="get" action="{{ route('search') }}" role="search">
+                        <label class="visually-hidden" for="topbar-q">Search animals and people</label>
+                        <input id="topbar-q" name="q" type="search" value="{{ request()->routeIs('search') ? request('q') : '' }}"
+                               placeholder="Search animals, people, microchips…" autocomplete="off" data-search-input>
+                        <button type="button" class="icon-button palette-hint" data-palette-open aria-haspopup="dialog" aria-controls="command-palette" title="Open quick search">
+                            <kbd>Ctrl</kbd><kbd>K</kbd>
+                        </button>
+                    </form>
 
                     <div class="topbar-actions">
                         <button type="button" class="icon-button" data-theme-toggle aria-pressed="false">Dark mode</button>
@@ -60,6 +65,20 @@
 
                     @yield('content')
                 </main>
+
+                <dialog class="palette" id="command-palette" aria-label="Quick search" data-palette
+                        data-search-url="{{ route('search.json') }}" data-results-url="{{ route('search') }}">
+                    <div class="palette-box">
+                        <label class="visually-hidden" for="palette-input">Search animals and people</label>
+                        <input id="palette-input" type="search" autocomplete="off" spellcheck="false"
+                               placeholder="Animal, person, microchip or CITES reference"
+                               role="combobox" aria-expanded="false" aria-autocomplete="list"
+                               aria-controls="palette-results" aria-activedescendant="" data-palette-input>
+                        <div id="palette-results" class="palette-results" role="listbox" aria-label="Search results" data-palette-results></div>
+                        <p class="palette-status" role="status" aria-live="polite" data-palette-status>Type at least 2 characters.</p>
+                        <p class="palette-help"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close</p>
+                    </div>
+                </dialog>
 
                 <footer class="app-footer">
                     Version {{ config('app.version') }} · locale {{ config('app.locale') }} · timezone {{ config('app.timezone') }} · today {{ \App\Support\UkDate::format(now()) }}
