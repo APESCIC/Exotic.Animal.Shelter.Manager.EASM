@@ -3,8 +3,17 @@
 @section('title', 'People · '.config('app.name'))
 
 @section('content')
-    <h1>People</h1>
-    <p class="hint">Adopters, fosters, vets, volunteers, staff, donors, and custom contacts. Flag banned owners and search by name, email, phone, or postcode.</p>
+    <div class="page-header">
+        <div>
+            <h1>People</h1>
+            <p class="hint">Adopters, fosters, vets, volunteers, staff, donors, and custom contacts. Flag banned owners and search by name, email, phone, or postcode.</p>
+        </div>
+        @if (auth()->user()?->role?->canManagePeople())
+            <div class="page-actions">
+                <a class="button button-primary" href="{{ route('people.create') }}">Add contact</a>
+            </div>
+        @endif
+    </div>
 
     <form class="filters" method="get" action="{{ route('people.index') }}">
         <div>

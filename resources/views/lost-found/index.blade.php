@@ -3,8 +3,17 @@
 @section('title', 'Lost and found · '.config('app.name'))
 
 @section('content')
-    <h1>Lost and found</h1>
-    <p class="hint">File lost or found reports for exotic animals and review likely matches against animals in care or recently adopted.</p>
+    <div class="page-header">
+        <div>
+            <h1>Lost and found</h1>
+            <p class="hint">File lost or found reports for exotic animals and review likely matches against animals in care or recently adopted.</p>
+        </div>
+        @if (auth()->user()?->role?->canManageLostFound())
+            <div class="page-actions">
+                <a class="button button-primary" href="{{ route('lost-found.create') }}">Add report</a>
+            </div>
+        @endif
+    </div>
 
     <form class="filters" method="get" action="{{ route('lost-found.index') }}">
         <div>

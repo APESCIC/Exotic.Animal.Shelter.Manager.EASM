@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\AnimalSex;
+use App\Enums\MovementType;
 use Database\Factories\AnimalFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class Animal extends Model
@@ -83,6 +85,40 @@ class Animal extends Model
     public function movements(): HasMany
     {
         return $this->hasMany(Movement::class)->orderByDesc('moved_at')->orderByDesc('id');
+    }
+
+    /**
+     * @return HasOne<Movement, $this>
+     */
+    public function latestMovement(): HasOne
+    {
+        return $this->hasOne(Movement::class)->ofMany(['moved_at' => 'max', 'id' => 'max']);
+    }
+
+    public function currentMovementType(): ?MovementType
+    {
+        return $this->latestMovement?->type;
+    }
+
+    public function isInQuarantine(): bool
+    {
+        return $this->deceased_at === null
+            && $this->currentMovementType() === MovementType::Quarantine;
+    }
+
+    /**
+     * Living animals whose most recent movement is quarantine.
+     *
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeInQuarantine(Builder $query): Builder
+    {
+        return $query
+            ->whereNull('deceased_at')
+            ->whereHas('latestMovement', function (Builder $movement): void {
+                $movement->where('type', MovementType::Quarantine->value);
+            });
     }
 
     /**

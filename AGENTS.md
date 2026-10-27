@@ -44,21 +44,42 @@ Finish a milestone before starting the next.
 1. #19 adoptable website and public API
 2. #20 online applications
 
-### v0.5.0 Documents, publishing and finance ([milestone/5](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/5), epic #6)
+### v0.4.5 UI and UX modernisation ([milestone/8](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/8), epic #56)
+
+1. #56 design tokens, light/dark, sidebar and top bar layout, badges (plain CSS/JS under `public/`; no npm build for shelters)
+2. #60 dashboard alerts and counters
+3. #58 global search and command palette
+4. #59 animal record tabs and sticky save
+
+### v0.5.0 Documents, publishing, finance and stock ([milestone/5](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/5), epic #6)
 
 1. #21 document templates/e-sign
 2. #22 publish to partner sites
-3. #23 donations/fees
+3. #23 donations/fees/Gift Aid/sponsorship
+4. #65 stock control for food and medical
+5. #66 waiting list with urgency
 
-### v0.6.0 Animal control, reporting and mobile ([milestone/6](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/6), epic #8)
+### v0.5.5 Enclosures, husbandry and compliance ([milestone/9](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/9))
 
-1. #24 animal control (does not block v1.0.0)
-2. #25 reports/timeline
-3. #26 touch-friendly tasks/rota
+1. #61 enclosures as a first-class entity
+2. #62 environment and equipment logs
+3. #63 CITES register and Article 10 tracking
+4. #64 DWA licence and inspection tracking
+
+### v0.6.0 Reporting, rota and mobile ([milestone/6](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/6), epic #8)
+
+1. #25 reports/timeline
+2. #26 touch-friendly tasks/rota
 
 ### v1.0.0 Production-ready self-host ([milestone/7](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/7), epic #7)
 
 1. #27 backup/security/first production install pack
+2. #34 bounded /health DB timeout and nginx front-controller docs
+3. #68 per-record audit log
+
+### v1.1.0 Optional: animal control ([milestone/10](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/10))
+
+1. #24 animal control (municipal ASM; does not block v1.0.0)
 
 Plan epic is #1 (unmiled).
 

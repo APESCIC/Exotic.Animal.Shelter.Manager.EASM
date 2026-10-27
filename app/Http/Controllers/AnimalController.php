@@ -21,6 +21,7 @@ class AnimalController extends Controller
         $location = $request->string('location')->toString();
 
         $animals = Animal::query()
+            ->with('latestMovement')
             ->search($q !== '' ? $q : null)
             ->atLocation($location !== '' ? $location : null)
             ->orderBy('name')
@@ -45,6 +46,7 @@ class AnimalController extends Controller
     public function shelter(): View
     {
         $groups = Animal::query()
+            ->with('latestMovement')
             ->orderBy('location')
             ->orderBy('name')
             ->get()
@@ -88,6 +90,7 @@ class AnimalController extends Controller
     public function show(Animal $animal): View
     {
         $animal->load([
+            'latestMovement',
             'movements.person',
             'medicalRecords',
             'diets',

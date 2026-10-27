@@ -71,7 +71,7 @@
             <button type="submit">Save status</button>
         </form>
 
-        <form method="post" action="{{ route('applications.accept', $application) }}" style="margin-top:1rem">
+        <form class="stacked-form" method="post" action="{{ route('applications.accept', $application) }}">
             @csrf
             <label for="accept_note">Accept note (optional)</label>
             <input id="accept_note" name="status_note" type="text" value="{{ old('status_note') }}">

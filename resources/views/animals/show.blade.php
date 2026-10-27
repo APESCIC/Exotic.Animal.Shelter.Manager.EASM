@@ -3,10 +3,19 @@
 @section('title', $animal->name.' · '.config('app.name'))
 
 @section('content')
-    <h1>{{ $animal->name }}</h1>
-    <p class="hint">{{ $animal->species }}@if ($animal->breed_type) · {{ $animal->breed_type }}@endif
-        @if ($animal->isPubliclyAdoptable()) · Available for adoption @endif
-    </p>
+    <div class="page-header">
+        <div>
+            <h1>{{ $animal->name }} @include('animals._badges')</h1>
+            <p class="hint">{{ $animal->species }}@if ($animal->breed_type) · {{ $animal->breed_type }}@endif
+                @if ($animal->isPubliclyAdoptable()) · Available for adoption @endif
+            </p>
+        </div>
+        @if (auth()->user()?->role?->canManageAnimals())
+            <div class="page-actions">
+                <a class="button button-primary" href="{{ route('animals.edit', $animal) }}">Edit</a>
+            </div>
+        @endif
+    </div>
 
     @if ($animal->primaryPhotoUrl())
         <img class="photo" src="{{ $animal->primaryPhotoUrl() }}" alt="Primary photo of {{ $animal->name }}">
@@ -199,12 +208,12 @@
                         <td>
                             @if (auth()->user()?->role?->canManageDiary())
                                 @if ($task->completed_at)
-                                    <form method="post" action="{{ route('diary.reopen', $task) }}" style="display:inline">
+                                    <form class="inline-form" method="post" action="{{ route('diary.reopen', $task) }}">
                                         @csrf
                                         <button type="submit">Reopen</button>
                                     </form>
                                 @else
-                                    <form method="post" action="{{ route('diary.complete', $task) }}" style="display:inline">
+                                    <form class="inline-form" method="post" action="{{ route('diary.complete', $task) }}">
                                         @csrf
                                         <button type="submit">Complete</button>
                                     </form>
@@ -253,10 +262,10 @@
                         <td>{{ $item->uploader?->name ?: '—' }}</td>
                         <td>
                             @if (auth()->user()?->role?->canManageMedia())
-                                <form method="post" action="{{ route('media.destroy', $item) }}" style="display:inline">
+                                <form class="inline-form" method="post" action="{{ route('media.destroy', $item) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit">Delete</button>
+                                    <button type="submit" class="button-danger">Delete</button>
                                 </form>
                             @endif
                         </td>
@@ -286,9 +295,5 @@
                 </tr>
             @endforeach
         </table>
-    @endif
-
-    @if (auth()->user()?->role?->canManageAnimals())
-        <p><a class="button" href="{{ route('animals.edit', $animal) }}">Edit</a></p>
     @endif
 @endsection
