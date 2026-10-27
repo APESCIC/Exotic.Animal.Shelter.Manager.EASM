@@ -18,6 +18,7 @@ use App\Http\Controllers\MovementController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\Public\AdoptableAnimalController;
 use App\Http\Controllers\Public\PublicApplicationController;
+use App\Http\Controllers\SearchController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,9 @@ Route::post('/apply/{type}', [PublicApplicationController::class, 'store'])
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
+
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/search.json', [SearchController::class, 'json'])->name('search.json');
 
     Route::get('/animals', [AnimalController::class, 'index'])->name('animals.index');
     Route::get('/animals/shelter', [AnimalController::class, 'shelter'])->name('animals.shelter');
