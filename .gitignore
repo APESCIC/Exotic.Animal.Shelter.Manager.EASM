@@ -6,11 +6,6 @@
 .phpactor.json
 .phpunit.result.cache
 /.codex
-/.cursor/*
-!/.cursor/rules/
-!/.cursor/rules/**
-!/.cursor/skills/
-!/.cursor/skills/**
 /.idea
 /.nova
 /.phpunit.cache
