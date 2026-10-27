@@ -35,6 +35,10 @@
         <p><a class="button" href="{{ route('people.edit', $person) }}">Edit</a></p>
     @endif
 
+    @if (auth()->user()?->role?->canViewFinance())
+        @include('people._finance')
+    @endif
+
     <h2>Documents</h2>
     @include('documents._list', ['documents' => $person->documents])
     @if (auth()->user()?->role?->canManageDocuments())

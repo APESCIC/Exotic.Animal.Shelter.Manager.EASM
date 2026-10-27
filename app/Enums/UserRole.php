@@ -95,4 +95,20 @@ enum UserRole: string
             self::Volunteer, self::Readonly => false,
         };
     }
+
+    public function canViewFinance(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Readonly => true,
+            self::Volunteer => false,
+        };
+    }
+
+    public function canManageFinance(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
 }

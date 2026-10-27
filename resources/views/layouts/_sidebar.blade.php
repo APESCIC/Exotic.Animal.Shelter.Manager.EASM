@@ -18,6 +18,16 @@
         ],
     ];
 
+    if ($role?->canViewFinance()) {
+        $groups['Finance'] = [
+            ['label' => 'Ledger', 'route' => 'finance.index', 'active' => ['finance.*', 'payments.*', 'sponsorships.*', 'gift-aid-declarations.*']],
+        ];
+
+        if ($role->canManageFinance()) {
+            $groups['Finance'][] = ['label' => 'Gift Aid', 'route' => 'gift-aid.index', 'active' => ['gift-aid.*']];
+        }
+    }
+
     if ($role?->isAdmin()) {
         $groups['Admin'] = [
             ['label' => 'Administration', 'route' => 'admin.dashboard', 'active' => ['admin.dashboard']],

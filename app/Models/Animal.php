@@ -265,6 +265,14 @@ class Animal extends Model
     }
 
     /**
+     * @return HasMany<Sponsorship, $this>
+     */
+    public function sponsorships(): HasMany
+    {
+        return $this->hasMany(Sponsorship::class)->orderByDesc('starts_on')->orderByDesc('id');
+    }
+
+    /**
      * @return HasMany<CustomFieldValue, $this>
      */
     public function customFieldValues(): HasMany
