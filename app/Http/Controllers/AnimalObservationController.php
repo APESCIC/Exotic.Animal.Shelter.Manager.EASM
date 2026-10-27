@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AnimalTab;
 use App\Http\Requests\StoreAnimalObservationRequest;
 use App\Models\Animal;
 use App\Models\AnimalObservation;
@@ -30,7 +31,7 @@ class AnimalObservationController extends Controller
         $animal->observations()->create($data);
 
         return redirect()
-            ->route('animals.show', $animal)
+            ->to(AnimalTab::Log->url($animal))
             ->with('status', 'Observation recorded.');
     }
 

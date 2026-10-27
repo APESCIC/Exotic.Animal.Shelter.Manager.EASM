@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AnimalTab;
 use App\Http\Requests\StoreDietRequest;
 use App\Http\Requests\UpdateDietRequest;
 use App\Models\Animal;
@@ -28,7 +29,7 @@ class DietController extends Controller
         $animal->diets()->create($this->validatedData($request));
 
         return redirect()
-            ->route('animals.show', $animal)
+            ->to(AnimalTab::Husbandry->url($animal))
             ->with('status', 'Diet recorded.');
     }
 
@@ -48,7 +49,7 @@ class DietController extends Controller
         $diet->update($this->validatedData($request));
 
         return redirect()
-            ->route('animals.show', $diet->animal)
+            ->to(AnimalTab::Husbandry->url($diet->animal))
             ->with('status', 'Diet updated.');
     }
 

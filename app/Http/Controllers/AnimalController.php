@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AnimalListFilter;
 use App\Enums\AnimalSex;
+use App\Enums\AnimalTab;
 use App\Enums\CustomFieldType;
 use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
@@ -96,28 +97,22 @@ class AnimalController extends Controller
             ->with('status', 'Animal record created.');
     }
 
-    public function show(Animal $animal): View
+    public function show(Animal $animal, ?string $tab = null): View
     {
-        $animal->load([
-            'latestMovement',
-            'movements.person',
-            'medicalRecords',
-            'diets',
-            'observations.user',
-            'diaryTasks.assignee',
-            'media.uploader',
-            'customFieldValues.definition',
-        ]);
+        $activeTab = AnimalTab::from($tab ?? AnimalTab::Overview->value);
 
-        $customFieldDefinitions = CustomFieldDefinition::query()
-            ->active()
-            ->forAnimal()
-            ->ordered()
-            ->get();
+        $animal->load(['latestMovement', ...$activeTab->relations()]);
+        $animal->loadCount(array_values(array_filter(
+            array_map(fn (AnimalTab $t): ?string => $t->countedRelation(), AnimalTab::cases()),
+        )));
 
         return view('animals.show', [
             'animal' => $animal,
-            'customFieldDefinitions' => $customFieldDefinitions,
+            'activeTab' => $activeTab,
+            'tabs' => AnimalTab::cases(),
+            'customFieldDefinitions' => $activeTab === AnimalTab::Overview
+                ? CustomFieldDefinition::query()->active()->forAnimal()->ordered()->get()
+                : collect(),
         ]);
     }
 

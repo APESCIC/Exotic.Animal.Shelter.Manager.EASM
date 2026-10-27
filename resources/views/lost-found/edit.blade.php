@@ -6,7 +6,7 @@
     <h1>Edit lost/found report</h1>
     <p class="hint">Update details or confirm a matched animal from the suggestions on the report page.</p>
 
-    <form method="post" action="{{ route('lost-found.update', $report) }}">
+    <form method="post" action="{{ route('lost-found.update', $report) }}" data-dirty-guard>
         @csrf
         @method('PUT')
         @include('lost-found._form')

@@ -340,9 +340,90 @@
         });
     }
 
+    function serializeForm(form) {
+        var parts = [];
+        new FormData(form).forEach(function (value, key) {
+            if (key === '_token' || key === '_method') {
+                return;
+            }
+            parts.push(key + '=' + (value instanceof File ? value.name : value));
+        });
+        return parts.join('&');
+    }
+
+    function initDirtyGuard() {
+        var forms = document.querySelectorAll('form[data-dirty-guard]');
+        if (forms.length === 0) {
+            return;
+        }
+
+        var dirtyForms = new Set();
+        var allowLeave = false;
+
+        forms.forEach(function (form) {
+            var initial = serializeForm(form);
+            var status = form.querySelector('[data-dirty-status]');
+
+            function check() {
+                var dirty = serializeForm(form) !== initial;
+                if (dirty) {
+                    dirtyForms.add(form);
+                } else {
+                    dirtyForms.delete(form);
+                }
+                form.classList.toggle('is-dirty', dirty);
+                if (status) {
+                    status.textContent = dirty ? 'Unsaved changes' : 'No unsaved changes';
+                }
+            }
+
+            form.addEventListener('input', check);
+            form.addEventListener('change', check);
+            form.addEventListener('submit', function () {
+                allowLeave = true;
+            });
+        });
+
+        window.addEventListener('beforeunload', function (event) {
+            if (!allowLeave && dirtyForms.size > 0) {
+                event.preventDefault();
+                event.returnValue = '';
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (allowLeave || dirtyForms.size === 0 || event.defaultPrevented) {
+                return;
+            }
+            if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+                return;
+            }
+
+            var link = event.target.closest('a[href]');
+            if (!link || link.target === '_blank' || link.hasAttribute('download')) {
+                return;
+            }
+
+            var target = new URL(link.href, window.location.href);
+            if (target.origin !== window.location.origin) {
+                return;
+            }
+            if (target.pathname === window.location.pathname && target.search === window.location.search && target.hash) {
+                return;
+            }
+
+            if (window.confirm('You have unsaved changes. Leave this page without saving?')) {
+                allowLeave = true;
+            } else {
+                event.preventDefault();
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         initTheme();
         initNavDrawer();
         initPalette();
+        initDirtyGuard();
     });
 })();

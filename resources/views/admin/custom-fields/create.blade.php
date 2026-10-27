@@ -6,7 +6,7 @@
     <h1>Add custom field</h1>
     <p class="hint">Animal entity only for now. Staff fill values on the animal create/edit form.</p>
 
-    <form method="post" action="{{ route('admin.custom-fields.store') }}">
+    <form method="post" action="{{ route('admin.custom-fields.store') }}" data-dirty-guard>
         @csrf
         @include('admin.custom-fields._form')
         <p>

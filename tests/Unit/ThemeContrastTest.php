@@ -31,6 +31,7 @@ class ThemeContrastTest extends TestCase
         ['warning-text', 'warning-bg'],
         ['info-text', 'info-bg'],
         ['info-text', 'surface'],
+        ['warning-text', 'surface'],
         ['neutral-text', 'neutral-bg'],
     ];
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AnimalTab;
 use App\Enums\DiaryDueFilter;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreDiaryTaskRequest;
@@ -72,7 +73,7 @@ class DiaryTaskController extends Controller
         $animal->diaryTasks()->create($data);
 
         return redirect()
-            ->route('animals.show', $animal)
+            ->to(AnimalTab::Diary->url($animal))
             ->with('status', 'Diary task created.');
     }
 
@@ -102,7 +103,7 @@ class DiaryTaskController extends Controller
     {
         if ($task->animal_id !== null) {
             return redirect()
-                ->route('animals.show', $task->animal_id)
+                ->to(AnimalTab::Diary->url($task->animal_id))
                 ->with('status', $status);
         }
 

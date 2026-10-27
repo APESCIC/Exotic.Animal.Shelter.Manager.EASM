@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\AnimalMediaKind;
+use App\Enums\AnimalTab;
 use App\Models\Animal;
 use App\Models\AnimalMedia;
 use App\Models\User;
@@ -26,7 +27,7 @@ class AnimalMediaTest extends TestCase
             ->post(route('animals.media.store', $animal), [
                 'media_file' => UploadedFile::fake()->image('enclosure.jpg', 200, 200),
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Media->url($animal));
 
         $photo = AnimalMedia::query()->where('animal_id', $animal->id)->first();
         $this->assertNotNull($photo);
@@ -39,7 +40,7 @@ class AnimalMediaTest extends TestCase
             ->post(route('animals.media.store', $animal), [
                 'media_file' => UploadedFile::fake()->create('care-plan.pdf', 100, 'application/pdf'),
             ])
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Media->url($animal));
 
         $pdf = AnimalMedia::query()
             ->where('animal_id', $animal->id)
@@ -49,7 +50,7 @@ class AnimalMediaTest extends TestCase
         Storage::disk('public')->assertExists($pdf->disk_path);
 
         $this->actingAs($staff)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Media->url($animal))
             ->assertOk()
             ->assertSee('Media', false)
             ->assertSee('enclosure.jpg', false)
@@ -87,7 +88,7 @@ class AnimalMediaTest extends TestCase
             ->assertForbidden();
 
         $this->actingAs($readonly)
-            ->get(route('animals.show', $animal))
+            ->get(AnimalTab::Media->url($animal))
             ->assertOk()
             ->assertSee('visible.jpg', false)
             ->assertDontSee('Upload media', false);
@@ -110,7 +111,7 @@ class AnimalMediaTest extends TestCase
 
         $this->actingAs($staff)
             ->delete(route('media.destroy', $media))
-            ->assertRedirect(route('animals.show', $animal));
+            ->assertRedirect(AnimalTab::Media->url($animal));
 
         $this->assertDatabaseMissing('animal_media', ['id' => $media->id]);
         Storage::disk('public')->assertMissing($path);

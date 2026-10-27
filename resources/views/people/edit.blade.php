@@ -5,7 +5,7 @@
 @section('content')
     <h1>Edit {{ $person->name }}</h1>
 
-    <form method="post" action="{{ route('people.update', $person) }}">
+    <form method="post" action="{{ route('people.update', $person) }}" data-dirty-guard>
         @csrf
         @method('PUT')
         @include('people._form')

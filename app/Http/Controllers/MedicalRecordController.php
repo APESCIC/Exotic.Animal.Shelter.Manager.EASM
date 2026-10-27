@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AnimalTab;
 use App\Enums\MedicalRecordType;
 use App\Http\Requests\StoreMedicalRecordRequest;
 use App\Http\Requests\UpdateMedicalRecordRequest;
@@ -31,7 +32,7 @@ class MedicalRecordController extends Controller
         $animal->medicalRecords()->create($this->validatedData($request));
 
         return redirect()
-            ->route('animals.show', $animal)
+            ->to(AnimalTab::Health->url($animal))
             ->with('status', 'Medical record added.');
     }
 
@@ -52,7 +53,7 @@ class MedicalRecordController extends Controller
         $medicalRecord->update($this->validatedData($request));
 
         return redirect()
-            ->route('animals.show', $medicalRecord->animal)
+            ->to(AnimalTab::Health->url($medicalRecord->animal))
             ->with('status', 'Medical record updated.');
     }
 
