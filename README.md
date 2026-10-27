@@ -4,6 +4,8 @@ Self-hosted software for one exotic-animal shelter per install. Stack: **Laravel
 
 UK-first defaults: locale `en_GB`, timezone `Europe/London`. Display dates as `dd/mm/yyyy` land with settings (#15).
 
+See [docs/roadmap.md](docs/roadmap.md) for product constraints and the milestone order (v0.1.0 through v1.1.0).
+
 Tracked against [issue #13](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/13) under [epic #3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/3) / [plan #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1).
 
 ## Hosting matrix
