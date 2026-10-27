@@ -6,7 +6,7 @@
     <div class="page-header">
         <div>
             <h1>Dashboard</h1>
-            <p class="hint">Self-hosted shelter software for exotic species. One shelter per install. Species stay free-text.</p>
+            <p class="hint">What needs attention today, {{ \App\Support\UkDate::format(now()) }}.</p>
         </div>
         @if (auth()->user()->role->canManageAnimals())
             <div class="page-actions">
@@ -14,6 +14,23 @@
             </div>
         @endif
     </div>
+
+    <section aria-labelledby="alerts-heading">
+        <h2 id="alerts-heading" class="visually-hidden">Alerts</h2>
+        <ul class="alert-grid">
+            @foreach ($alerts as $alert)
+                <li>
+                    <a class="alert-card alert-card-{{ $alert->tone }} {{ $alert->needsAttention() ? 'is-active' : 'is-clear' }}"
+                       href="{{ $alert->url }}"
+                       data-alert="{{ $alert->key }}">
+                        <span class="alert-count">{{ $alert->count }}</span>
+                        <span class="alert-label">{{ $alert->label }}</span>
+                        <span class="alert-description">{{ $alert->description }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </section>
 
     <div class="card-grid">
         <section class="card">

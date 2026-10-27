@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\DiaryTaskFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,5 +64,32 @@ class DiaryTask extends Model
     public function isCompleted(): bool
     {
         return $this->completed_at !== null;
+    }
+
+    /**
+     * @param  Builder<DiaryTask>  $query
+     * @return Builder<DiaryTask>
+     */
+    public function scopeOpen(Builder $query): Builder
+    {
+        return $query->whereNull('completed_at');
+    }
+
+    /**
+     * @param  Builder<DiaryTask>  $query
+     * @return Builder<DiaryTask>
+     */
+    public function scopeDueToday(Builder $query): Builder
+    {
+        return $query->open()->whereDate('due_on', today());
+    }
+
+    /**
+     * @param  Builder<DiaryTask>  $query
+     * @return Builder<DiaryTask>
+     */
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query->open()->whereNotNull('due_on')->whereDate('due_on', '<', today());
     }
 }

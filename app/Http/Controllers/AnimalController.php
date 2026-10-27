@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AnimalListFilter;
 use App\Enums\AnimalSex;
 use App\Enums\CustomFieldType;
 use App\Http\Requests\StoreAnimalRequest;
@@ -19,11 +20,18 @@ class AnimalController extends Controller
     {
         $q = $request->string('q')->toString();
         $location = $request->string('location')->toString();
+        $filter = AnimalListFilter::tryFrom($request->string('filter')->toString());
 
-        $animals = Animal::query()
+        $query = Animal::query()
             ->with('latestMovement')
             ->search($q !== '' ? $q : null)
-            ->atLocation($location !== '' ? $location : null)
+            ->atLocation($location !== '' ? $location : null);
+
+        if ($filter !== null) {
+            $filter->apply($query);
+        }
+
+        $animals = $query
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
@@ -40,6 +48,7 @@ class AnimalController extends Controller
             'locations' => $locations,
             'q' => $q,
             'location' => $location,
+            'filter' => $filter,
         ]);
     }
 

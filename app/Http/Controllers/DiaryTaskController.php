@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DiaryDueFilter;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreDiaryTaskRequest;
 use App\Models\Animal;
@@ -9,30 +10,42 @@ use App\Models\DiaryTask;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DiaryTaskController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $openTasks = DiaryTask::query()
+        $due = DiaryDueFilter::tryFrom($request->string('due')->toString());
+
+        $openQuery = DiaryTask::query()
             ->with(['animal', 'assignee', 'creator'])
-            ->whereNull('completed_at')
+            ->open();
+
+        if ($due !== null) {
+            $due->apply($openQuery);
+        }
+
+        $openTasks = $openQuery
             ->orderByRaw('due_on is null')
             ->orderBy('due_on')
             ->orderByDesc('id')
             ->get();
 
-        $recentlyCompleted = DiaryTask::query()
-            ->with(['animal', 'assignee', 'creator'])
-            ->whereNotNull('completed_at')
-            ->orderByDesc('completed_at')
-            ->limit(20)
-            ->get();
+        $recentlyCompleted = $due !== null
+            ? new Collection
+            : DiaryTask::query()
+                ->with(['animal', 'assignee', 'creator'])
+                ->whereNotNull('completed_at')
+                ->orderByDesc('completed_at')
+                ->limit(20)
+                ->get();
 
         return view('diary.index', [
             'openTasks' => $openTasks,
             'recentlyCompleted' => $recentlyCompleted,
+            'due' => $due,
         ]);
     }
 

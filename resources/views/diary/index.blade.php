@@ -6,6 +6,15 @@
     <h1>Diary / tasks</h1>
     <p class="hint">Open staff tasks and recently completed items. Animal-linked tasks also appear on the animal record.</p>
 
+    @if ($due)
+        <p class="filter-chips">
+            <span class="chip" data-active-filter="{{ $due->value }}">
+                {{ $due->label() }}
+                <a href="{{ route('diary.index') }}" aria-label="Remove filter: {{ $due->label() }}">Remove</a>
+            </span>
+        </p>
+    @endif
+
     <h2>Open</h2>
     @if ($openTasks->isEmpty())
         <p class="hint">No open tasks.</p>
@@ -47,6 +56,7 @@
         </table>
     @endif
 
+    @unless ($due)
     <h2>Recently completed</h2>
     @if ($recentlyCompleted->isEmpty())
         <p class="hint">No completed tasks yet.</p>
@@ -87,4 +97,5 @@
             </tbody>
         </table>
     @endif
+    @endunless
 @endsection

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\MedicalRecordType;
 use Database\Factories\MedicalRecordFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,5 +46,17 @@ class MedicalRecord extends Model
     public function animal(): BelongsTo
     {
         return $this->belongsTo(Animal::class);
+    }
+
+    /**
+     * @param  Builder<MedicalRecord>  $query
+     * @return Builder<MedicalRecord>
+     */
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query
+            ->whereNull('given_on')
+            ->whereNotNull('due_on')
+            ->whereDate('due_on', '<', today());
     }
 }
