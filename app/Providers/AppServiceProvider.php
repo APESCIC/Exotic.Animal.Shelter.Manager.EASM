@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Install\InstallationState;
 use App\Models\Setting;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
 
@@ -22,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(InstallationState $installation): void
     {
+        Paginator::useBootstrapFour();
+
         if (! $installation->isInstalled()) {
             // The wizard runs before MySQL tables exist. Do not use database
             // drivers for session, cache, or queue until install has finished.

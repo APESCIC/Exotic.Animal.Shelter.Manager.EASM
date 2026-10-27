@@ -3,8 +3,17 @@
 @section('title', 'Animals · '.config('app.name'))
 
 @section('content')
-    <h1>Animals</h1>
-    <p class="hint">Exotic species stay free-text. Search by name, species, code, location, enclosure, CITES, or DWA.</p>
+    <div class="page-header">
+        <div>
+            <h1>Animals</h1>
+            <p class="hint">Exotic species stay free-text. Search by name, species, code, location, enclosure, CITES, or DWA.</p>
+        </div>
+        @if (auth()->user()?->role?->canManageAnimals())
+            <div class="page-actions">
+                <a class="button button-primary" href="{{ route('animals.create') }}">Add animal</a>
+            </div>
+        @endif
+    </div>
 
     <form class="filters" method="get" action="{{ route('animals.index') }}">
         <div>
@@ -26,9 +35,10 @@
     <table>
         <thead>
             <tr>
-                <th></th>
+                <th><span class="visually-hidden">Photo</span></th>
                 <th>Name</th>
                 <th>Species</th>
+                <th>Status</th>
                 <th>Location</th>
                 <th>Enclosure</th>
                 <th>CITES</th>
@@ -45,6 +55,7 @@
                     </td>
                     <td><a href="{{ route('animals.show', $animal) }}">{{ $animal->name }}</a></td>
                     <td>{{ $animal->species }}</td>
+                    <td>@include('animals._badges')</td>
                     <td>{{ $animal->location }}</td>
                     <td>{{ $animal->enclosure }}</td>
                     <td>{{ $animal->cites }}</td>
@@ -52,7 +63,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">No animals match.</td>
+                    <td colspan="8">No animals match.</td>
                 </tr>
             @endforelse
         </tbody>

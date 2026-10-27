@@ -7,18 +7,21 @@
     <p class="hint">Animals grouped by location / unit.</p>
 
     @forelse ($groups as $location => $animals)
-        <h2>{{ $location }}</h2>
-        <ul>
-            @foreach ($animals as $animal)
-                <li>
-                    <a href="{{ route('animals.show', $animal) }}">{{ $animal->name }}</a>
-                    — {{ $animal->species }}
-                    @if ($animal->enclosure)
-                        · enclosure {{ $animal->enclosure }}
-                    @endif
-                </li>
-            @endforeach
-        </ul>
+        <section class="card">
+            <h2>{{ $location }}</h2>
+            <ul class="link-list">
+                @foreach ($animals as $animal)
+                    <li>
+                        <a href="{{ route('animals.show', $animal) }}">{{ $animal->name }}</a>
+                        — {{ $animal->species }}
+                        @if ($animal->enclosure)
+                            · enclosure {{ $animal->enclosure }}
+                        @endif
+                        @include('animals._badges')
+                    </li>
+                @endforeach
+            </ul>
+        </section>
     @empty
         <p>No animals in care yet.</p>
     @endforelse
