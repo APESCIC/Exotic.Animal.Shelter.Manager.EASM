@@ -46,6 +46,7 @@
             <ul class="link-list">
                 <li><a href="{{ route('people.index') }}">Contacts</a></li>
                 <li><a href="{{ route('applications.index') }}">Applications</a></li>
+                <li><a href="{{ route('waiting-list.index') }}">Waiting list</a></li>
             </ul>
         </section>
         <section class="card">

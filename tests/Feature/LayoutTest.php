@@ -16,6 +16,7 @@ use App\Models\Payment;
 use App\Models\Person;
 use App\Models\StockItem;
 use App\Models\User;
+use App\Models\WaitingListEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
@@ -42,6 +43,7 @@ class LayoutTest extends TestCase
             'document' => Document::factory()->for($animal)->create(),
             'payment' => Payment::factory()->create(),
             'stockItem' => StockItem::factory()->create(),
+            'waitingListEntry' => WaitingListEntry::factory()->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())

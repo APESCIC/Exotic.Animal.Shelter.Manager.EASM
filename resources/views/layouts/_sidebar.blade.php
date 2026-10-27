@@ -12,6 +12,7 @@
         'People' => [
             ['label' => 'People', 'route' => 'people.index', 'active' => ['people.*']],
             ['label' => 'Applications', 'route' => 'applications.index', 'active' => ['applications.*']],
+            ['label' => 'Waiting list', 'route' => 'waiting-list.index', 'active' => ['waiting-list.*']],
         ],
         'Care' => [
             ['label' => 'Diary and tasks', 'route' => 'diary.index', 'active' => ['diary.*']],
