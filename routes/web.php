@@ -30,6 +30,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\WaitingListEntryController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -140,6 +141,14 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/people/{person}', [PersonController::class, 'show'])->name('people.show');
     Route::get('/people/{person}/edit', [PersonController::class, 'edit'])->name('people.edit');
     Route::put('/people/{person}', [PersonController::class, 'update'])->name('people.update');
+
+    Route::get('/waiting-list', [WaitingListEntryController::class, 'index'])->name('waiting-list.index');
+    Route::get('/waiting-list/create', [WaitingListEntryController::class, 'create'])->name('waiting-list.create');
+    Route::post('/waiting-list', [WaitingListEntryController::class, 'store'])->name('waiting-list.store');
+    Route::get('/waiting-list/{waitingListEntry}/edit', [WaitingListEntryController::class, 'edit'])->name('waiting-list.edit');
+    Route::put('/waiting-list/{waitingListEntry}', [WaitingListEntryController::class, 'update'])->name('waiting-list.update');
+    Route::post('/waiting-list/{waitingListEntry}/close', [WaitingListEntryController::class, 'close'])->name('waiting-list.close');
+    Route::post('/waiting-list/{waitingListEntry}/reopen', [WaitingListEntryController::class, 'reopen'])->name('waiting-list.reopen');
 
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');

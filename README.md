@@ -81,6 +81,8 @@ Guests can browse animals staff have marked **Listed for public adoption** at `/
 
 Admins can share the same adoptable list with partner sites under **Administration → Partner feed**: a one-click CSV download, and an optional live feed at `/feeds/adoptable.{csv,json,rss}?token=…` that partners poll on their own schedule. See [docs/publishing.md](docs/publishing.md).
 
+Admin and staff keep a waiting list at `/waiting-list` of people who want to surrender an animal or adopt one. Each entry has an urgency (urgent, high, normal, low), species (free text), and a linked contact or free-text contact details. The list shows the most urgent first, then the longest waiting. Entries are closed as placed or removed and can be reopened.
+
 Guests can submit fixed online forms at `/apply` (adopter, volunteer, foster). Prefer an animal with `/adopt/{id}/apply`. Staff review the queue at `/applications`; accepting an application creates a Person contact only (no Animal create from applications).
 
 Open `/health`. You should see JSON with `"status":"ok"` and a `version` field.
