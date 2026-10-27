@@ -93,6 +93,7 @@ class PublicAdoptableTest extends TestCase
             ->assertJsonPath('data.0.colour', 'pastel')
             ->assertJsonPath('data.0.age_years', 3)
             ->assertJsonPath('data.0.url', route('public.adopt.show', $animal))
+            ->assertJsonPath('data.0.updated_at', $animal->updated_at->toIso8601String())
             ->assertJsonMissing(['name' => 'Skip'])
             ->assertJsonMissingPath('data.0.location')
             ->assertJsonMissingPath('data.0.cites')
