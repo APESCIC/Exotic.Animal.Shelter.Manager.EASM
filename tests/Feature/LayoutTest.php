@@ -12,6 +12,7 @@ use App\Models\DocumentTemplate;
 use App\Models\LostFoundReport;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
+use App\Models\Payment;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,6 +39,7 @@ class LayoutTest extends TestCase
             'customField' => CustomFieldDefinition::factory()->create(),
             'documentTemplate' => DocumentTemplate::factory()->create(),
             'document' => Document::factory()->for($animal)->create(),
+            'payment' => Payment::factory()->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())

@@ -39,7 +39,7 @@ enum AnimalTab: string
     public function relations(): array
     {
         return match ($this) {
-            self::Overview => ['customFieldValues.definition'],
+            self::Overview => ['customFieldValues.definition', 'sponsorships.person'],
             self::Health => ['medicalRecords'],
             self::Husbandry => ['diets'],
             self::Movements => ['movements.person'],

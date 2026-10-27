@@ -23,6 +23,36 @@
     </table>
 </div>
 
+@if (auth()->user()?->role?->canViewFinance())
+    @php
+        $activeSponsorships = $animal->sponsorships->filter(fn ($sponsorship) => $sponsorship->isActive());
+    @endphp
+    <h3>Sponsors</h3>
+    @if ($activeSponsorships->isEmpty())
+        <p class="hint">No current sponsors.</p>
+    @else
+        <table>
+            @foreach ($activeSponsorships as $sponsorship)
+                <tr>
+                    <th><a href="{{ route('people.show', $sponsorship->person) }}">{{ $sponsorship->person->name }}</a></th>
+                    <td>{{ \App\Support\Money::format($sponsorship->amount_pence) }} {{ strtolower($sponsorship->frequency->label()) }} since {{ UkDate::format($sponsorship->starts_on) }}</td>
+                    <td>
+                        @if (auth()->user()?->role?->canManageFinance())
+                            <form class="inline-form" method="post" action="{{ route('sponsorships.end', $sponsorship) }}">
+                                @csrf
+                                <button type="submit">End</button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </table>
+    @endif
+    @if (auth()->user()?->role?->canManageFinance())
+        <p><a class="button" href="{{ route('sponsorships.create', ['animal' => $animal->id]) }}">Add sponsor</a></p>
+    @endif
+@endif
+
 @php
     $customValues = $animal->customFieldValues->keyBy('definition_id');
 @endphp

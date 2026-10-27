@@ -62,6 +62,30 @@ class Person extends Model
         return $this->hasMany(Document::class)->orderByDesc('id');
     }
 
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->orderByDesc('received_on')->orderByDesc('id');
+    }
+
+    /**
+     * @return HasMany<GiftAidDeclaration, $this>
+     */
+    public function giftAidDeclarations(): HasMany
+    {
+        return $this->hasMany(GiftAidDeclaration::class)->orderByDesc('effective_from')->orderByDesc('id');
+    }
+
+    /**
+     * @return HasMany<Sponsorship, $this>
+     */
+    public function sponsorships(): HasMany
+    {
+        return $this->hasMany(Sponsorship::class)->orderByDesc('starts_on')->orderByDesc('id');
+    }
+
     public function addressLine(): string
     {
         return implode(', ', array_filter([

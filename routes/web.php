@@ -14,16 +14,20 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\GiftAidDeclarationController;
+use App\Http\Controllers\GiftAidExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\LostFoundReportController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MovementController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\Public\AdoptableAnimalController;
 use App\Http\Controllers\Public\PartnerFeedController;
 use App\Http\Controllers\Public\PublicApplicationController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SponsorshipController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -105,6 +109,20 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::post('/documents/{document}/sign', [DocumentController::class, 'sign'])->name('documents.sign');
     Route::get('/documents/{document}/pdf', [DocumentController::class, 'pdf'])->name('documents.pdf');
+
+    Route::get('/finance', [PaymentController::class, 'index'])->name('finance.index');
+    Route::get('/finance/payments/create', [PaymentController::class, 'create'])->name('payments.create');
+    Route::post('/finance/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/finance/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/finance/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    Route::get('/finance/gift-aid', [GiftAidExportController::class, 'index'])->name('gift-aid.index');
+    Route::get('/finance/gift-aid.csv', [GiftAidExportController::class, 'csv'])->name('gift-aid.csv');
+    Route::get('/people/{person}/gift-aid-declarations/create', [GiftAidDeclarationController::class, 'create'])->name('gift-aid-declarations.create');
+    Route::post('/people/{person}/gift-aid-declarations', [GiftAidDeclarationController::class, 'store'])->name('gift-aid-declarations.store');
+    Route::post('/gift-aid-declarations/{giftAidDeclaration}/cancel', [GiftAidDeclarationController::class, 'cancel'])->name('gift-aid-declarations.cancel');
+    Route::get('/sponsorships/create', [SponsorshipController::class, 'create'])->name('sponsorships.create');
+    Route::post('/sponsorships', [SponsorshipController::class, 'store'])->name('sponsorships.store');
+    Route::post('/sponsorships/{sponsorship}/end', [SponsorshipController::class, 'end'])->name('sponsorships.end');
 
     Route::get('/people', [PersonController::class, 'index'])->name('people.index');
     Route::get('/people/create', [PersonController::class, 'create'])->name('people.create');

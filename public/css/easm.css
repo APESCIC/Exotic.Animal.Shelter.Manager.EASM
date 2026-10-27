@@ -685,6 +685,13 @@ form.is-dirty .save-bar-status {
     line-height: 1.1;
 }
 
+.stat {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
 .alert-card.is-active .alert-count,
 .alert-card.is-active .alert-label {
     color: var(--alert-text);
