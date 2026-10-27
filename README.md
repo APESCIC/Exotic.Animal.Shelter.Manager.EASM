@@ -73,7 +73,9 @@ Admin and staff can generate documents (adoption contract, invoice, enclosure ca
 
 Admins define custom husbandry fields under `/admin/custom-fields` (text, number, date, yes/no). Staff fill them on animal create/edit; animal search also matches those values.
 
-Guests can browse animals staff have marked **Listed for public adoption** at `/adopt` (detail at `/adopt/{id}`, embeddable list at `/adopt/embed`). A read-only JSON API is available at `GET /api/v1/adoptable` and `GET /api/v1/adoptable/{id}` (public-safe fields only; no authentication). Petfinder / AdoptAPet publishing is not included.
+Guests can browse animals staff have marked **Listed for public adoption** at `/adopt` (detail at `/adopt/{id}`, embeddable list at `/adopt/embed`). A read-only JSON API is available at `GET /api/v1/adoptable` and `GET /api/v1/adoptable/{id}` (public-safe fields only; no authentication).
+
+Admins can share the same adoptable list with partner sites under **Administration → Partner feed**: a one-click CSV download, and an optional live feed at `/feeds/adoptable.{csv,json,rss}?token=…` that partners poll on their own schedule. See [docs/publishing.md](docs/publishing.md).
 
 Guests can submit fixed online forms at `/apply` (adopter, volunteer, foster). Prefer an animal with `/adopt/{id}/apply`. Staff review the queue at `/applications`; accepting an application creates a Person contact only (no Animal create from applications).
 
@@ -170,7 +172,7 @@ On Cloudron the database comes from the MySQL addon: `cloudron/start.sh` writes 
 ## What this does not include
 
 - Cloudron OIDC / MyAPES-Account auth copy (the Cloudron package uses local accounts)
-- Petfinder / AdoptAPet / partner-site publishing (later milestone)
+- Integrations built for specific partner sites, microchip registry updates and automatic social posting (the generic partner feed covers publishing; see [docs/publishing.md](docs/publishing.md))
 - Public lost/found intake forms (staff lost/found matching already ships)
 
 The repository is maintained by [APES CIC](https://github.com/APESCIC).

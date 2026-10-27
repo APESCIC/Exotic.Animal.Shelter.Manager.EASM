@@ -6,6 +6,7 @@ use App\Enums\AnimalMediaKind;
 use App\Http\Controllers\Controller;
 use App\Models\Animal;
 use App\Models\Setting;
+use App\Services\AdoptableFeed;
 use App\Support\UkDate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -54,7 +55,7 @@ class AdoptableAnimalController extends Controller
         ]);
     }
 
-    public function apiIndex(): JsonResponse
+    public function apiIndex(AdoptableFeed $feed): JsonResponse
     {
         $animals = Animal::query()
             ->adoptable()
@@ -62,7 +63,7 @@ class AdoptableAnimalController extends Controller
             ->paginate(24);
 
         return response()->json([
-            'data' => $animals->getCollection()->map(fn (Animal $animal) => $this->apiPayload($animal))->values(),
+            'data' => $animals->getCollection()->map(fn (Animal $animal) => $feed->payload($animal))->values(),
             'meta' => [
                 'current_page' => $animals->currentPage(),
                 'last_page' => $animals->lastPage(),
@@ -72,34 +73,13 @@ class AdoptableAnimalController extends Controller
         ]);
     }
 
-    public function apiShow(Animal $animal): JsonResponse
+    public function apiShow(Animal $animal, AdoptableFeed $feed): JsonResponse
     {
         abort_unless($animal->isPubliclyAdoptable(), 404);
 
         return response()->json([
-            'data' => $this->apiPayload($animal),
+            'data' => $feed->payload($animal),
         ]);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function apiPayload(Animal $animal): array
-    {
-        $photoUrl = $animal->primaryPhotoUrl();
-
-        return [
-            'id' => $animal->id,
-            'name' => $animal->name,
-            'species' => $animal->species,
-            'sex' => $animal->sex->value,
-            'age_years' => $animal->age_years,
-            'date_of_birth' => $animal->date_of_birth?->toDateString(),
-            'colour' => $animal->colour,
-            'bonded_animals' => $animal->bonded_animals,
-            'photo_url' => $photoUrl !== null ? url($photoUrl) : null,
-            'url' => route('public.adopt.show', $animal),
-        ];
     }
 
     private function organisationName(): string

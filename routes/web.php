@@ -4,6 +4,7 @@ use App\Enums\AnimalTab;
 use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
+use App\Http\Controllers\Admin\PublishingController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AnimalMediaController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\Public\AdoptableAnimalController;
+use App\Http\Controllers\Public\PartnerFeedController;
 use App\Http\Controllers\Public\PublicApplicationController;
 use App\Http\Controllers\SearchController;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -44,6 +46,11 @@ Route::post('/adopt/{animal}/apply', [PublicApplicationController::class, 'store
     ->middleware('throttle:10,1')
     ->name('public.adopt.apply.store');
 Route::get('/adopt/{animal}', [AdoptableAnimalController::class, 'show'])->name('public.adopt.show');
+
+Route::get('/feeds/adoptable.{format}', [PartnerFeedController::class, 'show'])
+    ->whereIn('format', PartnerFeedController::FORMATS)
+    ->middleware('throttle:60,1')
+    ->name('feeds.adoptable');
 
 Route::get('/apply', [PublicApplicationController::class, 'index'])->name('public.apply.index');
 Route::get('/apply/thanks', [PublicApplicationController::class, 'thanks'])->name('public.apply.thanks');
@@ -132,5 +139,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/document-templates', [DocumentTemplateController::class, 'store'])->name('document-templates.store');
         Route::get('/document-templates/{documentTemplate}/edit', [DocumentTemplateController::class, 'edit'])->name('document-templates.edit');
         Route::put('/document-templates/{documentTemplate}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
+        Route::get('/publishing', [PublishingController::class, 'edit'])->name('publishing.edit');
+        Route::put('/publishing', [PublishingController::class, 'update'])->name('publishing.update');
+        Route::post('/publishing/token', [PublishingController::class, 'regenerate'])->name('publishing.regenerate');
+        Route::get('/publishing/adoptable.csv', [PublishingController::class, 'download'])->name('publishing.csv');
     });
 });

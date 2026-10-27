@@ -24,6 +24,7 @@
             ['label' => 'Settings', 'route' => 'admin.settings.edit', 'active' => ['admin.settings.*']],
             ['label' => 'Custom fields', 'route' => 'admin.custom-fields.index', 'active' => ['admin.custom-fields.*']],
             ['label' => 'Document templates', 'route' => 'admin.document-templates.index', 'active' => ['admin.document-templates.*']],
+            ['label' => 'Partner feed', 'route' => 'admin.publishing.edit', 'active' => ['admin.publishing.*']],
         ];
     }
 @endphp

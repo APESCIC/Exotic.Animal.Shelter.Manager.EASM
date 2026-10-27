@@ -44,7 +44,8 @@ class LayoutTest extends TestCase
             ->filter(fn (Route $route): bool => in_array('GET', $route->methods(), true)
                 && in_array('auth', $route->gatherMiddleware(), true)
                 && ! str_ends_with((string) $route->getName(), '.json')
-                && ! str_ends_with((string) $route->getName(), '.pdf'));
+                && ! str_ends_with((string) $route->getName(), '.pdf')
+                && ! str_ends_with((string) $route->getName(), '.csv'));
 
         $this->assertGreaterThan(20, $routes->count());
 
