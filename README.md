@@ -4,8 +4,6 @@ Self-hosted software for one exotic-animal shelter per install. Stack: **Laravel
 
 UK-first defaults: locale `en_GB`, timezone `Europe/London`. Display dates as `dd/mm/yyyy` land with settings (#15).
 
-See [AGENTS.md](AGENTS.md) for product constraints and implement order (v0.1.0 through v1.0.0).
-
 Tracked against [issue #13](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/13) under [epic #3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/3) / [plan #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1).
 
 ## Hosting matrix
@@ -143,13 +141,13 @@ composer test
 composer lint
 ```
 
-PHPUnit treats the app as already installed (`APP_INSTALLED=true`) except in installer tests. Agents must not run Pint while editing; lint is for CI and the pre-commit verification gate (see AGENTS.md / ship-gate).
+PHPUnit treats the app as already installed (`APP_INSTALLED=true`) except in installer tests.
 
 ## Releases and deploy
 
 Shelters install from a clone or zip (Composer + `/install`) as above. Nothing deploys to shelter hosting.
 
-Cursor agents ship each merged PR as a GitHub Release: a patch release per PR, a minor release when a milestone closes (see [AGENTS.md](AGENTS.md)). CI (`.github/workflows/ci.yml`) runs tests on every PR and on `main`.
+Each merged PR ships as a GitHub Release: a patch release per PR, a minor release when a milestone closes. CI (`.github/workflows/ci.yml`) runs tests on every PR and on `main`.
 
 Publishing a release runs `.github/workflows/deploy-cloudron.yml`, which builds `ghcr.io/apescic/easm:<version>` from the `Dockerfile` and updates the APES-owned Cloudron app (`https://easm.intranet.apes.org.uk`). Re-deploy a tag with `gh workflow run "Deploy to Cloudron" -f tag=vX.Y.Z`.
 
