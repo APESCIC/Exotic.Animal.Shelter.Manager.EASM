@@ -15,33 +15,35 @@
 
 Finish a milestone before starting the next. The plan epic is [#1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) (no milestone).
 
-### v0.1.0 Foundation: generic hosting ([milestone/1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/1), epic #2)
+Status (27/10/2026): v0.1.0 to v0.4.5 are done. Next is v0.5.0, starting with #21. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
+
+### v0.1.0 Foundation: generic hosting ([milestone/1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/1), epic #2) — done
 
 1. #9 scaffold (Laravel + PHP 8 + MySQL)
 2. #10 installer wizard
 3. #11 auth/roles (admin, staff, volunteer, readonly)
 4. #15 settings (org, UK locale, timezone)
 
-### v0.2.0 Animals, people and movements ([milestone/2](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/2), epic #3)
+### v0.2.0 Animals, people and movements ([milestone/2](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/2), epic #3) — done
 
 1. #12 animal records (photo, enclosure, CITES, DWA)
 2. #14 people/contacts
 3. #13 movements (intake, hold, quarantine, foster, trial adoption, adopt, reclaim, transfer, deceased — first movements; quarantine for exotic intake)
 4. #28 lost/found matching
 
-### v0.3.0 Medical, diary and care ([milestone/3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/3), epic #4)
+### v0.3.0 Medical, diary and care ([milestone/3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/3), epic #4) — done
 
 1. #16 vaccinations/tests/treatments/diets
 2. #17 staff diary/tasks
 3. #18 media attachments
 4. #31 custom fields (after #12 enclosure/CITES/DWA; does not block first animal records)
 
-### v0.4.0 Public adoption and applications ([milestone/4](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/4), epic #5)
+### v0.4.0 Public adoption and applications ([milestone/4](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/4), epic #5) — done
 
 1. #19 adoptable website and public API
 2. #20 online applications
 
-### v0.4.5 UI and UX modernisation ([milestone/8](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/8), epic #56)
+### v0.4.5 UI and UX modernisation ([milestone/8](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/8), epic #56) — done
 
 1. #56 design tokens, light/dark, sidebar and top bar layout, badges (plain CSS/JS under `public/`; no npm build for shelters)
 2. #60 dashboard alerts and counters
