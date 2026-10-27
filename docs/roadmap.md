@@ -15,7 +15,7 @@
 
 Finish a milestone before starting the next. The plan epic is [#1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) (no milestone).
 
-Status (27/10/2026): v0.1.0 to v0.4.5 are done. Next is v0.5.0, starting with #21. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
+Status (27/10/2026): v0.1.0 to v0.5.0 are done. Next is v0.5.5, starting with #61. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
 
 ### v0.1.0 Foundation: generic hosting ([milestone/1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/1), epic #2) — done
 
@@ -50,13 +50,15 @@ Status (27/10/2026): v0.1.0 to v0.4.5 are done. Next is v0.5.0, starting with #2
 3. #58 global search and command palette
 4. #59 animal record tabs and sticky save
 
-### v0.5.0 Documents, publishing, finance and stock ([milestone/5](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/5), epic #6)
+### v0.5.0 Documents, publishing, finance and stock ([milestone/5](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/5), epic #6) — done
 
 1. #21 document templates/e-sign
-2. #22 publish to partner sites
-3. #23 donations/fees/Gift Aid/sponsorship
+2. #22 publish to partner sites (generic CSV/JSON/RSS partner feed; see [publishing.md](publishing.md))
+3. #23 donations/fees/Gift Aid/sponsorship (Gift Aid export is a draft until #110 checks it against the HMRC spec)
 4. #65 stock control for food and medical
 5. #66 waiting list with urgency
+
+Also shipped: #67 Dependabot fixes. #47 (Laravel Boost) was dropped because it conflicts with removing AI-agent files (#99).
 
 ### v0.5.5 Enclosures, husbandry and compliance ([milestone/9](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/9))
 
