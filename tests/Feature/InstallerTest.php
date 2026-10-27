@@ -134,6 +134,32 @@ class InstallerTest extends TestCase
         $this->assertGreaterThan(0, $spy->usersWhenInstalledWritten);
     }
 
+    public function test_managed_database_install_skips_database_settings(): void
+    {
+        config(['easm.managed_database' => true]);
+
+        $this->get(route('install.show'))
+            ->assertOk()
+            ->assertDontSee('name="db_database"', false)
+            ->assertSee('name="admin_email"', false);
+
+        $payload = array_diff_key($this->validPayload(), array_flip([
+            'db_host', 'db_port', 'db_database', 'db_username', 'db_password',
+        ]));
+
+        $this->post(route('install.store'), $payload)
+            ->assertRedirect('/');
+
+        $this->assertFileExists($this->installedPath);
+
+        $env = (string) file_get_contents($this->envPath);
+        $this->assertStringContainsString('APP_INSTALLED=true', $env);
+        $this->assertStringContainsString('APP_NAME="APES CIC Rescue"', $env);
+        $this->assertStringNotContainsString('easm_shelter', $env);
+        $this->assertStringNotContainsString('easm_user', $env);
+        $this->assertSame(1, User::query()->where('role', UserRole::Admin)->count());
+    }
+
     public function test_health_endpoint_still_works_after_install(): void
     {
         $this->post(route('install.store'), $this->validPayload())

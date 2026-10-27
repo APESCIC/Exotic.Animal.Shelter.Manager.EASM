@@ -22,9 +22,8 @@ class Installer
      */
     public function install(array $input): void
     {
-        $credentials = $this->credentials($input);
-
-        if (! app()->runningUnitTests()) {
+        if (! $this->managedDatabase() && ! app()->runningUnitTests()) {
+            $credentials = $this->credentials($input);
             $this->database->test($credentials);
             $this->database->apply($credentials);
         }
@@ -100,13 +99,18 @@ class Installer
             'APP_NAME' => (string) $input['organisation'],
             'APP_TIMEZONE' => (string) $input['timezone'],
             'APP_INSTALLED' => 'true',
-            'DB_CONNECTION' => 'mysql',
-            'DB_HOST' => (string) $input['db_host'],
-            'DB_PORT' => (string) $input['db_port'],
-            'DB_DATABASE' => (string) $input['db_database'],
-            'DB_USERNAME' => (string) $input['db_username'],
-            'DB_PASSWORD' => (string) ($input['db_password'] ?? ''),
         ];
+
+        if (! $this->managedDatabase()) {
+            $values += [
+                'DB_CONNECTION' => 'mysql',
+                'DB_HOST' => (string) $input['db_host'],
+                'DB_PORT' => (string) $input['db_port'],
+                'DB_DATABASE' => (string) $input['db_database'],
+                'DB_USERNAME' => (string) $input['db_username'],
+                'DB_PASSWORD' => (string) ($input['db_password'] ?? ''),
+            ];
+        }
 
         if (blank(config('app.key'))) {
             $key = 'base64:'.base64_encode(random_bytes(32));
@@ -115,5 +119,10 @@ class Installer
         }
 
         return $values;
+    }
+
+    private function managedDatabase(): bool
+    {
+        return (bool) config('easm.managed_database');
     }
 }

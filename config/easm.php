@@ -19,4 +19,17 @@ return [
 
     'installed_path' => env('EASM_INSTALLED_PATH', storage_path('app/installed')),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Platform-managed database
+    |--------------------------------------------------------------------------
+    |
+    | When the hosting platform writes DB_* itself (the Cloudron package does
+    | this on every start), the wizard skips the database step and never
+    | overwrites those keys.
+    |
+    */
+
+    'managed_database' => filter_var(env('EASM_MANAGED_DATABASE', false), FILTER_VALIDATE_BOOLEAN),
+
 ];

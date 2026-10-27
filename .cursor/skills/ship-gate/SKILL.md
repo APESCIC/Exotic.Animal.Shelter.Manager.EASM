@@ -1,116 +1,126 @@
 ---
 name: ship-gate
-description: Gated ship lifecycle — pre-commit verification, when-to-commit guidance, next-actions menus, optional GitHub Release. Use when work is ready to commit, PR checks are green, after merge to main, or when the user asks to ship or release. No hosting deploy.
+description: EASM ship flow — GitHub issue/milestone tracking, pre-commit verification, commit, PR, merge, GitHub Release and deploy to the APES Cloudron instance, with next-options menus. Use when starting product work, when work is ready to commit, when PR checks finish, after merge, or when the user asks to ship, release or deploy.
 ---
 
-# Ship-gate
+# Ship flow
 
-Use this skill for shipping gates on **Exotic Animal Shelter Manager**. There is no agent-driven deploy: operators install on their own hosting (zip/clone, Composer, `/install`).
+Run this end to end without asking **while every check is green**. Stop at the first failure or open decision and end the turn with the next-actions menu (below).
 
-## Gate reply format
+Deploy target: the APES-owned Cloudron app, id in repo variable `CLOUDRON_APP_ID` (`7afd5173-8880-4e64-9c36-5f978d9c8f64`, `https://easm.intranet.apes.org.uk`). Shelters still self-host from a clone or zip; agents never deploy to shelter hosting.
 
-End the turn with:
+## Next-actions menu
+
+End every turn that stops, finishes, or needs a choice with:
 
 ```markdown
 ## Next actions
-**Recommended:** <one clear choice>
+**Recommended:** <one clear choice and why>
 
 1. ...
 2. ...
+3. ...
 ```
 
-Do not proceed past a gate without an explicit user pick (or a prior explicit order that covers that gate).
+## 1. Start: issue, milestone, branch
 
-## Pre-commit verification (required)
+```powershell
+gh issue list --state open --search "<keywords>"
+gh api repos/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones --jq '.[] | [.number,.title,.open_issues] | @tsv'
+```
 
-Run **before** the commit gate. On Windows, source `scripts/local/use-laragon.ps1` first. Do **not** run Pint during feature work — only here.
+- Reuse an open issue when one fits; otherwise create one (`[Chore]`, `[Bug]`, `[Story]`… title prefix, `area:` labels, assignee `apescic-director`, milestone from AGENTS.md implement order).
+- Split larger work into sub-issues and link them to the parent:
+
+```powershell
+$child = gh api repos/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/<child> --jq .id
+gh api -X POST repos/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/<parent>/sub_issues -F sub_issue_id=$child
+```
+
+- Branch off `main`: `git switch -c cursor/{feature|fix|chore}/<n>-<slug>`.
+
+## 2. While working
+
+- Comment on the issue at each meaningful step (`gh issue comment <n> --body ...`): decisions, blockers, scope changes.
+- Tick acceptance criteria in the issue body as they land (`gh issue edit <n> --body-file ...`).
+- Follow `.cursor/rules/local-dev.mdc` (Laragon, no Pint mid-work).
+
+## 3. Pre-commit verification (required)
+
+Source `scripts/local/use-laragon.ps1` first.
 
 | Step | Command / check | Pass criteria |
 |------|-----------------|---------------|
 | Tests | `composer test` | Exit 0 (full suite) |
 | Lint | `composer lint` | Exit 0; if fail → one `composer format` → re-lint once |
-| UI smoke | Laragon up; browser or HTTP | Only when HTTP/views/routes changed: `/health` ok; changed path loads |
+| UI smoke | Laragon `http://easm.test` | When HTTP/views/routes changed: `/health` ok; changed path loads |
+| Image | `docker build -t easm-cloudron:local .` | When `Dockerfile`, `cloudron/` or `CloudronManifest.json` changed |
 
-If any step fails: report output, fix or stop. **Do not** offer commit options. WIP checkpoint commits only when the user explicitly asks to save broken work.
+Any failure: report it, fix or stop with the menu. Never commit broken work unless the user asked for a WIP checkpoint. No `.env` or credentials staged.
 
-Also confirm: no secrets (`.env`, credentials) staged; slice work on the `cursor/...` branch is complete for this slice.
-
-## When committing is best
-
-Commit when **all** apply:
-
-1. Pre-commit verification passed (above).
-2. Feature/fix work on the `cursor/...` branch is complete for this slice (or user explicitly requested a WIP checkpoint).
-3. No secrets staged.
-
-Then present the **commit gate** before the first push / PR update for that slice.
-
-## Commit gate
-
-**Recommended** when the slice is reviewable: commit and open/update PR.
+## 4. Commit, PR, CI
 
 ```powershell
-git status
-git diff
-git log -5 --oneline
-```
-
-Follow the repo commit protocol (user-approved only via this gate or an earlier explicit order). Then push and open/update the PR with `Fixes #<n>` when option 2 is chosen.
-
-## After PR CI is green
-
-```powershell
-gh pr view --json number,url,headRefName,mergeable
-gh pr checks --json name,bucket,state,workflow,link
-```
-
-Watch pending checks:
-
-```powershell
+git status; git diff; git log -5 --oneline
+git add <files>; git commit -m "<why-focused message>"
+git push -u origin HEAD
+gh pr create --title "<title>" --body "Fixes #<n>`n`n<summary and test plan>"
 gh pr checks --watch --fail-fast
 ```
 
-**Recommended** when checks are green: merge.
+Bump `APP_VERSION` in `.env.example` and the fallback in `config/app.php` to the release version as part of the PR.
+
+CI red → fix on the branch and push again. Stop with the menu if the fix is not clear.
+
+## 5. Merge
 
 ```powershell
 gh pr merge --merge --delete-branch
+git switch main; git pull --ff-only
+gh run list --branch main --workflow CI --limit 1
 ```
 
-Prefer `--squash` only if the user asks. Confirm merge landed on `main` before the release gate.
+Confirm the merge commit is on `main` and `main` CI is green. Close any finished sub-issues and comment the PR link on the parent.
 
-## After merge — no deploy
+## 6. Release
 
-Do **not** run Cloudron workflows, `workflow_dispatch` deploys, or remote hosting updates. CI on `main` is tests only (`.github/workflows/ci.yml`).
-
-Shelters install themselves: download/clone → `composer install` → document root `public/` → `/install`. Agents may point at README install steps; they do not deploy.
-
-Confirm main CI for the merge commit if useful:
+- **Patch** (`vX.Y.Z+1`) for each merged PR.
+- **Minor** (`vX.Y+1.0`) when the merge closes the last open issue in a milestone; then close the milestone:
 
 ```powershell
-gh run list --branch main --workflow "CI" --limit 3
+gh api -X PATCH repos/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones/<number> -f state=closed
 ```
-
-## After merge — GitHub Release gate
-
-**Recommended:** skip release unless the user already asked to cut one.
-
-If the user chooses create release:
-
-1. Confirm tag/version with the user if unclear. Today version lives in `APP_VERSION` / `config('app.version')` (see `.env.example`). There is no root `VERSION` or `releases.json` yet — do not invent MyAPES release-metadata scaffolding unless that is a separate task.
-2. Skip if the tag or release already exists:
 
 ```powershell
-gh release view "v0.1.0"
+gh release list --limit 3
+gh release create "vX.Y.Z" --target main --title "vX.Y.Z <short public title>" --notes "<public-safe summary, Fixes #n>"
 ```
 
-3. Otherwise create (replace version, title, and notes with the agreed public-safe text from the PR/issue):
+Release notes: public-safe only (no credentials, personal data or exploitable detail). Stop with the menu if the version is ambiguous.
+
+## 7. Deploy to Cloudron
+
+Publishing the release triggers `.github/workflows/deploy-cloudron.yml`: build `ghcr.io/apescic/easm:<version>`, `cloudron update --app $CLOUDRON_APP_ID --image ...`, then check `/health` reports the version.
 
 ```powershell
-gh release create "v0.1.0" --title "<short public title>" --notes "<summary from PR/issue>" --target main
+gh run list --workflow "Deploy to Cloudron" --limit 1
+gh run watch <run-id> --exit-status
 ```
 
-Use public-safe notes only (no credentials, personal data, or exploitable security detail).
+Manual re-deploy of a tag: `gh workflow run "Deploy to Cloudron" -f tag=vX.Y.Z`.
 
-## Completion
+Required repo settings (stop and ask the user to add any that are missing; never invent values):
 
-Only after merge is verified, and after any chosen release step succeeds, give the completion confirmation (PR URL/number, merge SHA, target branch, release URL if created, linked issue closed/updated). Offer to archive the agent; do not archive silently.
+| Name | Kind | Value |
+|------|------|-------|
+| `CLOUDRON_APP_ID` | variable | `7afd5173-8880-4e64-9c36-5f978d9c8f64` |
+| `CLOUDRON_SERVER` | secret | Cloudron dashboard domain (e.g. `my.cloudron.apes.org.uk`) |
+| `CLOUDRON_TOKEN` | secret | Cloudron API token (Profile → API Tokens) |
+
+The image is pushed to GHCR with the workflow's `GITHUB_TOKEN`; the `easm` container package must be public (or the GHCR registry configured in Cloudron) so Cloudron can pull it.
+
+The first deploy switches the app from its current LAMP package to EASM. The workflow refuses until run manually with `first_deploy=true` (Cloudron takes a backup first). Treat that as a decision point: stop and offer it as an option.
+
+## 8. Completion
+
+Report: PR link, short merge SHA, target branch, release URL, deploy run URL, `/health` version, and issues/milestone closed. Offer to archive the agent; never archive silently. Finish with the next-actions menu (usually the next issue in the AGENTS.md implement order).

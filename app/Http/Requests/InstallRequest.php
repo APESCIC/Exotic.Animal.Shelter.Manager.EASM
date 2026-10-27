@@ -22,12 +22,16 @@ class InstallRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $database = config('easm.managed_database') ? [] : [
             'db_host' => ['required', 'string', 'max:255'],
             'db_port' => ['required', 'integer', 'min:1', 'max:65535'],
             'db_database' => ['required', 'string', 'max:64'],
             'db_username' => ['required', 'string', 'max:255'],
             'db_password' => ['nullable', 'string', 'max:255'],
+        ];
+
+        return [
+            ...$database,
             'organisation' => ['required', 'string', 'max:255'],
             'timezone' => ['required', 'timezone'],
             'admin_name' => ['required', 'string', 'max:255'],
