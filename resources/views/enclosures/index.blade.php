@@ -45,7 +45,12 @@
         <tbody>
             @forelse ($enclosures as $enclosure)
                 <tr>
-                    <td><a href="{{ route('enclosures.show', $enclosure) }}">{{ $enclosure->name }}</a></td>
+                    <td>
+                        <a href="{{ route('enclosures.show', $enclosure) }}">{{ $enclosure->name }}</a>
+                        @if ($enclosure->due_equipment_count > 0)
+                            <x-badge tone="quarantine">Equipment due</x-badge>
+                        @endif
+                    </td>
                     <td>{{ $enclosure->zone ?: '—' }}</td>
                     <td>{{ $enclosure->size ?: '—' }}</td>
                     <td>@include('enclosures._occupancy')</td>

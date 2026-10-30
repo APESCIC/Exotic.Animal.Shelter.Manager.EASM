@@ -112,6 +112,17 @@ enum UserRole: string
         };
     }
 
+    /**
+     * Daily husbandry checks: environment readings and marking equipment replaced.
+     */
+    public function canRecordHusbandry(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Volunteer => true,
+            self::Readonly => false,
+        };
+    }
+
     public function canViewFinance(): bool
     {
         return match ($this) {
