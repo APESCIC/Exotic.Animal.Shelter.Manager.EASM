@@ -55,7 +55,8 @@ class LayoutTest extends TestCase
                 && in_array('auth', $route->gatherMiddleware(), true)
                 && ! str_ends_with((string) $route->getName(), '.json')
                 && ! str_ends_with((string) $route->getName(), '.pdf')
-                && ! str_ends_with((string) $route->getName(), '.csv'));
+                && ! str_ends_with((string) $route->getName(), '.csv')
+                && ! str_ends_with((string) $route->getName(), '.download'));
 
         $this->assertGreaterThan(20, $routes->count());
 

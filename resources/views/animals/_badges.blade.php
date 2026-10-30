@@ -5,7 +5,7 @@
         <x-badge tone="quarantine">Quarantine</x-badge>
     @endif
     @if ($animal->hasCitesListing())
-        <x-badge tone="cites" title="CITES {{ $animal->cites }}">CITES</x-badge>
+        <x-badge tone="cites" title="CITES {{ $animal->citesSummary() }}">CITES</x-badge>
     @endif
     @if ($animal->hasDwaListing())
         <x-badge tone="dwa" title="DWA {{ $animal->dwa }}">DWA</x-badge>

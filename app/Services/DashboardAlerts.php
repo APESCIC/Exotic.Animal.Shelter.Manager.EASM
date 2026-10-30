@@ -21,6 +21,7 @@ class DashboardAlerts
             $this->overdueTasks(),
             $this->tasksDueToday(),
             $this->citesInCare(),
+            $this->missingArticleTen(),
             $this->dwaInCare(),
             $this->lowStock(),
         ];
@@ -60,8 +61,17 @@ class DashboardAlerts
     {
         return $this->animalAlert(
             AnimalListFilter::Cites,
-            'Animals in care with a CITES reference to keep paperwork for.',
+            'Animals in care with a CITES Annex or reference to keep paperwork for.',
             'cites',
+        );
+    }
+
+    public function missingArticleTen(): DashboardAlert
+    {
+        return $this->animalAlert(
+            AnimalListFilter::MissingArticleTen,
+            'Annex A animals in care with no Article 10 certificate on file.',
+            'danger',
         );
     }
 

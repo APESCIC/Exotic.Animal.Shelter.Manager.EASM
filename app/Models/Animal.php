@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\AnimalSex;
+use App\Enums\CitesAnnex;
+use App\Enums\CitesCertificateType;
 use App\Enums\MovementType;
 use Database\Factories\AnimalFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,6 +47,7 @@ class Animal extends Model
         'death_reason',
         'enclosure_id',
         'cites',
+        'cites_annex',
         'dwa',
         'primary_photo_path',
     ];
@@ -56,6 +59,7 @@ class Animal extends Model
     {
         return [
             'sex' => AnimalSex::class,
+            'cites_annex' => CitesAnnex::class,
             'date_of_birth' => 'date',
             'deceased_at' => 'date',
             'non_shelter' => 'boolean',
@@ -91,6 +95,14 @@ class Animal extends Model
     public function enclosure(): BelongsTo
     {
         return $this->belongsTo(Enclosure::class);
+    }
+
+    /**
+     * @return HasMany<CitesCertificate, $this>
+     */
+    public function citesCertificates(): HasMany
+    {
+        return $this->hasMany(CitesCertificate::class)->orderByDesc('issued_on')->orderByDesc('id');
     }
 
     /**
@@ -172,7 +184,10 @@ class Animal extends Model
      */
     public function scopeCitesListed(Builder $query): Builder
     {
-        return $this->whereListed($query->inCare(), 'cites');
+        return $query->inCare()->where(function (Builder $inner): void {
+            $inner->whereIn('cites_annex', CitesAnnex::listedValues())
+                ->orWhere(fn (Builder $reference) => $this->whereListed($reference, 'cites'));
+        });
     }
 
     /**
@@ -184,9 +199,54 @@ class Animal extends Model
         return $this->whereListed($query->inCare(), 'dwa');
     }
 
+    /**
+     * Annex A animals in care with no Article 10 certificate on file.
+     *
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeMissingArticleTen(Builder $query): Builder
+    {
+        return $query
+            ->inCare()
+            ->where('cites_annex', CitesAnnex::A->value)
+            ->whereDoesntHave('citesCertificates', function (Builder $certificates): void {
+                $certificates->where('type', CitesCertificateType::Article10->value);
+            });
+    }
+
+    /**
+     * Animals with an Annex, a CITES reference or a certificate on file.
+     *
+     * @param  Builder<Animal>  $query
+     * @return Builder<Animal>
+     */
+    public function scopeOnCitesRegister(Builder $query): Builder
+    {
+        return $query->where(function (Builder $inner): void {
+            $inner->whereIn('cites_annex', CitesAnnex::listedValues())
+                ->orHas('citesCertificates')
+                ->orWhere(fn (Builder $reference) => $this->whereListed($reference, 'cites'));
+        });
+    }
+
+    public function isMissingArticleTen(): bool
+    {
+        return $this->cites_annex === CitesAnnex::A
+            && ! $this->citesCertificates->contains('type', CitesCertificateType::Article10);
+    }
+
     public function hasCitesListing(): bool
     {
-        return self::isListedValue($this->cites);
+        return $this->cites_annex?->isListed() || self::isListedValue($this->cites);
+    }
+
+    public function citesSummary(): string
+    {
+        return implode(' · ', array_filter([
+            $this->cites_annex?->isListed() ? $this->cites_annex->label() : null,
+            self::isListedValue($this->cites) ? $this->cites : null,
+        ]));
     }
 
     public function hasDwaListing(): bool

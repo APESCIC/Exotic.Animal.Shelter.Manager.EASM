@@ -22,6 +22,12 @@
         ],
     ];
 
+    if ($role?->canViewCompliance()) {
+        $groups['Compliance'] = [
+            ['label' => 'CITES register', 'route' => 'compliance.cites.index', 'active' => ['compliance.cites.*']],
+        ];
+    }
+
     if ($role?->canViewFinance()) {
         $groups['Finance'] = [
             ['label' => 'Ledger', 'route' => 'finance.index', 'active' => ['finance.*', 'payments.*', 'sponsorships.*', 'gift-aid-declarations.*']],

@@ -51,14 +51,14 @@ class GlobalSearch
             ->orderBy('name')
             ->limit($limit)
             ->with('enclosure:id,name')
-            ->get(['id', 'name', 'species', 'identifying_code', 'cites', 'dwa', 'location', 'enclosure_id', 'deceased_at'])
+            ->get(['id', 'name', 'species', 'identifying_code', 'cites', 'cites_annex', 'dwa', 'location', 'enclosure_id', 'deceased_at'])
             ->map(fn (Animal $animal): array => [
                 'type' => 'animal',
                 'title' => $animal->name,
                 'subtitle' => $this->join([
                     $animal->species,
                     $animal->identifying_code,
-                    $animal->hasCitesListing() ? 'CITES '.$animal->cites : null,
+                    $animal->hasCitesListing() ? 'CITES '.$animal->citesSummary() : null,
                     $animal->hasDwaListing() ? 'DWA '.$animal->dwa : null,
                     $animal->location,
                     $animal->enclosure ? 'Enclosure '.$animal->enclosure->name : null,

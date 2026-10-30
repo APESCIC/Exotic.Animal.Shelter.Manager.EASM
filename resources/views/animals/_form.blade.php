@@ -1,5 +1,6 @@
 @php
     use App\Enums\AnimalSex;
+    use App\Enums\CitesAnnex;
 @endphp
 
 <fieldset>
@@ -49,8 +50,17 @@
     </select>
     <p class="hint">Manage the list under <a href="{{ route('enclosures.index') }}">Enclosures</a>. You can place an animal in a full enclosure; EASM shows a warning.</p>
 
-    <label for="cites">CITES</label>
-    <input id="cites" name="cites" type="text" value="{{ old('cites', $animal->cites) }}">
+    <label for="cites_annex">CITES Annex</label>
+    <select id="cites_annex" name="cites_annex">
+        <option value="">— Not recorded —</option>
+        @foreach (CitesAnnex::cases() as $annex)
+            <option value="{{ $annex->value }}" @selected(old('cites_annex', $animal->cites_annex?->value) === $annex->value)>{{ $annex->label() }}</option>
+        @endforeach
+    </select>
+    <p class="hint">Annex under the UK wildlife trade regulations. Check the species' current listing; EASM does not look it up. Certificates are added on the animal's Legal tab.</p>
+
+    <label for="cites">CITES reference</label>
+    <input id="cites" name="cites" type="text" value="{{ old('cites', $animal->cites) }}" placeholder="Appendix, permit or reference number">
 
     <label for="dwa">DWA</label>
     <input id="dwa" name="dwa" type="text" value="{{ old('dwa', $animal->dwa) }}">

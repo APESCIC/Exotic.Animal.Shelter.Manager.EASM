@@ -11,6 +11,8 @@ use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CitesCertificateController;
+use App\Http\Controllers\CitesRegisterController;
 use App\Http\Controllers\DevLoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
@@ -101,6 +103,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/equipment/{equipment}/edit', [EnclosureEquipmentController::class, 'edit'])->name('equipment.edit');
     Route::put('/equipment/{equipment}', [EnclosureEquipmentController::class, 'update'])->name('equipment.update');
     Route::post('/equipment/{equipment}/replaced', [EnclosureEquipmentController::class, 'replaced'])->name('equipment.replaced');
+
+    Route::get('/compliance/cites', [CitesRegisterController::class, 'index'])->name('compliance.cites.index');
+    Route::get('/compliance/cites.csv', [CitesRegisterController::class, 'csv'])->name('compliance.cites.csv');
+    Route::post('/animals/{animal}/cites-certificates', [CitesCertificateController::class, 'store'])->name('animals.cites-certificates.store');
+    Route::get('/cites-certificates/{citesCertificate}/download', [CitesCertificateController::class, 'download'])->name('cites-certificates.download');
+    Route::delete('/cites-certificates/{citesCertificate}', [CitesCertificateController::class, 'destroy'])->name('cites-certificates.destroy');
 
     Route::get('/animals/{animal}/medical/create', [MedicalRecordController::class, 'create'])->name('animals.medical.create');
     Route::post('/animals/{animal}/medical', [MedicalRecordController::class, 'store'])->name('animals.medical.store');

@@ -35,6 +35,7 @@ class AnimalFactory extends Factory
             'death_reason' => null,
             'enclosure_id' => null,
             'cites' => fake()->optional()->randomElement(['Appendix I', 'Appendix II', 'None']),
+            'cites_annex' => null,
             'dwa' => fake()->optional()->randomElement(['Yes', 'No', 'Pending']),
             'primary_photo_path' => null,
         ];

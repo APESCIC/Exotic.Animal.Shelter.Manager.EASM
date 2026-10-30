@@ -59,6 +59,8 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 
 Admin and staff can manage animal records at `/animals` (free-text species, primary photo, enclosure/CITES/DWA, find/filter, shelter view by location). Run `php artisan storage:link` once so primary photos and animal media are served.
 
+Admin, staff and read-only users keep a CITES register at `/compliance/cites`. Staff set each animal's CITES Annex (A, B, C, D or not listed) on the animal record and add certificates (Article 10, import or export permits) with an optional scan or PDF on the animal's Legal tab. Certificate files are stored privately under `storage/app/private/cites` and can only be downloaded by signed-in admin, staff and read-only users. The register lists animals in care (or, optionally, everyone who has left too) and downloads as CSV. Annex A animals in care with no Article 10 certificate raise an **Annex A without Article 10** alert on the dashboard. EASM does not look up Annex listings or decide when a certificate is needed: this is a record-keeping aid, not legal advice, so check current APHA guidance.
+
 Admin and staff can manage people/contacts at `/people` (categories, banned and homechecked flags, find/filter).
 
 Admin and staff can record movements on an animal (intake, hold, quarantine, foster, trial adoption, adoption, reclaim, transfer, deceased) with history on the animal record. A deceased movement updates the animal’s deceased date and death reason. Optional contact links use people from `/people`.
