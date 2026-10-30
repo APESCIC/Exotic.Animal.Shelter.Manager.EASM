@@ -4,7 +4,7 @@
     $role = auth()->user()?->role;
 @endphp
 
-<p class="hint">CITES and Dangerous Wild Animals records for this animal. DWA licence tracking arrives with the compliance milestone.</p>
+<p class="hint">CITES and Dangerous Wild Animals records for this animal.</p>
 
 <table>
     <tr>
@@ -38,6 +38,29 @@
 
 @if ($role?->canManageAnimals())
     <p><a class="button" href="{{ route('animals.edit', $animal) }}#cites_annex">Edit CITES / DWA</a></p>
+@endif
+
+<h3>DWA licences</h3>
+@if ($animal->dwaLicences->isEmpty())
+    <p class="hint">Not linked to a DWA licence. Link animals from the licence under <a href="{{ route('compliance.dwa.index') }}">DWA licences</a>.</p>
+@else
+    <table>
+        <thead>
+            <tr><th>Licence</th><th>Council</th><th>Expires</th></tr>
+        </thead>
+        <tbody>
+            @foreach ($animal->dwaLicences as $licence)
+                <tr data-dwa-licence="{{ $licence->id }}">
+                    <td><a href="{{ route('compliance.dwa.show', $licence) }}">{{ $licence->licence_number }}</a></td>
+                    <td>{{ $licence->issuing_authority }}</td>
+                    <td>
+                        {{ UkDate::format($licence->expires_on) }}
+                        <x-badge :tone="$licence->statusTone()">{{ $licence->statusLabel() }}</x-badge>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 @endif
 
 <h3>CITES certificates</h3>

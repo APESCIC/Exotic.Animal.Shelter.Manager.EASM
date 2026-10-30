@@ -17,6 +17,8 @@ use App\Http\Controllers\DevLoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DwaInspectionController;
+use App\Http\Controllers\DwaLicenceController;
 use App\Http\Controllers\EnclosureController;
 use App\Http\Controllers\EnclosureEquipmentController;
 use App\Http\Controllers\EnclosureLogController;
@@ -106,6 +108,13 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/compliance/cites', [CitesRegisterController::class, 'index'])->name('compliance.cites.index');
     Route::get('/compliance/cites.csv', [CitesRegisterController::class, 'csv'])->name('compliance.cites.csv');
+    Route::get('/compliance/dwa', [DwaLicenceController::class, 'index'])->name('compliance.dwa.index');
+    Route::get('/compliance/dwa/create', [DwaLicenceController::class, 'create'])->name('compliance.dwa.create');
+    Route::post('/compliance/dwa', [DwaLicenceController::class, 'store'])->name('compliance.dwa.store');
+    Route::get('/compliance/dwa/{dwaLicence}', [DwaLicenceController::class, 'show'])->name('compliance.dwa.show');
+    Route::get('/compliance/dwa/{dwaLicence}/edit', [DwaLicenceController::class, 'edit'])->name('compliance.dwa.edit');
+    Route::put('/compliance/dwa/{dwaLicence}', [DwaLicenceController::class, 'update'])->name('compliance.dwa.update');
+    Route::post('/compliance/dwa/{dwaLicence}/inspections', [DwaInspectionController::class, 'store'])->name('compliance.dwa.inspections.store');
     Route::post('/animals/{animal}/cites-certificates', [CitesCertificateController::class, 'store'])->name('animals.cites-certificates.store');
     Route::get('/cites-certificates/{citesCertificate}/download', [CitesCertificateController::class, 'download'])->name('cites-certificates.download');
     Route::delete('/cites-certificates/{citesCertificate}', [CitesCertificateController::class, 'destroy'])->name('cites-certificates.destroy');
