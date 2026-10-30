@@ -43,7 +43,7 @@ enum AnimalTab: string
             self::Health => ['medicalRecords'],
             self::Husbandry => ['diets', 'enclosure'],
             self::Movements => ['movements.person'],
-            self::Legal => [],
+            self::Legal => ['citesCertificates.uploader'],
             self::Media => ['media.uploader'],
             self::Documents => ['documents.person'],
             self::Diary => ['diaryTasks.assignee'],

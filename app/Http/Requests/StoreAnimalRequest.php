@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\AnimalSex;
+use App\Enums\CitesAnnex;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -40,6 +41,7 @@ class StoreAnimalRequest extends FormRequest
             'death_reason' => ['nullable', 'string', 'max:255'],
             'enclosure_id' => ['nullable', 'integer', Rule::exists('enclosures', 'id')],
             'cites' => ['nullable', 'string', 'max:255'],
+            'cites_annex' => ['nullable', Rule::enum(CitesAnnex::class)],
             'dwa' => ['nullable', 'string', 'max:255'],
             'primary_photo' => ['nullable', 'image', 'max:5120'],
         ];

@@ -123,6 +123,17 @@ enum UserRole: string
         };
     }
 
+    /**
+     * The CITES register and certificate files: legal paperwork, not shown to volunteers.
+     */
+    public function canViewCompliance(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Readonly => true,
+            self::Volunteer => false,
+        };
+    }
+
     public function canViewFinance(): bool
     {
         return match ($this) {
