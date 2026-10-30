@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HealthController;
+use App\Http\Middleware\AutoLoginDevUser;
 use App\Http\Middleware\EnsureInstallerAccess;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -30,6 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Must run before auth so uninstalled hosts reach /install, not /login.
         $middleware->web(prepend: [
             EnsureInstallerAccess::class,
+        ], append: [
+            AutoLoginDevUser::class,
         ]);
 
         $middleware->api(prepend: [
@@ -38,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->priority([
             EnsureInstallerAccess::class,
+            AutoLoginDevUser::class,
             Authenticate::class,
         ]);
     })

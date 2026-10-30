@@ -1,3 +1,4 @@
+@inject('devLogin', 'App\Support\DevLogin')
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -42,6 +43,13 @@
                 margin: 1rem 0;
             }
             .hint { margin: 0 0 1rem; color: #444; }
+            .dev-login {
+                margin-top: 2rem;
+                padding: 0.75rem 1rem;
+                border: 1px dashed #b45309;
+                background: #fffbeb;
+            }
+            .dev-login h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
         </style>
     </head>
     <body>
@@ -74,5 +82,17 @@
 
             <button type="submit">Sign in</button>
         </form>
+
+        @if ($devLogin->enabled())
+            <section class="dev-login" aria-labelledby="dev-login-title" data-dev-login>
+                <h2 id="dev-login-title">Development: sign in as</h2>
+                <p class="hint">Local QA accounts (password <code>{{ \App\Support\DevLogin::PASSWORD }}</code>). Auto-login stays paused after signing out until you pick a role.</p>
+                <ul>
+                    @foreach (\App\Enums\UserRole::cases() as $devRole)
+                        <li><a href="{{ route('dev.login-as', $devRole) }}">{{ $devRole->label() }}</a> · {{ \App\Support\DevLogin::email($devRole) }}</li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
     </body>
 </html>

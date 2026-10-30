@@ -11,6 +11,7 @@ use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DevLoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\DocumentController;
@@ -45,6 +46,8 @@ Route::middleware(RedirectIfAuthenticated::class)->group(function (): void {
 Route::post('/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::get('/dev/login-as/{role}', DevLoginController::class)->name('dev.login-as');
 
 Route::get('/adopt', [AdoptableAnimalController::class, 'index'])->name('public.adopt.index');
 Route::get('/adopt/embed', [AdoptableAnimalController::class, 'embed'])->name('public.adopt.embed');

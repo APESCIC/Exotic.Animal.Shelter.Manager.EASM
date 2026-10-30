@@ -1,3 +1,4 @@
+@inject('devLogin', 'App\Support\DevLogin')
 @php
     $role = auth()->user()?->role;
     $groups = [
@@ -68,5 +69,18 @@
                 <li><a class="nav-link" href="{{ route('public.apply.index') }}">Public applications</a></li>
             </ul>
         </div>
+
+        @if ($devLogin->enabled())
+            <div class="nav-group" data-dev-login>
+                <p class="nav-group-title">Development: sign in as</p>
+                <ul>
+                    @foreach (\App\Enums\UserRole::cases() as $devRole)
+                        <li>
+                            <a class="nav-link" href="{{ route('dev.login-as', $devRole) }}"@if ($role === $devRole) aria-current="page"@endif>{{ $devRole->label() }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
     </nav>
 </aside>

@@ -32,4 +32,20 @@ return [
 
     'managed_database' => filter_var(env('EASM_MANAGED_DATABASE', false), FILTER_VALIDATE_BOOLEAN),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Development auto-login
+    |--------------------------------------------------------------------------
+    |
+    | Signs guests in as a QA account so local testing needs no password, and
+    | enables the role switcher. Only honoured when APP_ENV=local; ignored in
+    | every other environment even when set.
+    |
+    */
+
+    'dev_login' => [
+        'auto_login' => filter_var(env('DEV_AUTO_LOGIN', false), FILTER_VALIDATE_BOOLEAN),
+        'role' => env('DEV_AUTO_LOGIN_ROLE', 'admin'),
+    ],
+
 ];
