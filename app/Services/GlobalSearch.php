@@ -50,7 +50,8 @@ class GlobalSearch
             ->orderByRaw('case when identifying_code = ? or cites = ? or dwa = ? then 0 else 1 end', [$term, $term, $term])
             ->orderBy('name')
             ->limit($limit)
-            ->get(['id', 'name', 'species', 'identifying_code', 'cites', 'dwa', 'location', 'deceased_at'])
+            ->with('enclosure:id,name')
+            ->get(['id', 'name', 'species', 'identifying_code', 'cites', 'dwa', 'location', 'enclosure_id', 'deceased_at'])
             ->map(fn (Animal $animal): array => [
                 'type' => 'animal',
                 'title' => $animal->name,
@@ -60,6 +61,7 @@ class GlobalSearch
                     $animal->hasCitesListing() ? 'CITES '.$animal->cites : null,
                     $animal->hasDwaListing() ? 'DWA '.$animal->dwa : null,
                     $animal->location,
+                    $animal->enclosure ? 'Enclosure '.$animal->enclosure->name : null,
                     $animal->deceased_at ? 'Deceased' : null,
                 ]),
                 'url' => route('animals.show', $animal),

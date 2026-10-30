@@ -94,7 +94,7 @@ class DocumentRenderer
             'animal.identifying_code' => $animal?->identifying_code,
             'animal.colour' => $animal?->colour,
             'animal.location' => $animal?->location,
-            'animal.enclosure' => $animal?->enclosure,
+            'animal.enclosure' => $animal?->enclosure?->name,
             'animal.cites' => $animal?->cites,
             'animal.dwa' => $animal?->dwa,
             'person.name' => $person?->name,

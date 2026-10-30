@@ -7,6 +7,7 @@
         'Animals' => [
             ['label' => 'Animals', 'route' => 'animals.index', 'active' => ['animals.index', 'animals.show', 'animals.create', 'animals.edit', 'animals.movements.*', 'animals.medical.*', 'animals.diets.*', 'animals.observations.*', 'animals.media.*', 'animals.diary.*', 'medical.*', 'diets.*', 'documents.*']],
             ['label' => 'Shelter view', 'route' => 'animals.shelter', 'active' => ['animals.shelter']],
+            ['label' => 'Enclosures', 'route' => 'enclosures.index', 'active' => ['enclosures.*']],
             ['label' => 'Lost and found', 'route' => 'lost-found.index', 'active' => ['lost-found.*']],
         ],
         'People' => [

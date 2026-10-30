@@ -41,7 +41,7 @@ enum AnimalTab: string
         return match ($this) {
             self::Overview => ['customFieldValues.definition', 'sponsorships.person'],
             self::Health => ['medicalRecords'],
-            self::Husbandry => ['diets'],
+            self::Husbandry => ['diets', 'enclosure'],
             self::Movements => ['movements.person'],
             self::Legal => [],
             self::Media => ['media.uploader'],

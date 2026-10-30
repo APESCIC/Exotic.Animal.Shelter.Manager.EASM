@@ -10,6 +10,8 @@ use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
 use App\Models\CustomFieldDefinition;
+use App\Models\Enclosure;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +26,7 @@ class AnimalController extends Controller
         $filter = AnimalListFilter::tryFrom($request->string('filter')->toString());
 
         $query = Animal::query()
-            ->with('latestMovement')
+            ->with(['latestMovement', 'enclosure'])
             ->search($q !== '' ? $q : null)
             ->atLocation($location !== '' ? $location : null);
 
@@ -53,16 +55,37 @@ class AnimalController extends Controller
         ]);
     }
 
-    public function shelter(): View
+    public function shelter(Request $request): View
     {
+        $byEnclosure = $request->string('group')->toString() === 'enclosure';
+
+        if ($byEnclosure) {
+            return view('animals.shelter', [
+                'byEnclosure' => true,
+                'enclosures' => Enclosure::query()
+                    ->with(['occupants.latestMovement'])
+                    ->withCount('occupants')
+                    ->where(fn ($query) => $query->active()->orHas('occupants'))
+                    ->ordered()
+                    ->get(),
+                'unassigned' => Animal::query()
+                    ->inCare()
+                    ->whereNull('enclosure_id')
+                    ->with('latestMovement')
+                    ->orderBy('name')
+                    ->get(),
+            ]);
+        }
+
         $groups = Animal::query()
-            ->with('latestMovement')
+            ->with(['latestMovement', 'enclosure'])
             ->orderBy('location')
             ->orderBy('name')
             ->get()
             ->groupBy(fn (Animal $animal) => $animal->location ?: 'Unassigned');
 
         return view('animals.shelter', [
+            'byEnclosure' => false,
             'groups' => $groups,
         ]);
     }
@@ -73,6 +96,7 @@ class AnimalController extends Controller
 
         return view('animals.create', [
             'animal' => new Animal(['sex' => AnimalSex::Unknown]),
+            'enclosures' => $this->enclosureOptions(),
             'customFieldDefinitions' => CustomFieldDefinition::query()
                 ->active()
                 ->forAnimal()
@@ -92,9 +116,10 @@ class AnimalController extends Controller
         $animal = Animal::query()->create($data);
         $this->syncCustomFieldValues($request, $animal);
 
-        return redirect()
-            ->route('animals.show', $animal)
-            ->with('status', 'Animal record created.');
+        return $this->withCapacityWarning(
+            redirect()->route('animals.show', $animal)->with('status', 'Animal record created.'),
+            $animal,
+        );
     }
 
     public function show(Animal $animal, ?string $tab = null): View
@@ -124,6 +149,7 @@ class AnimalController extends Controller
 
         return view('animals.edit', [
             'animal' => $animal,
+            'enclosures' => $this->enclosureOptions($animal->enclosure_id),
             'customFieldDefinitions' => CustomFieldDefinition::query()
                 ->active()
                 ->forAnimal()
@@ -146,9 +172,39 @@ class AnimalController extends Controller
         $animal->update($data);
         $this->syncCustomFieldValues($request, $animal);
 
-        return redirect()
-            ->route('animals.show', $animal)
-            ->with('status', 'Animal record updated.');
+        return $this->withCapacityWarning(
+            redirect()->route('animals.show', $animal)->with('status', 'Animal record updated.'),
+            $animal,
+        );
+    }
+
+    /**
+     * Capacity is advisory: staff may need to over-fill an enclosure in an emergency intake.
+     */
+    private function withCapacityWarning(RedirectResponse $response, Animal $animal): RedirectResponse
+    {
+        $enclosure = $animal->enclosure()->first();
+
+        if ($enclosure === null || ! $enclosure->isOverCapacity()) {
+            return $response;
+        }
+
+        return $response->with(
+            'warning',
+            "{$enclosure->name} is over capacity: {$enclosure->occupancyLabel()} animals.",
+        );
+    }
+
+    /**
+     * @return Collection<int, Enclosure>
+     */
+    private function enclosureOptions(?int $currentId = null): Collection
+    {
+        return Enclosure::query()
+            ->withCount('occupants')
+            ->where(fn ($query) => $query->active()->when($currentId !== null, fn ($inner) => $inner->orWhere('id', $currentId)))
+            ->ordered()
+            ->get();
     }
 
     /**

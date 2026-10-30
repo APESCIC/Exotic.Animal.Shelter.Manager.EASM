@@ -10,6 +10,7 @@ use App\Models\AnimalObservation;
 use App\Models\DiaryTask;
 use App\Models\Diet;
 use App\Models\Document;
+use App\Models\Enclosure;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
 use App\Models\User;
@@ -144,7 +145,7 @@ class AnimalTabsTest extends TestCase
     {
         $animal = Animal::factory()->create([
             'colour' => 'Tab Colour',
-            'enclosure' => 'ENC-77',
+            'enclosure_id' => Enclosure::factory()->create(['name' => 'ENC-77'])->id,
             'cites' => 'Appendix II',
             'dwa' => 'DWA-TAB-1',
         ]);

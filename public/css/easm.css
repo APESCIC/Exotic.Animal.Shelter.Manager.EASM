@@ -742,6 +742,7 @@ form.is-dirty .save-bar-status {
 /* Alerts */
 
 .status,
+.warning,
 .errors {
     padding: var(--space-3) var(--space-4);
     margin: 0 0 var(--space-4);
@@ -751,6 +752,11 @@ form.is-dirty .save-bar-status {
 .status {
     background: var(--color-success-bg);
     color: var(--color-success-text);
+}
+
+.warning {
+    background: var(--color-warning-bg);
+    color: var(--color-warning-text);
 }
 
 .errors {

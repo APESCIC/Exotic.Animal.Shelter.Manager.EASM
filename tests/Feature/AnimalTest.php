@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\Animal;
+use App\Models\Enclosure;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +20,7 @@ class AnimalTest extends TestCase
         Storage::fake('public');
 
         $staff = User::factory()->staff()->create();
+        $enclosure = Enclosure::factory()->create(['name' => 'ENC-12']);
 
         $response = $this->actingAs($staff)->post(route('animals.store'), [
             'name' => 'Spike',
@@ -34,7 +36,7 @@ class AnimalTest extends TestCase
             'bonded_animals' => 'Dot',
             'entry_reason' => 'Surrender',
             'non_shelter' => '0',
-            'enclosure' => 'ENC-12',
+            'enclosure_id' => $enclosure->id,
             'cites' => 'Appendix II',
             'dwa' => 'No',
             'primary_photo' => UploadedFile::fake()->createWithContent(
@@ -49,7 +51,7 @@ class AnimalTest extends TestCase
 
         $this->assertSame('Spike', $animal->name);
         $this->assertSame('Bearded dragon', $animal->species);
-        $this->assertSame('ENC-12', $animal->enclosure);
+        $this->assertSame('ENC-12', $animal->enclosure?->name);
         $this->assertSame('Appendix II', $animal->cites);
         $this->assertSame('No', $animal->dwa);
         $this->assertNotNull($animal->primary_photo_path);

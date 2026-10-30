@@ -4,7 +4,16 @@
 
 <table>
     <tr><th>Location</th><td>{{ $animal->location ?: '—' }}</td></tr>
-    <tr><th>Enclosure</th><td>{{ $animal->enclosure ?: '—' }}</td></tr>
+    <tr>
+        <th>Enclosure</th>
+        <td>
+            @if ($animal->enclosure)
+                <a href="{{ route('enclosures.show', $animal->enclosure) }}">{{ $animal->enclosure->label() }}</a>
+            @else
+                —
+            @endif
+        </td>
+    </tr>
     <tr><th>Bonded animals</th><td>{{ $animal->bonded_animals ?: '—' }}</td></tr>
 </table>
 

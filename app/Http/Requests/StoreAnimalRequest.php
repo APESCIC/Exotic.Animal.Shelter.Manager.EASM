@@ -38,7 +38,7 @@ class StoreAnimalRequest extends FormRequest
             'is_adoptable' => ['sometimes', 'boolean'],
             'deceased_at' => ['nullable', 'date'],
             'death_reason' => ['nullable', 'string', 'max:255'],
-            'enclosure' => ['nullable', 'string', 'max:255'],
+            'enclosure_id' => ['nullable', 'integer', Rule::exists('enclosures', 'id')],
             'cites' => ['nullable', 'string', 'max:255'],
             'dwa' => ['nullable', 'string', 'max:255'],
             'primary_photo' => ['nullable', 'image', 'max:5120'],
