@@ -15,7 +15,7 @@
 
 Finish a milestone before starting the next. The plan epic is [#1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) (no milestone).
 
-Status (27/10/2026): v0.1.0 to v0.5.0 are done. Next is v0.5.5, starting with #61. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
+Status (30/10/2026): v0.1.0 to v0.5.5 are done. Next is v0.6.0, starting with #25. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
 
 ### v0.1.0 Foundation: generic hosting ([milestone/1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/1), epic #2) — done
 
@@ -60,12 +60,14 @@ Status (27/10/2026): v0.1.0 to v0.5.0 are done. Next is v0.5.5, starting with #6
 
 Also shipped: #67 Dependabot fixes. #47 (Laravel Boost) was dropped because it conflicts with removing AI-agent files (#99).
 
-### v0.5.5 Enclosures, husbandry and compliance ([milestone/9](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/9))
+### v0.5.5 Enclosures, husbandry and compliance ([milestone/9](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/9), epic #115) — done
 
 1. #61 enclosures as a first-class entity
-2. #62 environment and equipment logs
-3. #63 CITES register and Article 10 tracking
-4. #64 DWA licence and inspection tracking
+2. #62 environment and equipment logs (reminders run when the dashboard or diary loads, or via `php artisan easm:reminders`; no cron)
+3. #63 CITES register and Article 10 tracking (legal check still open)
+4. #64 DWA licence and inspection tracking (legal check still open)
+
+Also shipped: #116 development auto-login and QA role accounts (local only).
 
 ### v0.6.0 Reporting, rota and mobile ([milestone/6](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/6), epic #8)
 
