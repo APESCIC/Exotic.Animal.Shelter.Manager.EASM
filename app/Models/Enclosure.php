@@ -56,6 +56,34 @@ class Enclosure extends Model
         return $this->animals()->inCare()->orderBy('name');
     }
 
+    /**
+     * @return HasMany<EnclosureLog, $this>
+     */
+    public function logs(): HasMany
+    {
+        return $this->hasMany(EnclosureLog::class)->orderByDesc('recorded_at')->orderByDesc('id');
+    }
+
+    /**
+     * @return HasMany<EnclosureEquipment, $this>
+     */
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(EnclosureEquipment::class)
+            ->orderByDesc('active')
+            ->orderByRaw('replace_due_on is null')
+            ->orderBy('replace_due_on')
+            ->orderBy('name');
+    }
+
+    /**
+     * @return HasMany<EnclosureEquipment, $this>
+     */
+    public function dueEquipment(): HasMany
+    {
+        return $this->hasMany(EnclosureEquipment::class)->due();
+    }
+
     public function occupantCount(): int
     {
         return (int) ($this->occupants_count ?? $this->occupants()->count());

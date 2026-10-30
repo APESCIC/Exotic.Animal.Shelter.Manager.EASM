@@ -15,6 +15,8 @@ use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EnclosureController;
+use App\Http\Controllers\EnclosureEquipmentController;
+use App\Http\Controllers\EnclosureLogController;
 use App\Http\Controllers\GiftAidDeclarationController;
 use App\Http\Controllers\GiftAidExportController;
 use App\Http\Controllers\HomeController;
@@ -91,6 +93,11 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/enclosures/{enclosure}', [EnclosureController::class, 'show'])->name('enclosures.show');
     Route::get('/enclosures/{enclosure}/edit', [EnclosureController::class, 'edit'])->name('enclosures.edit');
     Route::put('/enclosures/{enclosure}', [EnclosureController::class, 'update'])->name('enclosures.update');
+    Route::post('/enclosures/{enclosure}/logs', [EnclosureLogController::class, 'store'])->name('enclosures.logs.store');
+    Route::post('/enclosures/{enclosure}/equipment', [EnclosureEquipmentController::class, 'store'])->name('enclosures.equipment.store');
+    Route::get('/equipment/{equipment}/edit', [EnclosureEquipmentController::class, 'edit'])->name('equipment.edit');
+    Route::put('/equipment/{equipment}', [EnclosureEquipmentController::class, 'update'])->name('equipment.update');
+    Route::post('/equipment/{equipment}/replaced', [EnclosureEquipmentController::class, 'replaced'])->name('equipment.replaced');
 
     Route::get('/animals/{animal}/medical/create', [MedicalRecordController::class, 'create'])->name('animals.medical.create');
     Route::post('/animals/{animal}/medical', [MedicalRecordController::class, 'store'])->name('animals.medical.store');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EquipmentType;
 use App\Http\Requests\StoreEnclosureRequest;
 use App\Models\Enclosure;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,7 @@ class EnclosureController extends Controller
         $q = trim($request->string('q')->toString());
 
         $enclosures = Enclosure::query()
-            ->withCount('occupants')
+            ->withCount(['occupants', 'dueEquipment'])
             ->when($zone !== '', fn ($query) => $query->where('zone', $zone))
             ->when($q !== '', fn ($query) => $query->where('name', 'like', '%'.$q.'%'))
             ->orderByDesc('active')
@@ -52,10 +53,12 @@ class EnclosureController extends Controller
 
     public function show(Enclosure $enclosure): View
     {
-        $enclosure->load(['occupants.latestMovement'])->loadCount('occupants');
+        $enclosure->load(['occupants.latestMovement', 'equipment'])->loadCount('occupants');
 
         return view('enclosures.show', [
             'enclosure' => $enclosure,
+            'logs' => $enclosure->logs()->with('user')->paginate(20)->fragment('environment'),
+            'types' => EquipmentType::cases(),
         ]);
     }
 

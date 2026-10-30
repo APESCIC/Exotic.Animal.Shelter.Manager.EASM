@@ -23,7 +23,7 @@
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Animal</th>
+                    <th>Animal / enclosure</th>
                     <th>Assignee</th>
                     <th>Due</th>
                     <th></th>
@@ -36,6 +36,8 @@
                         <td>
                             @if ($task->animal)
                                 <a href="{{ route('animals.show', $task->animal) }}">{{ $task->animal->name }}</a>
+                            @elseif ($task->enclosure)
+                                <a href="{{ route('enclosures.show', $task->enclosure) }}">{{ $task->enclosure->name }}</a>
                             @else
                                 —
                             @endif
@@ -65,7 +67,7 @@
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Animal</th>
+                    <th>Animal / enclosure</th>
                     <th>Assignee</th>
                     <th>Completed</th>
                     <th></th>
@@ -78,6 +80,8 @@
                         <td>
                             @if ($task->animal)
                                 <a href="{{ route('animals.show', $task->animal) }}">{{ $task->animal->name }}</a>
+                            @elseif ($task->enclosure)
+                                <a href="{{ route('enclosures.show', $task->enclosure) }}">{{ $task->enclosure->name }}</a>
                             @else
                                 —
                             @endif

@@ -9,6 +9,7 @@ use App\Http\Requests\StoreDiaryTaskRequest;
 use App\Models\Animal;
 use App\Models\DiaryTask;
 use App\Models\User;
+use App\Services\ReminderSync;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,12 +17,14 @@ use Illuminate\View\View;
 
 class DiaryTaskController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ReminderSync $reminders): View
     {
+        $reminders->sync();
+
         $due = DiaryDueFilter::tryFrom($request->string('due')->toString());
 
         $openQuery = DiaryTask::query()
-            ->with(['animal', 'assignee', 'creator'])
+            ->with(['animal', 'enclosure', 'assignee', 'creator'])
             ->open();
 
         if ($due !== null) {
@@ -37,7 +40,7 @@ class DiaryTaskController extends Controller
         $recentlyCompleted = $due !== null
             ? new Collection
             : DiaryTask::query()
-                ->with(['animal', 'assignee', 'creator'])
+                ->with(['animal', 'enclosure', 'assignee', 'creator'])
                 ->whereNotNull('completed_at')
                 ->orderByDesc('completed_at')
                 ->limit(20)

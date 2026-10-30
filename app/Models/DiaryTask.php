@@ -18,12 +18,14 @@ class DiaryTask extends Model
      */
     protected $fillable = [
         'animal_id',
+        'enclosure_id',
         'assigned_to',
         'created_by',
         'title',
         'body',
         'due_on',
         'completed_at',
+        'reminder_key',
     ];
 
     /**
@@ -43,6 +45,19 @@ class DiaryTask extends Model
     public function animal(): BelongsTo
     {
         return $this->belongsTo(Animal::class);
+    }
+
+    /**
+     * @return BelongsTo<Enclosure, $this>
+     */
+    public function enclosure(): BelongsTo
+    {
+        return $this->belongsTo(Enclosure::class);
+    }
+
+    public function isReminder(): bool
+    {
+        return $this->reminder_key !== null;
     }
 
     /**
@@ -91,5 +106,14 @@ class DiaryTask extends Model
     public function scopeOverdue(Builder $query): Builder
     {
         return $query->open()->whereNotNull('due_on')->whereDate('due_on', '<', today());
+    }
+
+    /**
+     * @param  Builder<DiaryTask>  $query
+     * @return Builder<DiaryTask>
+     */
+    public function scopeReminderKeyStartsWith(Builder $query, string $prefix): Builder
+    {
+        return $query->where('reminder_key', 'like', $prefix.'%');
     }
 }
