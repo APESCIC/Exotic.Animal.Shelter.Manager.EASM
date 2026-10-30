@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
@@ -95,6 +96,14 @@ class Animal extends Model
     public function enclosure(): BelongsTo
     {
         return $this->belongsTo(Enclosure::class);
+    }
+
+    /**
+     * @return BelongsToMany<DwaLicence, $this>
+     */
+    public function dwaLicences(): BelongsToMany
+    {
+        return $this->belongsToMany(DwaLicence::class)->withTimestamps()->orderBy('expires_on');
     }
 
     /**

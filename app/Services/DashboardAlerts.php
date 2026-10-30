@@ -6,6 +6,7 @@ use App\Enums\AnimalListFilter;
 use App\Enums\DiaryDueFilter;
 use App\Models\Animal;
 use App\Models\DiaryTask;
+use App\Models\DwaLicence;
 use App\Models\StockItem;
 
 class DashboardAlerts
@@ -23,6 +24,7 @@ class DashboardAlerts
             $this->citesInCare(),
             $this->missingArticleTen(),
             $this->dwaInCare(),
+            $this->dwaRenewals(),
             $this->lowStock(),
         ];
     }
@@ -36,6 +38,18 @@ class DashboardAlerts
             count: StockItem::query()->lowStock()->count(),
             url: route('stock.index', ['filter' => 'low']),
             tone: 'quarantine',
+        );
+    }
+
+    public function dwaRenewals(): DashboardAlert
+    {
+        return new DashboardAlert(
+            key: 'dwa_renewals',
+            label: 'DWA licences to renew',
+            description: 'Dangerous Wild Animals licences expired or expiring within '.DwaLicence::RENEWAL_REMINDER_DAYS.' days.',
+            count: DwaLicence::query()->needsRenewal()->count(),
+            url: route('compliance.dwa.index', ['filter' => 'renewal']),
+            tone: 'dwa',
         );
     }
 

@@ -22,10 +22,12 @@
         ],
     ];
 
+    $groups['Compliance'] = [
+        ['label' => 'DWA licences', 'route' => 'compliance.dwa.index', 'active' => ['compliance.dwa.*']],
+    ];
+
     if ($role?->canViewCompliance()) {
-        $groups['Compliance'] = [
-            ['label' => 'CITES register', 'route' => 'compliance.cites.index', 'active' => ['compliance.cites.*']],
-        ];
+        array_unshift($groups['Compliance'], ['label' => 'CITES register', 'route' => 'compliance.cites.index', 'active' => ['compliance.cites.*']]);
     }
 
     if ($role?->canViewFinance()) {

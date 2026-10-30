@@ -9,6 +9,7 @@ use App\Models\CustomFieldDefinition;
 use App\Models\Diet;
 use App\Models\Document;
 use App\Models\DocumentTemplate;
+use App\Models\DwaLicence;
 use App\Models\Enclosure;
 use App\Models\EnclosureEquipment;
 use App\Models\LostFoundReport;
@@ -48,6 +49,7 @@ class LayoutTest extends TestCase
             'waitingListEntry' => WaitingListEntry::factory()->create(),
             'enclosure' => Enclosure::factory()->create(),
             'equipment' => EnclosureEquipment::factory()->create(),
+            'dwaLicence' => DwaLicence::factory()->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())

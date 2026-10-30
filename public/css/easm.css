@@ -769,6 +769,10 @@ form.is-dirty .save-bar-status {
     padding-left: var(--space-5);
 }
 
+.prewrap {
+    white-space: pre-wrap;
+}
+
 /* Badges */
 
 .badge {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\DiaryTask;
+use App\Models\DwaLicence;
 use App\Models\EnclosureEquipment;
 use App\Support\UkDate;
 
@@ -19,7 +20,30 @@ class ReminderSync
      */
     public function sync(): int
     {
-        return $this->equipmentReplacements();
+        return $this->equipmentReplacements() + $this->dwaRenewals();
+    }
+
+    private function dwaRenewals(): int
+    {
+        $created = 0;
+
+        foreach (DwaLicence::query()->needsRenewal()->get() as $licence) {
+            $task = DiaryTask::query()->firstOrCreate(
+                ['reminder_key' => $licence->reminderKey()],
+                [
+                    'title' => "Renew DWA licence {$licence->licence_number}",
+                    'body' => "Issued by {$licence->issuing_authority}; expires on ".UkDate::format($licence->expires_on)
+                        .'. Update the expiry date on the licence once it is renewed.',
+                    'due_on' => $licence->expires_on->copy()->subDays(DwaLicence::RENEWAL_REMINDER_DAYS),
+                ],
+            );
+
+            if ($task->wasRecentlyCreated) {
+                $created++;
+            }
+        }
+
+        return $created;
     }
 
     private function equipmentReplacements(): int
