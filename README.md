@@ -146,6 +146,30 @@ Open http://127.0.0.1:8000/install against a local MySQL/MariaDB database, then 
 
 Node and Vite are optional and are not required to boot, install, or hit `/health`.
 
+### Development logins
+
+Local QA accounts, one per role, all with password `password`:
+
+| Role | Email |
+| --- | --- |
+| Admin | `admin@easm.test` |
+| Staff | `staff@easm.test` |
+| Volunteer | `volunteer@easm.test` |
+| Read only | `readonly@easm.test` |
+
+`php artisan db:seed` creates them when `APP_ENV=local`; or run `php artisan db:seed --class=DevUserSeeder` (refuses outside local and testing).
+
+To skip the login screen, add to your local `.env`:
+
+```env
+DEV_AUTO_LOGIN=true
+DEV_AUTO_LOGIN_ROLE=admin
+```
+
+Guests are then signed in as the QA account for `DEV_AUTO_LOGIN_ROLE` (missing accounts are created on first use). The sidebar gains a **Development: sign in as** list to switch roles, also reachable at `/dev/login-as/{role}`. Signing out pauses auto-login for that browser session so the login page stays usable; pick a role on the login page to resume. Installer, `/login`, `/adopt`, `/apply` and `/feeds` are never auto-logged-in. Set `DEV_AUTO_LOGIN=false` (then `php artisan config:clear` if config is cached) to turn it off.
+
+Auto-login and `/dev/login-as` only work when `APP_ENV=local`; in any other environment the flag is ignored and the route returns 404.
+
 ### Tests and lint
 
 ```bash
