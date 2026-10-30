@@ -33,7 +33,7 @@ class AnimalFactory extends Factory
             'is_adoptable' => false,
             'deceased_at' => null,
             'death_reason' => null,
-            'enclosure' => fake()->optional()->bothify('ENC-##'),
+            'enclosure_id' => null,
             'cites' => fake()->optional()->randomElement(['Appendix I', 'Appendix II', 'None']),
             'dwa' => fake()->optional()->randomElement(['Yes', 'No', 'Pending']),
             'primary_photo_path' => null,

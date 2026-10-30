@@ -8,6 +8,7 @@ use Database\Factories\AnimalFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +43,7 @@ class Animal extends Model
         'is_adoptable',
         'deceased_at',
         'death_reason',
-        'enclosure',
+        'enclosure_id',
         'cites',
         'dwa',
         'primary_photo_path',
@@ -82,6 +83,14 @@ class Animal extends Model
         return $this->is_adoptable
             && $this->deceased_at === null
             && ! $this->non_shelter;
+    }
+
+    /**
+     * @return BelongsTo<Enclosure, $this>
+     */
+    public function enclosure(): BelongsTo
+    {
+        return $this->belongsTo(Enclosure::class);
     }
 
     /**
@@ -310,7 +319,9 @@ class Animal extends Model
                 ->orWhere('identifying_code', 'like', $like)
                 ->orWhere('location', 'like', $like)
                 ->orWhere('colour', 'like', $like)
-                ->orWhere('enclosure', 'like', $like)
+                ->orWhereHas('enclosure', function (Builder $enclosure) use ($like): void {
+                    $enclosure->where('name', 'like', $like);
+                })
                 ->orWhere('cites', 'like', $like)
                 ->orWhere('dwa', 'like', $like)
                 ->orWhereHas('customFieldValues', function (Builder $values) use ($like): void {

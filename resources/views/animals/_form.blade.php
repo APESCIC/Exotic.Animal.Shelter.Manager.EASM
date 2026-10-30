@@ -38,8 +38,16 @@
     <label for="location">Location / unit</label>
     <input id="location" name="location" type="text" value="{{ old('location', $animal->location) }}">
 
-    <label for="enclosure">Enclosure</label>
-    <input id="enclosure" name="enclosure" type="text" value="{{ old('enclosure', $animal->enclosure) }}">
+    <label for="enclosure_id">Enclosure</label>
+    <select id="enclosure_id" name="enclosure_id">
+        <option value="">— None —</option>
+        @foreach ($enclosures ?? [] as $enclosure)
+            <option value="{{ $enclosure->id }}" @selected((string) old('enclosure_id', $animal->enclosure_id) === (string) $enclosure->id)>
+                {{ $enclosure->label() }} ({{ $enclosure->occupancyLabel() }}){{ $enclosure->isFull() ? ' — full' : '' }}
+            </option>
+        @endforeach
+    </select>
+    <p class="hint">Manage the list under <a href="{{ route('enclosures.index') }}">Enclosures</a>. You can place an animal in a full enclosure; EASM shows a warning.</p>
 
     <label for="cites">CITES</label>
     <input id="cites" name="cites" type="text" value="{{ old('cites', $animal->cites) }}">

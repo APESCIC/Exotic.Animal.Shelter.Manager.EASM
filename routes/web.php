@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DiaryTaskController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\EnclosureController;
 use App\Http\Controllers\GiftAidDeclarationController;
 use App\Http\Controllers\GiftAidExportController;
 use App\Http\Controllers\HomeController;
@@ -83,6 +84,13 @@ Route::middleware('auth')->group(function (): void {
     Route::put('/animals/{animal}', [AnimalController::class, 'update'])->name('animals.update');
     Route::get('/animals/{animal}/movements/create', [MovementController::class, 'create'])->name('animals.movements.create');
     Route::post('/animals/{animal}/movements', [MovementController::class, 'store'])->name('animals.movements.store');
+
+    Route::get('/enclosures', [EnclosureController::class, 'index'])->name('enclosures.index');
+    Route::get('/enclosures/create', [EnclosureController::class, 'create'])->name('enclosures.create');
+    Route::post('/enclosures', [EnclosureController::class, 'store'])->name('enclosures.store');
+    Route::get('/enclosures/{enclosure}', [EnclosureController::class, 'show'])->name('enclosures.show');
+    Route::get('/enclosures/{enclosure}/edit', [EnclosureController::class, 'edit'])->name('enclosures.edit');
+    Route::put('/enclosures/{enclosure}', [EnclosureController::class, 'update'])->name('enclosures.update');
 
     Route::get('/animals/{animal}/medical/create', [MedicalRecordController::class, 'create'])->name('animals.medical.create');
     Route::post('/animals/{animal}/medical', [MedicalRecordController::class, 'store'])->name('animals.medical.store');

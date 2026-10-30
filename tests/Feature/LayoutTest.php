@@ -9,6 +9,7 @@ use App\Models\CustomFieldDefinition;
 use App\Models\Diet;
 use App\Models\Document;
 use App\Models\DocumentTemplate;
+use App\Models\Enclosure;
 use App\Models\LostFoundReport;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
@@ -44,6 +45,7 @@ class LayoutTest extends TestCase
             'payment' => Payment::factory()->create(),
             'stockItem' => StockItem::factory()->create(),
             'waitingListEntry' => WaitingListEntry::factory()->create(),
+            'enclosure' => Enclosure::factory()->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())

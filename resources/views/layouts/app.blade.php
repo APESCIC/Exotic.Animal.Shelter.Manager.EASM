@@ -53,6 +53,10 @@
                         <div class="status" role="status">{{ session('status') }}</div>
                     @endif
 
+                    @if (session('warning'))
+                        <div class="warning" role="alert">{{ session('warning') }}</div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="errors" role="alert">
                             <ul>

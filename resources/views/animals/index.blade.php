@@ -69,7 +69,11 @@
                     <td>{{ $animal->species }}</td>
                     <td>@include('animals._badges')</td>
                     <td>{{ $animal->location }}</td>
-                    <td>{{ $animal->enclosure }}</td>
+                    <td>
+                        @if ($animal->enclosure)
+                            <a href="{{ route('enclosures.show', $animal->enclosure) }}">{{ $animal->enclosure->name }}</a>
+                        @endif
+                    </td>
                     <td>{{ $animal->cites }}</td>
                     <td>{{ $animal->dwa }}</td>
                 </tr>
