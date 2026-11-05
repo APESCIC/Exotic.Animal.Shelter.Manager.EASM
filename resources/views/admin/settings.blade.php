@@ -30,6 +30,14 @@
             </select>
         </fieldset>
 
+        <fieldset>
+            <legend>Compliance</legend>
+            <label for="dwa_reminder_days">DWA licence renewal reminder (days before expiry)</label>
+            <input id="dwa_reminder_days" name="dwa_reminder_days" type="number" min="7" max="180" step="1" inputmode="numeric" required
+                   value="{{ old('dwa_reminder_days', $settings->dwa_reminder_days ?? \App\Models\Setting::DEFAULT_DWA_REMINDER_DAYS) }}">
+            <p class="hint">EASM adds a renewal task to the diary this many days before a Dangerous Wild Animals licence expires. Check your council's renewal window: Herefordshire, for example, takes applications between two months and four weeks before expiry. Not legal advice.</p>
+        </fieldset>
+
         <button type="submit">Save settings</button>
     </form>
 @endsection

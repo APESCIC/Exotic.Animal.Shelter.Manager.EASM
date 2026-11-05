@@ -46,7 +46,7 @@ class DashboardAlerts
         return new DashboardAlert(
             key: 'dwa_renewals',
             label: 'DWA licences to renew',
-            description: 'Dangerous Wild Animals licences expired or expiring within '.DwaLicence::RENEWAL_REMINDER_DAYS.' days.',
+            description: 'Dangerous Wild Animals licences expired or expiring within '.DwaLicence::reminderDays().' days.',
             count: DwaLicence::query()->needsRenewal()->count(),
             url: route('compliance.dwa.index', ['filter' => 'renewal']),
             tone: 'dwa',

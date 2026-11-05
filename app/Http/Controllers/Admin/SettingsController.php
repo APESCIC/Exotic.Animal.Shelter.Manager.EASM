@@ -16,6 +16,7 @@ class SettingsController extends Controller
             'organisation_name' => config('app.name'),
             'locale' => config('app.locale'),
             'timezone' => config('app.timezone'),
+            'dwa_reminder_days' => Setting::DEFAULT_DWA_REMINDER_DAYS,
         ]);
 
         return view('admin.settings', [
@@ -30,6 +31,7 @@ class SettingsController extends Controller
             'organisation_name',
             'locale',
             'timezone',
+            'dwa_reminder_days',
         ]);
 
         $settings = Setting::current();

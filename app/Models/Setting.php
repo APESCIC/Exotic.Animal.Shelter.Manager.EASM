@@ -16,7 +16,10 @@ class Setting extends Model
         'timezone',
         'partner_feed_enabled',
         'partner_feed_token',
+        'dwa_reminder_days',
     ];
+
+    public const DEFAULT_DWA_REMINDER_DAYS = 60;
 
     /**
      * @var list<string>
@@ -32,6 +35,7 @@ class Setting extends Model
     {
         return [
             'partner_feed_enabled' => 'boolean',
+            'dwa_reminder_days' => 'integer',
         ];
     }
 
@@ -66,6 +70,7 @@ class Setting extends Model
             'app.fallback_locale' => $this->locale,
             'app.faker_locale' => $this->locale,
             'app.timezone' => $this->timezone,
+            'easm.dwa_reminder_days' => $this->dwa_reminder_days ?? self::DEFAULT_DWA_REMINDER_DAYS,
         ]);
 
         date_default_timezone_set($this->timezone);

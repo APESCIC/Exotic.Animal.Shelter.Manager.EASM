@@ -16,7 +16,7 @@
 
 <label for="expires_on">Expires on</label>
 <input id="expires_on" type="date" name="expires_on" value="{{ old('expires_on', optional($licence->expires_on)->format('Y-m-d')) }}" required>
-<p class="hint">EASM adds a renewal task to the diary {{ \App\Models\DwaLicence::RENEWAL_REMINDER_DAYS }} days before this date. When the licence is renewed, change this date.</p>
+<p class="hint">EASM adds a renewal task to the diary {{ \App\Models\DwaLicence::reminderDays() }} days before this date (an admin can change this under Settings). When the licence is renewed, change this date.</p>
 
 <label for="animal_ids">Animals covered</label>
 <select id="animal_ids" name="animal_ids[]" multiple size="8">
