@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\AnimalSex;
+use App\Enums\CitesAnnex;
 use App\Models\Animal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -39,5 +40,14 @@ class AnimalFactory extends Factory
             'dwa' => fake()->optional()->randomElement(['Yes', 'No', 'Pending']),
             'primary_photo_path' => null,
         ];
+    }
+
+    public function annexXExempt(): static
+    {
+        return $this->state(fn (): array => [
+            'cites_annex' => CitesAnnex::A,
+            'cites_exempt_annex_x' => true,
+            'cites_exemption_note' => 'Captive-bred, breeder records held',
+        ]);
     }
 }

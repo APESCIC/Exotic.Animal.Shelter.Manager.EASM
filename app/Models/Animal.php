@@ -49,6 +49,8 @@ class Animal extends Model
         'enclosure_id',
         'cites',
         'cites_annex',
+        'cites_exempt_annex_x',
+        'cites_exemption_note',
         'dwa',
         'primary_photo_path',
     ];
@@ -61,6 +63,7 @@ class Animal extends Model
         return [
             'sex' => AnimalSex::class,
             'cites_annex' => CitesAnnex::class,
+            'cites_exempt_annex_x' => 'boolean',
             'date_of_birth' => 'date',
             'deceased_at' => 'date',
             'non_shelter' => 'boolean',
@@ -209,7 +212,8 @@ class Animal extends Model
     }
 
     /**
-     * Annex A animals in care with no Article 10 certificate on file.
+     * Annex A animals in care with no Article 10 certificate on file, other than
+     * captive-bred animals staff have marked exempt under Annex X.
      *
      * @param  Builder<Animal>  $query
      * @return Builder<Animal>
@@ -219,6 +223,7 @@ class Animal extends Model
         return $query
             ->inCare()
             ->where('cites_annex', CitesAnnex::A->value)
+            ->where('cites_exempt_annex_x', false)
             ->whereDoesntHave('citesCertificates', function (Builder $certificates): void {
                 $certificates->where('type', CitesCertificateType::Article10->value);
             });
@@ -242,7 +247,13 @@ class Animal extends Model
     public function isMissingArticleTen(): bool
     {
         return $this->cites_annex === CitesAnnex::A
+            && ! $this->isAnnexXExempt()
             && ! $this->citesCertificates->contains('type', CitesCertificateType::Article10);
+    }
+
+    public function isAnnexXExempt(): bool
+    {
+        return $this->cites_annex === CitesAnnex::A && $this->cites_exempt_annex_x;
     }
 
     public function hasCitesListing(): bool

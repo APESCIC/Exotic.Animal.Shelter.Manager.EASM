@@ -161,6 +161,63 @@ class CitesRegisterTest extends TestCase
         $this->assertSame(0, CitesCertificate::query()->count());
     }
 
+    public function test_annex_x_exempt_animal_is_not_flagged_and_shows_as_exempt(): void
+    {
+        $exempt = Animal::factory()->annexXExempt()->create(['name' => 'Captive-bred Testudo', 'species' => "Hermann's tortoise"]);
+        $missing = Animal::factory()->create(['name' => 'Wild-caught Testudo', 'species' => "Hermann's tortoise", 'cites_annex' => CitesAnnex::A]);
+        $staff = User::factory()->staff()->create();
+
+        $this->assertSame(1, app(DashboardAlerts::class)->missingArticleTen()->count);
+        $listed = $this->actingAs($staff)
+            ->get(route('animals.index', ['filter' => 'missing_article_10']))
+            ->viewData('animals')->pluck('name')->all();
+        $this->assertSame(['Wild-caught Testudo'], $listed);
+
+        $this->actingAs($staff)
+            ->get(route('compliance.cites.index'))
+            ->assertOk()
+            ->assertSee('Exempt (Annex X)');
+
+        $csv = (string) $this->actingAs($staff)->get(route('compliance.cites.csv'))->getContent();
+        $rows = collect(array_map('str_getcsv', array_values(array_filter(explode("\n", $csv)))))->keyBy(1);
+        $this->assertSame('Exempt (Annex X)', $rows['Captive-bred Testudo'][7]);
+        $this->assertSame('Missing', $rows['Wild-caught Testudo'][7]);
+
+        $this->actingAs($staff)
+            ->get(AnimalTab::Legal->url($exempt))
+            ->assertOk()
+            ->assertSee('data-annex-x-exempt', false)
+            ->assertSee('Captive-bred, breeder records held')
+            ->assertDontSee('Article 10 missing');
+
+        $this->assertFalse($missing->isAnnexXExempt());
+    }
+
+    public function test_staff_set_and_clear_the_annex_x_exemption(): void
+    {
+        $animal = Animal::factory()->create(['name' => 'Shelly', 'species' => "Hermann's tortoise", 'sex' => 'female', 'cites_annex' => CitesAnnex::A]);
+        $form = ['name' => 'Shelly', 'species' => "Hermann's tortoise", 'sex' => 'female', 'cites_annex' => 'A'];
+
+        $this->actingAs(User::factory()->volunteer()->create())
+            ->put(route('animals.update', $animal), [...$form, 'cites_exempt_annex_x' => '1'])
+            ->assertForbidden();
+        $this->assertFalse($animal->refresh()->cites_exempt_annex_x);
+
+        $staff = User::factory()->staff()->create();
+        $this->actingAs($staff)
+            ->put(route('animals.update', $animal), [...$form, 'cites_exempt_annex_x' => '1', 'cites_exemption_note' => 'Hatched here 2024'])
+            ->assertRedirect(route('animals.show', $animal));
+        $this->assertTrue($animal->refresh()->cites_exempt_annex_x);
+        $this->assertSame(0, app(DashboardAlerts::class)->missingArticleTen()->count);
+
+        $this->actingAs($staff)
+            ->put(route('animals.update', $animal), $form)
+            ->assertRedirect(route('animals.show', $animal));
+        $this->assertFalse($animal->refresh()->cites_exempt_annex_x);
+        $this->assertSame(1, app(DashboardAlerts::class)->missingArticleTen()->count);
+        $this->assertTrue($animal->load('citesCertificates')->isMissingArticleTen());
+    }
+
     public function test_volunteers_cannot_see_the_register_and_staff_set_the_annex(): void
     {
         $volunteer = User::factory()->volunteer()->create();

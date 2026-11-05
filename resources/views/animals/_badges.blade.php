@@ -6,6 +6,9 @@
     @endif
     @if ($animal->hasCitesListing())
         <x-badge tone="cites" title="CITES {{ $animal->citesSummary() }}">CITES</x-badge>
+        @if ($animal->isAnnexXExempt())
+            <x-badge tone="cites" title="Captive-bred, exempt from Article 10 under Annex X">Annex X exempt</x-badge>
+        @endif
     @endif
     @if ($animal->hasDwaListing())
         <x-badge tone="dwa" title="DWA {{ $animal->dwa }}">DWA</x-badge>

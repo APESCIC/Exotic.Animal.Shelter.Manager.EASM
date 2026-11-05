@@ -62,6 +62,10 @@ class CitesRegister
             return 'Yes';
         }
 
+        if ($animal->isAnnexXExempt()) {
+            return 'Exempt (Annex X)';
+        }
+
         return $animal->isMissingArticleTen() && $this->status($animal) === 'In care' ? 'Missing' : 'No';
     }
 

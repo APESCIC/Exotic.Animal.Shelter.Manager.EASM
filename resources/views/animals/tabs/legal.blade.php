@@ -13,9 +13,17 @@
             {{ $animal->cites_annex?->label() ?? 'Not recorded' }}
             @if ($animal->isMissingArticleTen())
                 <x-badge tone="dwa" data-missing-article-10>Article 10 missing</x-badge>
+            @elseif ($animal->isAnnexXExempt())
+                <x-badge tone="cites" data-annex-x-exempt>Exempt (Annex X)</x-badge>
             @endif
         </td>
     </tr>
+    @if ($animal->isAnnexXExempt() && $animal->cites_exemption_note)
+        <tr>
+            <th>Exemption note</th>
+            <td class="prewrap">{{ $animal->cites_exemption_note }}</td>
+        </tr>
+    @endif
     <tr>
         <th>CITES reference</th>
         <td>
