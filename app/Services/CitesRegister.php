@@ -66,6 +66,10 @@ class CitesRegister
             return 'Exempt (Annex X)';
         }
 
+        if (($coverUntil = $animal->articleTenCoverUntil()) !== null) {
+            return 'Covered by export permit until '.UkDate::format($coverUntil);
+        }
+
         return $animal->isMissingArticleTen() && $this->status($animal) === 'In care' ? 'Missing' : 'No';
     }
 

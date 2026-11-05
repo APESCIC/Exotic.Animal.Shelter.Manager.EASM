@@ -10,9 +10,11 @@ use App\Models\Animal;
 use App\Models\CitesCertificate;
 use App\Models\Movement;
 use App\Models\User;
+use App\Services\CitesRegister;
 use App\Services\DashboardAlerts;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -191,6 +193,40 @@ class CitesRegisterTest extends TestCase
             ->assertDontSee('Article 10 missing');
 
         $this->assertFalse($missing->isAnnexXExempt());
+    }
+
+    public function test_recent_export_permit_covers_article_10_for_six_months(): void
+    {
+        $animal = Animal::factory()->create(['name' => 'Imported tortoise', 'cites_annex' => CitesAnnex::A]);
+        CitesCertificate::factory()->for($animal)->create(['type' => CitesCertificateType::ExportPermit, 'issued_on' => '2026-09-01']);
+        $undated = Animal::factory()->create(['name' => 'Undated permit', 'cites_annex' => CitesAnnex::A]);
+        CitesCertificate::factory()->for($undated)->create(['type' => CitesCertificateType::ExportPermit, 'issued_on' => null]);
+        $register = app(CitesRegister::class);
+        $staff = User::factory()->staff()->create();
+
+        try {
+            Carbon::setTestNow('2026-10-30 09:00:00');
+            $this->assertFalse($animal->fresh()->isMissingArticleTen());
+            $this->assertSame('Covered by export permit until 01/03/2027', $register->articleTenStatus($animal->fresh()->load('citesCertificates', 'latestMovement')));
+            $this->assertTrue($undated->fresh()->isMissingArticleTen());
+            $this->assertSame(['Undated permit'], Animal::query()->missingArticleTen()->pluck('name')->all());
+            $this->actingAs($staff)
+                ->get(AnimalTab::Legal->url($animal))
+                ->assertSee('Covered by export permit until 01/03/2027');
+            $this->actingAs($staff)
+                ->get(route('compliance.cites.csv'))
+                ->assertSee('Covered by export permit until 01/03/2027');
+
+            Carbon::setTestNow('2027-03-01 09:00:00');
+            $this->assertFalse($animal->fresh()->isMissingArticleTen());
+
+            Carbon::setTestNow('2027-03-02 09:00:00');
+            $this->assertTrue($animal->fresh()->isMissingArticleTen());
+            $this->assertSame('Missing', $register->articleTenStatus($animal->fresh()->load('citesCertificates', 'latestMovement')));
+            $this->assertSame(['Imported tortoise', 'Undated permit'], Animal::query()->missingArticleTen()->orderBy('name')->pluck('name')->all());
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_staff_set_and_clear_the_annex_x_exemption(): void

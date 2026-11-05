@@ -1,4 +1,5 @@
 @php
+    use App\Enums\CitesAnnex;
     use App\Enums\CitesCertificateType;
     use App\Support\UkDate;
     $role = auth()->user()?->role;
@@ -15,6 +16,8 @@
                 <x-badge tone="dwa" data-missing-article-10>Article 10 missing</x-badge>
             @elseif ($animal->isAnnexXExempt())
                 <x-badge tone="cites" data-annex-x-exempt>Exempt (Annex X)</x-badge>
+            @elseif ($animal->cites_annex === CitesAnnex::A && ! $animal->citesCertificates->contains('type', CitesCertificateType::Article10) && ($coverUntil = $animal->articleTenCoverUntil()))
+                <x-badge tone="cites" data-export-permit-cover>Covered by export permit until {{ UkDate::format($coverUntil) }}</x-badge>
             @endif
         </td>
     </tr>
