@@ -15,7 +15,7 @@
 
 Finish a milestone before starting the next. The plan epic is [#1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) (no milestone).
 
-Status (30/10/2026): v0.1.0 to v0.5.5 are done. Next is v0.6.0, starting with #25. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
+Status (05/11/2026): v0.1.0 to v0.6.0 are done. Next is v0.9.0, starting with #77. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
 
 ### v0.1.0 Foundation: generic hosting ([milestone/1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/1), epic #2) — done
 
@@ -69,10 +69,14 @@ Also shipped: #67 Dependabot fixes. #47 (Laravel Boost) was dropped because it c
 
 Also shipped: #116 development auto-login and QA role accounts (local only).
 
-### v0.6.0 Reporting, rota and mobile ([milestone/6](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/6), epic #8)
+### v0.6.0 Reporting, rota and mobile ([milestone/6](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/6), epic #8) — done
 
-1. #25 reports/timeline
-2. #26 touch-friendly tasks/rota
+1. #25 occupancy, intake/outcome and animal timeline reports with CSV
+2. #26 mobile PWA care tasks (offline queue, enclosure QR labels and scan, camera photo, e-sign) and staff/volunteer rota
+3. #122 CITES Annex X exemption, #123 export permit cover for 6 months, #126 interim Article 10 wording (APHA follow-up is #134 in v1.0.0)
+4. #124 DWA renewal reminder lead time setting (default 60 days), #125 default DWA expiry two years after issue
+
+Also shipped: #114 GitHub Actions on Node 24 runtimes.
 
 ### v0.9.0 Install and update system ([milestone/11](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/11), epic #76)
 
@@ -101,6 +105,7 @@ Optional CLI layers (not blocking): #87 `easm:install`, #88 `easm:update` / `eas
 1. #27 backup/security/first production install pack
 2. #34 bounded /health DB timeout and nginx front-controller docs
 3. #68 per-record audit log
+4. #134 apply APHA's answer on adoption-fee rehoming and Article 10
 
 ### v1.1.0 Optional: animal control ([milestone/10](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/10))
 
