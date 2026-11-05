@@ -3,6 +3,11 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="theme-color" content="#1b4332">
+        <link rel="manifest" href="{{ route('webmanifest') }}">
+        <link rel="icon" href="{{ asset('icons/easm.svg') }}" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="{{ asset('icons/easm-192.png') }}">
         <title>@yield('title', config('app.name'))</title>
         <script>
             (function () {
@@ -14,9 +19,11 @@
         </script>
         <link rel="stylesheet" href="{{ asset('css/easm.css') }}?v={{ @filemtime(public_path('css/easm.css')) }}">
         <script src="{{ asset('js/easm.js') }}?v={{ @filemtime(public_path('js/easm.js')) }}" defer></script>
+        <script src="{{ asset('js/offline-queue.js') }}?v={{ @filemtime(public_path('js/offline-queue.js')) }}" defer></script>
         @stack('head')
     </head>
-    <body data-layout="app">
+    <body data-layout="app" data-sw-url="{{ asset('sw.js') }}"
+          @auth data-user-id="{{ auth()->id() }}" data-token-url="{{ route('mobile.token.json') }}" @endauth>
         <a class="skip-link" href="#main">Skip to content</a>
 
         <div class="shell">
@@ -40,7 +47,7 @@
                         <button type="button" class="icon-button" data-theme-toggle aria-pressed="false">Dark mode</button>
                         @auth
                             <span class="topbar-user"><strong>{{ auth()->user()->name }}</strong> <span>({{ auth()->user()->role->label() }})</span></span>
-                            <form class="inline-form" method="post" action="{{ route('logout') }}">
+                            <form class="inline-form" method="post" action="{{ route('logout') }}" data-logout>
                                 @csrf
                                 <button type="submit" class="linkish">Sign out</button>
                             </form>
@@ -49,6 +56,8 @@
                 </header>
 
                 <main id="main" class="content" tabindex="-1">
+                    <div class="offline-status" role="status" aria-live="polite" data-offline-status hidden></div>
+
                     @if (session('status'))
                         <div class="status" role="status">{{ session('status') }}</div>
                     @endif

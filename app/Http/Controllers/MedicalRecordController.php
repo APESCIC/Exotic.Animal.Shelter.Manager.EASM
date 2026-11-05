@@ -13,6 +13,7 @@ use App\Models\MedicalRecord;
 use App\Models\StockItem;
 use App\Services\StockLedger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -84,6 +85,20 @@ class MedicalRecordController extends Controller
         return redirect()
             ->to(AnimalTab::Health->url($medicalRecord->animal))
             ->with('status', 'Medical record updated.');
+    }
+
+    public function given(Request $request, MedicalRecord $medicalRecord): RedirectResponse
+    {
+        $this->authorizeManage();
+        $request->validate(['given_on' => ['nullable', 'date', 'before_or_equal:today']]);
+
+        if ($medicalRecord->given_on === null) {
+            $medicalRecord->update(['given_on' => $request->input('given_on') ?: today()->toDateString()]);
+        }
+
+        return redirect()
+            ->to(AnimalTab::Health->url($medicalRecord->animal_id))
+            ->with('status', $medicalRecord->name.' marked as given.');
     }
 
     /**

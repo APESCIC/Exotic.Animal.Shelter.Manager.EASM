@@ -420,10 +420,52 @@
         });
     }
 
+    /* Service workers need HTTPS (or localhost); plain-HTTP installs simply skip it. */
+    function initServiceWorker() {
+        var url = document.body.getAttribute('data-sw-url');
+        if (!url || !('serviceWorker' in navigator) || !window.isSecureContext) {
+            return;
+        }
+        navigator.serviceWorker.register(url).catch(function () {});
+    }
+
+    /* Signed-out phones should not keep copies of care pages. Queued writes stay. */
+    function initLogout() {
+        document.querySelectorAll('form[data-logout]').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                if (window.caches) {
+                    window.caches.delete('easm-pages');
+                }
+            });
+        });
+    }
+
+    function initPrintButtons() {
+        document.querySelectorAll('[data-print]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                window.print();
+            });
+        });
+    }
+
+    function initEnclosureJump() {
+        document.querySelectorAll('[data-enclosure-select]').forEach(function (select) {
+            select.addEventListener('change', function () {
+                if (select.value) {
+                    window.location.assign(select.value);
+                }
+            });
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         initTheme();
         initNavDrawer();
         initPalette();
         initDirtyGuard();
+        initServiceWorker();
+        initLogout();
+        initPrintButtons();
+        initEnclosureJump();
     });
 })();
