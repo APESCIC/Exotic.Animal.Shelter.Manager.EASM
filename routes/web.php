@@ -34,6 +34,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\Public\AdoptableAnimalController;
 use App\Http\Controllers\Public\PartnerFeedController;
 use App\Http\Controllers\Public\PublicApplicationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\StockItemController;
@@ -155,6 +156,14 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/stock/{stockItem}/edit', [StockItemController::class, 'edit'])->name('stock.edit');
     Route::put('/stock/{stockItem}', [StockItemController::class, 'update'])->name('stock.update');
     Route::post('/stock/{stockItem}/movements', [StockMovementController::class, 'store'])->name('stock.movements.store');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/occupancy', [ReportController::class, 'occupancy'])->name('reports.occupancy');
+    Route::get('/reports/occupancy.csv', [ReportController::class, 'occupancyCsv'])->name('reports.occupancy.csv');
+    Route::get('/reports/intake-outcome', [ReportController::class, 'intakeOutcome'])->name('reports.intake-outcome');
+    Route::get('/reports/intake-outcome.csv', [ReportController::class, 'intakeOutcomeCsv'])->name('reports.intake-outcome.csv');
+    Route::get('/reports/timeline', [ReportController::class, 'timeline'])->name('reports.timeline');
+    Route::get('/reports/timeline.csv', [ReportController::class, 'timelineCsv'])->name('reports.timeline.csv');
 
     Route::get('/finance', [PaymentController::class, 'index'])->name('finance.index');
     Route::get('/finance/payments/create', [PaymentController::class, 'create'])->name('payments.create');

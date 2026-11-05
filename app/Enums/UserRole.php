@@ -134,6 +134,17 @@ enum UserRole: string
         };
     }
 
+    /**
+     * Occupancy, intake/outcome and timeline reports for managers.
+     */
+    public function canViewReports(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Readonly => true,
+            self::Volunteer => false,
+        };
+    }
+
     public function canViewFinance(): bool
     {
         return match ($this) {

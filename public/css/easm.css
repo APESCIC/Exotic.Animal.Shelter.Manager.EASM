@@ -1094,6 +1094,36 @@ button[type="submit"].linkish:hover {
     color: var(--color-text-muted);
 }
 
+/* Reports */
+
+.timeline .hint {
+    display: block;
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.timeline-track-head {
+    min-width: 12rem;
+}
+
+.timeline-track {
+    width: 40%;
+    background: var(--color-surface-alt);
+}
+
+.timeline-bar {
+    display: block;
+    height: 0.75rem;
+    min-width: 2px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
+}
+
+.timeline-bar.is-open {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 /* Responsive */
 
 @media (min-width: 40rem) {
