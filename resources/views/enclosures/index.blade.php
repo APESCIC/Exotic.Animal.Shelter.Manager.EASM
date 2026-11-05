@@ -10,6 +10,7 @@
         </div>
         <div class="page-actions">
             <a class="button" href="{{ route('animals.shelter', ['group' => 'enclosure']) }}">Shelter view by enclosure</a>
+            <a class="button" href="{{ route('enclosures.qr-labels') }}">Print QR labels</a>
             @if (auth()->user()?->role?->canManageAnimals())
                 <a class="button button-primary" href="{{ route('enclosures.create') }}">Add enclosure</a>
             @endif

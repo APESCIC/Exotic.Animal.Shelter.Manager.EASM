@@ -10,6 +10,7 @@ use App\Models\DiaryTask;
 use App\Models\DwaInspection;
 use App\Models\DwaLicence;
 use App\Models\Movement;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\DashboardAlerts;
 use App\Services\ReminderSync;
@@ -28,34 +29,79 @@ class DwaLicenceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_renewal_reminder_is_created_30_days_before_expiry_and_not_before(): void
+    public function test_renewal_reminder_is_created_60_days_before_expiry_by_default_and_not_before(): void
     {
-        Carbon::setTestNow('2026-10-30 09:00:00');
+        Carbon::setTestNow('2026-10-31 09:00:00');
         $licence = DwaLicence::factory()->create([
             'licence_number' => 'DWA-2026-07',
             'issuing_authority' => 'Bristol City Council',
-            'expires_on' => '2026-11-30',
+            'expires_on' => '2026-12-31',
         ]);
         $sync = app(ReminderSync::class);
 
         $this->assertSame(0, $sync->sync());
         $this->assertSame(0, DiaryTask::query()->count());
 
-        Carbon::setTestNow('2026-10-31 09:00:00');
+        Carbon::setTestNow('2026-11-01 09:00:00');
         $this->assertSame(1, $sync->sync());
         $this->assertSame(0, $sync->sync());
         $this->artisan('easm:reminders')->expectsOutput('0 reminder tasks created.')->assertSuccessful();
 
         $task = DiaryTask::query()->sole();
         $this->assertSame('Renew DWA licence DWA-2026-07', $task->title);
-        $this->assertSame('2026-10-31', $task->due_on?->toDateString());
+        $this->assertSame('2026-11-01', $task->due_on?->toDateString());
         $this->assertSame($licence->reminderKey(), $task->reminder_key);
-        $this->assertStringContainsString('Bristol City Council; expires on 30/11/2026', (string) $task->body);
+        $this->assertStringContainsString('Bristol City Council; expires on 31/12/2026', (string) $task->body);
         $this->assertTrue(DiaryTask::query()->dueToday()->exists());
 
         $task->update(['completed_at' => now()]);
         Carbon::setTestNow('2026-11-15 09:00:00');
         $this->assertSame(0, $sync->sync());
+    }
+
+    public function test_changing_the_lead_time_moves_the_open_reminder_without_a_duplicate(): void
+    {
+        Carbon::setTestNow('2026-11-05 09:00:00');
+        Setting::query()->create(['organisation_name' => 'Shelter', 'locale' => 'en_GB', 'timezone' => 'Europe/London']);
+        DwaLicence::factory()->create(['licence_number' => 'DWA-90', 'expires_on' => '2026-12-31']);
+        $admin = User::factory()->admin()->create();
+
+        app(ReminderSync::class)->sync();
+        $this->assertSame('2026-11-01', DiaryTask::query()->sole()->due_on->toDateString());
+
+        $this->actingAs($admin)->put(route('admin.settings.update'), [
+            'organisation_name' => 'Shelter',
+            'locale' => 'en_GB',
+            'timezone' => 'Europe/London',
+            'dwa_reminder_days' => 90,
+        ])->assertRedirect(route('admin.settings.edit'));
+        $this->assertSame(90, Setting::current()->dwa_reminder_days);
+        $this->assertSame(90, DwaLicence::reminderDays());
+
+        $this->assertSame(0, app(ReminderSync::class)->sync());
+        $this->assertSame('2026-10-02', DiaryTask::query()->sole()->due_on->toDateString());
+
+        $this->actingAs($admin)
+            ->get(route('home'))
+            ->assertSee('Dangerous Wild Animals licences expired or expiring within 90 days.');
+        $this->actingAs($admin)
+            ->get(route('admin.settings.edit'))
+            ->assertSee('name="dwa_reminder_days"', false)
+            ->assertSee('value="90"', false);
+    }
+
+    public function test_lead_time_outside_7_to_180_days_is_rejected(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $form = ['organisation_name' => 'Shelter', 'locale' => 'en_GB', 'timezone' => 'Europe/London'];
+
+        foreach ([0, 400] as $days) {
+            $this->actingAs($admin)
+                ->put(route('admin.settings.update'), [...$form, 'dwa_reminder_days' => $days])
+                ->assertSessionHasErrors(['dwa_reminder_days' => 'The DWA renewal reminder must be between 7 and 180 days before expiry.']);
+        }
+
+        $this->assertSame(60, DwaLicence::reminderDays());
     }
 
     public function test_renewing_closes_the_old_reminder_and_starts_a_new_cycle(): void
@@ -170,13 +216,13 @@ class DwaLicenceTest extends TestCase
             ->assertSee('01/10/2026 · Action required', false);
     }
 
-    public function test_dashboard_alert_counts_licences_expired_or_expiring_within_30_days(): void
+    public function test_dashboard_alert_counts_licences_expired_or_expiring_within_the_lead_time(): void
     {
         Carbon::setTestNow('2026-10-30 09:00:00');
         DwaLicence::factory()->create(['licence_number' => 'EXPIRED', 'expires_on' => '2026-10-01']);
         DwaLicence::factory()->create(['licence_number' => 'SOON', 'expires_on' => '2026-11-15']);
-        DwaLicence::factory()->create(['licence_number' => 'EDGE', 'expires_on' => '2026-11-29']);
-        DwaLicence::factory()->create(['licence_number' => 'LATER', 'expires_on' => '2026-11-30']);
+        DwaLicence::factory()->create(['licence_number' => 'EDGE', 'expires_on' => '2026-12-29']);
+        DwaLicence::factory()->create(['licence_number' => 'LATER', 'expires_on' => '2026-12-30']);
 
         $alert = app(DashboardAlerts::class)->dwaRenewals();
         $this->assertSame(3, $alert->count);
@@ -190,8 +236,50 @@ class DwaLicenceTest extends TestCase
             ->assertOk()
             ->assertSee('data-active-filter="renewal"', false)
             ->assertSee('Expired', false)
-            ->assertSee('Expires in 30 days', false);
+            ->assertSee('Expires in 60 days', false);
         $this->assertSame(['EDGE', 'EXPIRED', 'SOON'], $response->viewData('licences')->pluck('licence_number')->sort()->values()->all());
+    }
+
+    public function test_new_licence_expiry_defaults_to_two_years_after_issue(): void
+    {
+        Carbon::setTestNow('2028-03-01 09:00:00');
+        $staff = User::factory()->staff()->create();
+        $form = ['licence_number' => 'DWA-NEW', 'issuing_authority' => 'Herefordshire Council'];
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), [...$form, 'issued_on' => '2026-11-15', 'expires_on' => ''])->assertRedirect();
+        $this->assertSame('2028-11-15', DwaLicence::query()->latest('id')->first()->expires_on->toDateString());
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), [...$form, 'issued_on' => '2026-11-15', 'expires_on' => '2027-06-30'])->assertRedirect();
+        $this->assertSame('2027-06-30', DwaLicence::query()->latest('id')->first()->expires_on->toDateString());
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), [...$form, 'issued_on' => '2028-02-29'])->assertRedirect();
+        $this->assertSame('2030-02-28', DwaLicence::query()->latest('id')->first()->expires_on->toDateString());
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), $form)->assertSessionHasErrors('expires_on');
+        $this->assertSame(3, DwaLicence::query()->count());
+
+        $this->actingAs($staff)
+            ->get(route('compliance.dwa.create'))
+            ->assertSee('data-dwa-expiry', false)
+            ->assertSee('s.1(3)');
+    }
+
+    public function test_editing_a_licence_never_changes_its_expiry(): void
+    {
+        $staff = User::factory()->staff()->create();
+        $licence = DwaLicence::factory()->create(['issued_on' => '2025-01-10', 'expires_on' => '2026-12-31']);
+
+        $this->actingAs($staff)->put(route('compliance.dwa.update', $licence), [
+            'licence_number' => $licence->licence_number,
+            'issuing_authority' => $licence->issuing_authority,
+            'issued_on' => '2025-01-10',
+            'expires_on' => '',
+        ])->assertSessionHasErrors('expires_on');
+        $this->assertSame('2026-12-31', $licence->refresh()->expires_on->toDateString());
+
+        $this->actingAs($staff)
+            ->get(route('compliance.dwa.edit', $licence))
+            ->assertDontSee('data-dwa-expiry', false);
     }
 
     public function test_only_staff_and_admin_manage_licences(): void

@@ -34,12 +34,14 @@ class ReminderSync
                     'title' => "Renew DWA licence {$licence->licence_number}",
                     'body' => "Issued by {$licence->issuing_authority}; expires on ".UkDate::format($licence->expires_on)
                         .'. Update the expiry date on the licence once it is renewed.',
-                    'due_on' => $licence->expires_on->copy()->subDays(DwaLicence::RENEWAL_REMINDER_DAYS),
+                    'due_on' => $licence->reminderDueOn(),
                 ],
             );
 
             if ($task->wasRecentlyCreated) {
                 $created++;
+            } elseif ($task->completed_at === null && ! $task->due_on?->isSameDay($licence->reminderDueOn())) {
+                $task->update(['due_on' => $licence->reminderDueOn()]);
             }
         }
 

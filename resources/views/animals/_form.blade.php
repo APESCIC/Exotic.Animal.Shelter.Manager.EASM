@@ -59,6 +59,15 @@
     </select>
     <p class="hint">Annex under the UK wildlife trade regulations. Check the species' current listing; EASM does not look it up. Certificates are added on the animal's Legal tab.</p>
 
+    <label class="check" for="cites_exempt_annex_x">
+        <input id="cites_exempt_annex_x" name="cites_exempt_annex_x" type="checkbox" value="1" @checked(old('cites_exempt_annex_x', $animal->cites_exempt_annex_x))>
+        Captive-bred and exempt under Annex X (no Article 10 needed)
+    </label>
+    <p class="hint">Only for Annex A animals of species on Annex X, such as the Testudo tortoises being added. Check the species and the evidence you need with APHA. This is not legal advice.</p>
+
+    <label for="cites_exemption_note">Exemption note</label>
+    <textarea id="cites_exemption_note" name="cites_exemption_note" maxlength="2000" rows="2" placeholder="Breeder, hatch date, evidence held">{{ old('cites_exemption_note', $animal->cites_exemption_note) }}</textarea>
+
     <label for="cites">CITES reference</label>
     <input id="cites" name="cites" type="text" value="{{ old('cites', $animal->cites) }}" placeholder="Appendix, permit or reference number">
 

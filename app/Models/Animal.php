@@ -6,6 +6,7 @@ use App\Enums\AnimalSex;
 use App\Enums\CitesAnnex;
 use App\Enums\CitesCertificateType;
 use App\Enums\MovementType;
+use Carbon\CarbonInterface;
 use Database\Factories\AnimalFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,6 +50,8 @@ class Animal extends Model
         'enclosure_id',
         'cites',
         'cites_annex',
+        'cites_exempt_annex_x',
+        'cites_exemption_note',
         'dwa',
         'primary_photo_path',
     ];
@@ -61,6 +64,7 @@ class Animal extends Model
         return [
             'sex' => AnimalSex::class,
             'cites_annex' => CitesAnnex::class,
+            'cites_exempt_annex_x' => 'boolean',
             'date_of_birth' => 'date',
             'deceased_at' => 'date',
             'non_shelter' => 'boolean',
@@ -209,7 +213,8 @@ class Animal extends Model
     }
 
     /**
-     * Annex A animals in care with no Article 10 certificate on file.
+     * Annex A animals in care with no Article 10 certificate on file, other than
+     * captive-bred animals staff have marked exempt under Annex X.
      *
      * @param  Builder<Animal>  $query
      * @return Builder<Animal>
@@ -219,8 +224,14 @@ class Animal extends Model
         return $query
             ->inCare()
             ->where('cites_annex', CitesAnnex::A->value)
+            ->where('cites_exempt_annex_x', false)
             ->whereDoesntHave('citesCertificates', function (Builder $certificates): void {
-                $certificates->where('type', CitesCertificateType::Article10->value);
+                $certificates->where('type', CitesCertificateType::Article10->value)
+                    ->orWhere(function (Builder $permit): void {
+                        $permit->where('type', CitesCertificateType::ExportPermit->value)
+                            ->whereDate('issued_on', '<=', today())
+                            ->whereDate('issued_on', '>=', today()->subMonthsNoOverflow(CitesCertificate::EXPORT_PERMIT_COVER_MONTHS));
+                    });
             });
     }
 
@@ -242,7 +253,26 @@ class Animal extends Model
     public function isMissingArticleTen(): bool
     {
         return $this->cites_annex === CitesAnnex::A
-            && ! $this->citesCertificates->contains('type', CitesCertificateType::Article10);
+            && ! $this->isAnnexXExempt()
+            && ! $this->citesCertificates->contains('type', CitesCertificateType::Article10)
+            && $this->articleTenCoverUntil() === null;
+    }
+
+    /**
+     * When a recent export permit currently stands in for Article 10, the last day it does.
+     */
+    public function articleTenCoverUntil(): ?CarbonInterface
+    {
+        return $this->citesCertificates
+            ->filter(fn (CitesCertificate $certificate): bool => $certificate->coversArticleTenOn(today()))
+            ->map(fn (CitesCertificate $certificate): CarbonInterface => $certificate->articleTenCoverEndsOn())
+            ->sortDesc()
+            ->first();
+    }
+
+    public function isAnnexXExempt(): bool
+    {
+        return $this->cites_annex === CitesAnnex::A && $this->cites_exempt_annex_x;
     }
 
     public function hasCitesListing(): bool

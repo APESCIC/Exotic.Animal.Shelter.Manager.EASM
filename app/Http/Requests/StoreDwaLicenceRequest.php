@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\DwaLicence;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class StoreDwaLicenceRequest extends FormRequest
@@ -28,6 +31,27 @@ class StoreDwaLicenceRequest extends FormRequest
             'animal_ids' => ['nullable', 'array'],
             'animal_ids.*' => ['integer', Rule::exists('animals', 'id')],
         ];
+    }
+
+    /**
+     * New licences default to the same calendar date two years after issue (DWA Act 1976 s.1(3));
+     * edits never change an existing expiry.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->routeIs('compliance.dwa.store') || $this->filled('expires_on') || ! $this->filled('issued_on')) {
+            return;
+        }
+
+        try {
+            $issued = Carbon::createFromFormat('!Y-m-d', $this->string('issued_on')->toString());
+        } catch (InvalidFormatException) {
+            return;
+        }
+
+        if ($issued !== null) {
+            $this->merge(['expires_on' => $issued->addYearsNoOverflow(DwaLicence::TERM_YEARS)->toDateString()]);
+        }
     }
 
     /**

@@ -134,6 +134,28 @@ enum UserRole: string
         };
     }
 
+    /**
+     * Everyone signed in can see the rota; only staff and admins plan it.
+     */
+    public function canManageRota(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
+
+    /**
+     * Occupancy, intake/outcome and timeline reports for managers.
+     */
+    public function canViewReports(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Readonly => true,
+            self::Volunteer => false,
+        };
+    }
+
     public function canViewFinance(): bool
     {
         return match ($this) {

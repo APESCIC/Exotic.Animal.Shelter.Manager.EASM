@@ -17,6 +17,7 @@ use App\Models\MedicalRecord;
 use App\Models\Movement;
 use App\Models\Payment;
 use App\Models\Person;
+use App\Models\RotaShift;
 use App\Models\StockItem;
 use App\Models\User;
 use App\Models\WaitingListEntry;
@@ -50,6 +51,7 @@ class LayoutTest extends TestCase
             'enclosure' => Enclosure::factory()->create(),
             'equipment' => EnclosureEquipment::factory()->create(),
             'dwaLicence' => DwaLicence::factory()->create(),
+            'rotaShift' => RotaShift::factory()->create(),
         ];
 
         $routes = collect(RouteFacade::getRoutes()->getRoutes())

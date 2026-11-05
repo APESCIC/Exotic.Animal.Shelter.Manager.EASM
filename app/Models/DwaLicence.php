@@ -15,7 +15,10 @@ class DwaLicence extends Model
     /** @use HasFactory<DwaLicenceFactory> */
     use HasFactory;
 
-    public const RENEWAL_REMINDER_DAYS = 30;
+    /**
+     * DWA Act 1976 s.1(3): a licence lasts two years in England and Wales (check the licence).
+     */
+    public const TERM_YEARS = 2;
 
     /**
      * @var list<string>
@@ -104,9 +107,22 @@ class DwaLicence extends Model
         return 'dwa-licence:'.$id.':';
     }
 
+    /**
+     * Shelter setting: how many days before expiry the renewal reminder is raised.
+     */
+    public static function reminderDays(): int
+    {
+        return (int) config('easm.dwa_reminder_days', Setting::DEFAULT_DWA_REMINDER_DAYS);
+    }
+
+    public function reminderDueOn(): Carbon
+    {
+        return $this->expires_on->copy()->subDays(self::reminderDays());
+    }
+
     public static function reminderHorizon(): Carbon
     {
-        return today()->addDays(self::RENEWAL_REMINDER_DAYS);
+        return today()->addDays(self::reminderDays());
     }
 
     /**

@@ -43,6 +43,19 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | DWA licence renewal reminder
+    |--------------------------------------------------------------------------
+    |
+    | Days before a Dangerous Wild Animals licence expires that EASM raises the
+    | renewal diary task. Admins change it under Settings; this is the default
+    | until they do.
+    |
+    */
+
+    'dwa_reminder_days' => 60,
+
     'dev_login' => [
         'auto_login' => filter_var(env('DEV_AUTO_LOGIN', false), FILTER_VALIDATE_BOOLEAN),
         'role' => env('DEV_AUTO_LOGIN_ROLE', 'admin'),

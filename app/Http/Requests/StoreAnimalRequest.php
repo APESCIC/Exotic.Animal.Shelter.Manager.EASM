@@ -42,6 +42,8 @@ class StoreAnimalRequest extends FormRequest
             'enclosure_id' => ['nullable', 'integer', Rule::exists('enclosures', 'id')],
             'cites' => ['nullable', 'string', 'max:255'],
             'cites_annex' => ['nullable', Rule::enum(CitesAnnex::class)],
+            'cites_exempt_annex_x' => ['sometimes', 'boolean'],
+            'cites_exemption_note' => ['nullable', 'string', 'max:2000'],
             'dwa' => ['nullable', 'string', 'max:255'],
             'primary_photo' => ['nullable', 'image', 'max:5120'],
         ];
@@ -52,6 +54,7 @@ class StoreAnimalRequest extends FormRequest
         $this->merge([
             'non_shelter' => $this->boolean('non_shelter'),
             'is_adoptable' => $this->boolean('is_adoptable'),
+            'cites_exempt_annex_x' => $this->boolean('cites_exempt_annex_x'),
         ]);
     }
 }

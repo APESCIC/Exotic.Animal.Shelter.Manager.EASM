@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Collection;
 class CitesRegister
 {
     /**
+     * Article 10 is needed for commercial use; whether fee-paid rehoming counts is waiting on APHA (#134).
+     */
+    public const NO_ARTICLE_TEN = 'No Article 10: needed before any sale or fee-paid rehoming (to be confirmed)';
+
+    /**
      * @var list<string>
      */
     public const COLUMNS = [
@@ -62,7 +67,15 @@ class CitesRegister
             return 'Yes';
         }
 
-        return $animal->isMissingArticleTen() && $this->status($animal) === 'In care' ? 'Missing' : 'No';
+        if ($animal->isAnnexXExempt()) {
+            return 'Exempt (Annex X)';
+        }
+
+        if (($coverUntil = $animal->articleTenCoverUntil()) !== null) {
+            return 'Covered by export permit until '.UkDate::format($coverUntil);
+        }
+
+        return $animal->isMissingArticleTen() && $this->status($animal) === 'In care' ? self::NO_ARTICLE_TEN : 'No';
     }
 
     /**

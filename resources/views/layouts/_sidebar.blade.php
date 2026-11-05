@@ -17,7 +17,9 @@
             ['label' => 'Waiting list', 'route' => 'waiting-list.index', 'active' => ['waiting-list.*']],
         ],
         'Care' => [
+            ['label' => 'Mobile tasks', 'route' => 'mobile.index', 'active' => ['mobile.*']],
             ['label' => 'Diary and tasks', 'route' => 'diary.index', 'active' => ['diary.*']],
+            ['label' => 'Rota', 'route' => 'rota.index', 'active' => ['rota.*']],
             ['label' => 'Stock', 'route' => 'stock.index', 'active' => ['stock.*']],
         ],
     ];
@@ -28,6 +30,12 @@
 
     if ($role?->canViewCompliance()) {
         array_unshift($groups['Compliance'], ['label' => 'CITES register', 'route' => 'compliance.cites.index', 'active' => ['compliance.cites.*']]);
+    }
+
+    if ($role?->canViewReports()) {
+        $groups['Reports'] = [
+            ['label' => 'Reports', 'route' => 'reports.index', 'active' => ['reports.*']],
+        ];
     }
 
     if ($role?->canViewFinance()) {

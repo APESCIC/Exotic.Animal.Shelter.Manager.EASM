@@ -12,11 +12,12 @@
             <h1>{{ $enclosure->name }}</h1>
             <p class="hint">{{ $enclosure->zone ?: 'No zone' }}@if ($enclosure->size) · {{ $enclosure->size }}@endif</p>
         </div>
-        @if (auth()->user()?->role?->canManageAnimals())
-            <div class="page-actions">
+        <div class="page-actions">
+            <a class="button" href="{{ route('enclosures.qr', $enclosure) }}">QR label</a>
+            @if (auth()->user()?->role?->canManageAnimals())
                 <a class="button" href="{{ route('enclosures.edit', $enclosure) }}">Edit</a>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     <div class="card-grid">

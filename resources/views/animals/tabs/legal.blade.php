@@ -1,5 +1,7 @@
 @php
+    use App\Enums\CitesAnnex;
     use App\Enums\CitesCertificateType;
+    use App\Services\CitesRegister;
     use App\Support\UkDate;
     $role = auth()->user()?->role;
 @endphp
@@ -12,10 +14,20 @@
         <td>
             {{ $animal->cites_annex?->label() ?? 'Not recorded' }}
             @if ($animal->isMissingArticleTen())
-                <x-badge tone="dwa" data-missing-article-10>Article 10 missing</x-badge>
+                <x-badge tone="dwa" data-missing-article-10>{{ CitesRegister::NO_ARTICLE_TEN }}</x-badge>
+            @elseif ($animal->isAnnexXExempt())
+                <x-badge tone="cites" data-annex-x-exempt>Exempt (Annex X)</x-badge>
+            @elseif ($animal->cites_annex === CitesAnnex::A && ! $animal->citesCertificates->contains('type', CitesCertificateType::Article10) && ($coverUntil = $animal->articleTenCoverUntil()))
+                <x-badge tone="cites" data-export-permit-cover>Covered by export permit until {{ UkDate::format($coverUntil) }}</x-badge>
             @endif
         </td>
     </tr>
+    @if ($animal->isAnnexXExempt() && $animal->cites_exemption_note)
+        <tr>
+            <th>Exemption note</th>
+            <td class="prewrap">{{ $animal->cites_exemption_note }}</td>
+        </tr>
+    @endif
     <tr>
         <th>CITES reference</th>
         <td>

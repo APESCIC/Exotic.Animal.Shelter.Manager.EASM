@@ -26,7 +26,7 @@
     @if ($renewalOnly)
         <p class="filter-chips">
             <span class="chip" data-active-filter="renewal">
-                Expired or expiring within {{ \App\Models\DwaLicence::RENEWAL_REMINDER_DAYS }} days
+                Expired or expiring within {{ \App\Models\DwaLicence::reminderDays() }} days
                 <a href="{{ route('compliance.dwa.index') }}" aria-label="Remove filter">Remove</a>
             </span>
         </p>

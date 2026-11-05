@@ -420,10 +420,80 @@
         });
     }
 
+    /* Service workers need HTTPS (or localhost); plain-HTTP installs simply skip it. */
+    function initServiceWorker() {
+        var url = document.body.getAttribute('data-sw-url');
+        if (!url || !('serviceWorker' in navigator) || !window.isSecureContext) {
+            return;
+        }
+        navigator.serviceWorker.register(url).catch(function () {});
+    }
+
+    /* Signed-out phones should not keep copies of care pages. Queued writes stay. */
+    function initLogout() {
+        document.querySelectorAll('form[data-logout]').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                if (window.caches) {
+                    window.caches.delete('easm-pages');
+                }
+            });
+        });
+    }
+
+    function initPrintButtons() {
+        document.querySelectorAll('[data-print]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                window.print();
+            });
+        });
+    }
+
+    function initEnclosureJump() {
+        document.querySelectorAll('[data-enclosure-select]').forEach(function (select) {
+            select.addEventListener('change', function () {
+                if (select.value) {
+                    window.location.assign(select.value);
+                }
+            });
+        });
+    }
+
+    /* New DWA licence: suggest the same calendar date N years after issue; 29 Feb falls back to 28 Feb. */
+    function initDwaExpiryDefault() {
+        var issued = document.querySelector('[data-dwa-issued]');
+        var expiry = document.querySelector('[data-dwa-expiry]');
+        if (!issued || !expiry) {
+            return;
+        }
+        var years = parseInt(expiry.getAttribute('data-term-years'), 10) || 2;
+        var suggested = '';
+
+        issued.addEventListener('change', function () {
+            var match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(issued.value);
+            if (!match || (expiry.value !== '' && expiry.value !== suggested)) {
+                return;
+            }
+            var year = parseInt(match[1], 10) + years;
+            var day = match[3];
+            var leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+            if (match[2] === '02' && day === '29' && !leap) {
+                day = '28';
+            }
+            suggested = year + '-' + match[2] + '-' + day;
+            expiry.value = suggested;
+            expiry.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         initTheme();
         initNavDrawer();
         initPalette();
         initDirtyGuard();
+        initServiceWorker();
+        initLogout();
+        initPrintButtons();
+        initEnclosureJump();
+        initDwaExpiryDefault();
     });
 })();

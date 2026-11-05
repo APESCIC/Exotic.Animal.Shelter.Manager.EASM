@@ -22,23 +22,29 @@ use App\Http\Controllers\DwaLicenceController;
 use App\Http\Controllers\EnclosureController;
 use App\Http\Controllers\EnclosureEquipmentController;
 use App\Http\Controllers\EnclosureLogController;
+use App\Http\Controllers\EnclosureQrController;
 use App\Http\Controllers\GiftAidDeclarationController;
 use App\Http\Controllers\GiftAidExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallerController;
 use App\Http\Controllers\LostFoundReportController;
 use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\MobileController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\Public\AdoptableAnimalController;
 use App\Http\Controllers\Public\PartnerFeedController;
 use App\Http\Controllers\Public\PublicApplicationController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RotaShiftController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\WaitingListEntryController;
+use App\Http\Controllers\WebManifestController;
+use App\Http\Middleware\DeduplicateClientRequests;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +61,8 @@ Route::post('/logout', [LoginController::class, 'destroy'])
     ->name('logout');
 
 Route::get('/dev/login-as/{role}', DevLoginController::class)->name('dev.login-as');
+
+Route::get('/manifest.webmanifest', WebManifestController::class)->name('webmanifest');
 
 Route::get('/adopt', [AdoptableAnimalController::class, 'index'])->name('public.adopt.index');
 Route::get('/adopt/embed', [AdoptableAnimalController::class, 'embed'])->name('public.adopt.embed');
@@ -76,7 +84,7 @@ Route::post('/apply/{type}', [PublicApplicationController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('public.apply.store');
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', DeduplicateClientRequests::class])->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
 
     Route::get('/search', [SearchController::class, 'index'])->name('search');
@@ -94,8 +102,25 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/animals/{animal}/movements/create', [MovementController::class, 'create'])->name('animals.movements.create');
     Route::post('/animals/{animal}/movements', [MovementController::class, 'store'])->name('animals.movements.store');
 
+    Route::get('/m', [MobileController::class, 'index'])->name('mobile.index');
+    Route::get('/m/animals', [MobileController::class, 'animals'])->name('mobile.animals');
+    Route::get('/m/animals/{animal}', [MobileController::class, 'animal'])->name('mobile.animals.show');
+    Route::get('/m/enclosures/{enclosure}', [MobileController::class, 'enclosure'])->name('mobile.enclosures.show');
+    Route::get('/m/scan', [MobileController::class, 'scan'])->name('mobile.scan');
+    Route::get('/m/token', [MobileController::class, 'token'])->name('mobile.token.json');
+
+    Route::get('/rota', [RotaShiftController::class, 'index'])->name('rota.index');
+    Route::get('/rota/mine', [RotaShiftController::class, 'mine'])->name('rota.mine');
+    Route::get('/rota/create', [RotaShiftController::class, 'create'])->name('rota.create');
+    Route::post('/rota', [RotaShiftController::class, 'store'])->name('rota.store');
+    Route::get('/rota/{rotaShift}/edit', [RotaShiftController::class, 'edit'])->name('rota.edit');
+    Route::put('/rota/{rotaShift}', [RotaShiftController::class, 'update'])->name('rota.update');
+    Route::delete('/rota/{rotaShift}', [RotaShiftController::class, 'destroy'])->name('rota.destroy');
+
     Route::get('/enclosures', [EnclosureController::class, 'index'])->name('enclosures.index');
+    Route::get('/enclosures/qr-labels', [EnclosureQrController::class, 'index'])->name('enclosures.qr-labels');
     Route::get('/enclosures/create', [EnclosureController::class, 'create'])->name('enclosures.create');
+    Route::get('/enclosures/{enclosure}/qr', [EnclosureQrController::class, 'show'])->name('enclosures.qr');
     Route::post('/enclosures', [EnclosureController::class, 'store'])->name('enclosures.store');
     Route::get('/enclosures/{enclosure}', [EnclosureController::class, 'show'])->name('enclosures.show');
     Route::get('/enclosures/{enclosure}/edit', [EnclosureController::class, 'edit'])->name('enclosures.edit');
@@ -123,6 +148,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/animals/{animal}/medical', [MedicalRecordController::class, 'store'])->name('animals.medical.store');
     Route::get('/medical/{medicalRecord}/edit', [MedicalRecordController::class, 'edit'])->name('medical.edit');
     Route::put('/medical/{medicalRecord}', [MedicalRecordController::class, 'update'])->name('medical.update');
+    Route::post('/medical/{medicalRecord}/given', [MedicalRecordController::class, 'given'])->name('medical.given');
 
     Route::get('/animals/{animal}/diets/create', [DietController::class, 'create'])->name('animals.diets.create');
     Route::post('/animals/{animal}/diets', [DietController::class, 'store'])->name('animals.diets.store');
@@ -155,6 +181,14 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/stock/{stockItem}/edit', [StockItemController::class, 'edit'])->name('stock.edit');
     Route::put('/stock/{stockItem}', [StockItemController::class, 'update'])->name('stock.update');
     Route::post('/stock/{stockItem}/movements', [StockMovementController::class, 'store'])->name('stock.movements.store');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/occupancy', [ReportController::class, 'occupancy'])->name('reports.occupancy');
+    Route::get('/reports/occupancy.csv', [ReportController::class, 'occupancyCsv'])->name('reports.occupancy.csv');
+    Route::get('/reports/intake-outcome', [ReportController::class, 'intakeOutcome'])->name('reports.intake-outcome');
+    Route::get('/reports/intake-outcome.csv', [ReportController::class, 'intakeOutcomeCsv'])->name('reports.intake-outcome.csv');
+    Route::get('/reports/timeline', [ReportController::class, 'timeline'])->name('reports.timeline');
+    Route::get('/reports/timeline.csv', [ReportController::class, 'timelineCsv'])->name('reports.timeline.csv');
 
     Route::get('/finance', [PaymentController::class, 'index'])->name('finance.index');
     Route::get('/finance/payments/create', [PaymentController::class, 'create'])->name('payments.create');
