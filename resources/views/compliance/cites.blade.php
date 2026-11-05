@@ -1,5 +1,6 @@
 @php
     use App\Enums\AnimalTab;
+    use App\Services\CitesRegister;
     use App\Support\UkDate;
 @endphp
 @extends('layouts.app')
@@ -56,8 +57,8 @@
                         @endforelse
                     </td>
                     <td>
-                        @if ($articleTen === 'Missing')
-                            <x-badge tone="dwa" data-missing-article-10>Missing</x-badge>
+                        @if ($articleTen === CitesRegister::NO_ARTICLE_TEN)
+                            <x-badge tone="dwa" data-missing-article-10>{{ $articleTen }}</x-badge>
                         @else
                             {{ $articleTen }}
                         @endif

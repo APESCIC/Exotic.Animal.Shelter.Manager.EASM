@@ -84,7 +84,7 @@ class DashboardAlerts
     {
         return $this->animalAlert(
             AnimalListFilter::MissingArticleTen,
-            'Annex A animals in care with no Article 10 certificate on file.',
+            'Annex A animals in care with no Article 10 certificate on file. One is needed before any sale or fee-paid rehoming (to be confirmed).',
             'danger',
         );
     }

@@ -19,7 +19,7 @@ enum AnimalListFilter: string
             self::Quarantine => 'In quarantine',
             self::MedicalOverdue => 'Overdue medical',
             self::Cites => 'CITES-listed in care',
-            self::MissingArticleTen => 'Annex A without Article 10',
+            self::MissingArticleTen => 'No Article 10 (Annex A)',
             self::Dwa => 'DWA-licensed in care',
         };
     }
