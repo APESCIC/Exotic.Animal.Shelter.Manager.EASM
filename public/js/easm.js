@@ -458,6 +458,33 @@
         });
     }
 
+    /* New DWA licence: suggest the same calendar date N years after issue; 29 Feb falls back to 28 Feb. */
+    function initDwaExpiryDefault() {
+        var issued = document.querySelector('[data-dwa-issued]');
+        var expiry = document.querySelector('[data-dwa-expiry]');
+        if (!issued || !expiry) {
+            return;
+        }
+        var years = parseInt(expiry.getAttribute('data-term-years'), 10) || 2;
+        var suggested = '';
+
+        issued.addEventListener('change', function () {
+            var match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(issued.value);
+            if (!match || (expiry.value !== '' && expiry.value !== suggested)) {
+                return;
+            }
+            var year = parseInt(match[1], 10) + years;
+            var day = match[3];
+            var leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+            if (match[2] === '02' && day === '29' && !leap) {
+                day = '28';
+            }
+            suggested = year + '-' + match[2] + '-' + day;
+            expiry.value = suggested;
+            expiry.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         initTheme();
         initNavDrawer();
@@ -467,5 +494,6 @@
         initLogout();
         initPrintButtons();
         initEnclosureJump();
+        initDwaExpiryDefault();
     });
 })();

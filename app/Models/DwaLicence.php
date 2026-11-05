@@ -16,6 +16,11 @@ class DwaLicence extends Model
     use HasFactory;
 
     /**
+     * DWA Act 1976 s.1(3): a licence lasts two years in England and Wales (check the licence).
+     */
+    public const TERM_YEARS = 2;
+
+    /**
      * @var list<string>
      */
     protected $fillable = [

@@ -240,6 +240,48 @@ class DwaLicenceTest extends TestCase
         $this->assertSame(['EDGE', 'EXPIRED', 'SOON'], $response->viewData('licences')->pluck('licence_number')->sort()->values()->all());
     }
 
+    public function test_new_licence_expiry_defaults_to_two_years_after_issue(): void
+    {
+        Carbon::setTestNow('2028-03-01 09:00:00');
+        $staff = User::factory()->staff()->create();
+        $form = ['licence_number' => 'DWA-NEW', 'issuing_authority' => 'Herefordshire Council'];
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), [...$form, 'issued_on' => '2026-11-15', 'expires_on' => ''])->assertRedirect();
+        $this->assertSame('2028-11-15', DwaLicence::query()->latest('id')->first()->expires_on->toDateString());
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), [...$form, 'issued_on' => '2026-11-15', 'expires_on' => '2027-06-30'])->assertRedirect();
+        $this->assertSame('2027-06-30', DwaLicence::query()->latest('id')->first()->expires_on->toDateString());
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), [...$form, 'issued_on' => '2028-02-29'])->assertRedirect();
+        $this->assertSame('2030-02-28', DwaLicence::query()->latest('id')->first()->expires_on->toDateString());
+
+        $this->actingAs($staff)->post(route('compliance.dwa.store'), $form)->assertSessionHasErrors('expires_on');
+        $this->assertSame(3, DwaLicence::query()->count());
+
+        $this->actingAs($staff)
+            ->get(route('compliance.dwa.create'))
+            ->assertSee('data-dwa-expiry', false)
+            ->assertSee('s.1(3)');
+    }
+
+    public function test_editing_a_licence_never_changes_its_expiry(): void
+    {
+        $staff = User::factory()->staff()->create();
+        $licence = DwaLicence::factory()->create(['issued_on' => '2025-01-10', 'expires_on' => '2026-12-31']);
+
+        $this->actingAs($staff)->put(route('compliance.dwa.update', $licence), [
+            'licence_number' => $licence->licence_number,
+            'issuing_authority' => $licence->issuing_authority,
+            'issued_on' => '2025-01-10',
+            'expires_on' => '',
+        ])->assertSessionHasErrors('expires_on');
+        $this->assertSame('2026-12-31', $licence->refresh()->expires_on->toDateString());
+
+        $this->actingAs($staff)
+            ->get(route('compliance.dwa.edit', $licence))
+            ->assertDontSee('data-dwa-expiry', false);
+    }
+
     public function test_only_staff_and_admin_manage_licences(): void
     {
         $licence = DwaLicence::factory()->create();

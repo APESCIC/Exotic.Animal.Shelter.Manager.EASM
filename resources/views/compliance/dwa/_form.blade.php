@@ -12,10 +12,14 @@
 <p class="hint">Copy the conditions from the licence so staff can check them.</p>
 
 <label for="issued_on">Issued on</label>
-<input id="issued_on" type="date" name="issued_on" value="{{ old('issued_on', optional($licence->issued_on)->format('Y-m-d')) }}">
+<input id="issued_on" type="date" name="issued_on" value="{{ old('issued_on', optional($licence->issued_on)->format('Y-m-d')) }}" @unless ($licence->exists) data-dwa-issued @endunless>
 
 <label for="expires_on">Expires on</label>
-<input id="expires_on" type="date" name="expires_on" value="{{ old('expires_on', optional($licence->expires_on)->format('Y-m-d')) }}" required>
+<input id="expires_on" type="date" name="expires_on" value="{{ old('expires_on', optional($licence->expires_on)->format('Y-m-d')) }}"
+       @if ($licence->exists) required @else data-dwa-expiry data-term-years="{{ \App\Models\DwaLicence::TERM_YEARS }}" @endif>
+@unless ($licence->exists)
+    <p class="hint">Filled in as the same date two years after issue: a DWA licence lasts two years in England and Wales (Dangerous Wild Animals Act 1976, s.1(3)). Check your licence and change it if it differs.</p>
+@endunless
 <p class="hint">EASM adds a renewal task to the diary {{ \App\Models\DwaLicence::reminderDays() }} days before this date (an admin can change this under Settings). When the licence is renewed, change this date.</p>
 
 <label for="animal_ids">Animals covered</label>
