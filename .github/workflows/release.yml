@@ -1,0 +1,108 @@
+name: Release
+
+# One release per milestone. Pushing the vX.Y.Z tag on the milestone's merge commit
+# builds the Cloudron image once (BuildKit layers cached in GitHub Actions), pushes
+# it to GHCR and publishes the GitHub Release. Deploying is a separate, manual step:
+# deploy-cloudron.yml with that tag.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/apescic/easm
+
+jobs:
+  release:
+    name: Build image and publish the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      issues: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the tag matches VERSION and is on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match VERSION ($version). Run php scripts/milestone-version bump in the milestone PR."
+            exit 1
+          fi
+          status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$GITHUB_SHA...main" --jq '.status')"
+          if [[ "$status" != "ahead" && "$status" != "identical" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME ($GITHUB_SHA) is not on main ($status)."
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push the image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: true
+          build-args: EASM_VERSION=${{ env.VERSION }}
+          tags: |
+            ${{ env.IMAGE }}:${{ env.VERSION }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ env.VERSION }}
+          cache-from: type=gha,scope=easm-image
+          cache-to: type=gha,scope=easm-image,mode=max
+
+      - name: Resolve the release title from the milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          milestone_title="$(gh api "repos/$GITHUB_REPOSITORY/milestones?state=all&per_page=100" --paginate \
+            --jq '.[] | .title | select(startswith("v" + env.VERSION + " ") or startswith("v" + env.VERSION + ":"))' \
+            | head -n1 || true)"
+          name="${milestone_title#"v${VERSION}"}"
+          name="${name#:}"
+          if [[ "$name" == *:* ]]; then name="${name#*:}"; fi
+          name="$(sed -E 's/^[[:space:]]+|[[:space:]]+$//g' <<<"$name")"
+          echo "RELEASE_TITLE=v${VERSION}${name:+ $name}" >> "$GITHUB_ENV"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; not changed."
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --title "$RELEASE_TITLE" --generate-notes --latest
+          fi
+          {
+            echo "## Release $RELEASE_TITLE"
+            echo "- Image: \`$IMAGE:$VERSION\`"
+            echo "- Deploy next: \`gh workflow run deploy-cloudron.yml -f tag=$GITHUB_REF_NAME\`"
+          } >> "$GITHUB_STEP_SUMMARY"
