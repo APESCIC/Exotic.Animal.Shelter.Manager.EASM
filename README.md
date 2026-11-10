@@ -105,57 +105,27 @@ Development install uses `composer install` (with dev packages) instead of `--no
 
 Laravel's built-in `GET /up` probe remains available.
 
-## Local development
+## Local development with Laragon
 
-On Windows, prefer **[Laragon](https://laragon.org/)** (Apache + MySQL + PHP) instead of `php artisan serve` or a separate Winget PHP.
+Laragon on Windows is the only supported local set-up for developing EASM. It is its own Laragon project at <http://easm.test>: Apache running PHP 8.3 (as in the Cloudron image) through FastCGI, MySQL 8.4 with the `easm_local` database, and Browsersync live reload on port 5176. The values are in [docs/laragon/profile.md](docs/laragon/profile.md).
 
-### Laragon (recommended on Windows)
+1. Install Laragon (Full), start it, and clone this repository.
+2. Run the set-up script from the repository root. It links `C:\laragon\www\easm` to the clone, checks PHP 8.3 and its extensions, copies `.env.laragon.example` to `.env`, installs dependencies, creates `easm_local`, migrates and offers the demo data:
 
-1. Start Laragon (Apache and MySQL).
-2. From a PowerShell session in the repo root, load Laragon’s PHP/Composer onto `PATH`:
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\laragon-setup.ps1 -SeedDemo
+   ```
 
-```powershell
-. .\scripts\local\use-laragon.ps1
-composer install
-```
+   The first time, add `-InstallVhost` so Laragon serves EASM with PHP 8.3 through its own virtual host (`docs/laragon/easm.test.conf`), then restart Apache in Laragon.
+3. Before any work, run the live preview gate. It loads the latest code and dependencies, checks the preview serves them, and starts live reload:
 
-The script uses the newest Laragon PHP folder that has a `php.ini` (builds without one load no extensions, so Composer and tests fail). Set `$env:LARAGON_PHP` to a folder name such as `php-8.3.33-Win32-vs16-x64` to pin a version, and select the same version in Laragon’s PHP menu for Apache.
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1
+   ```
 
-3. Point a site at this clone’s `public/` directory. Easiest: a directory junction so Laragon’s auto-host works:
+4. Open <http://easm.test> (or <http://localhost:5176> for live reload while you edit views, JavaScript or CSS).
 
-```powershell
-cmd /c mklink /J C:\laragon\www\easm "%CD%"
-```
-
-Open **http://easm.test** (document root must be `public/`). If the auto-host serves the repo root instead of `public/`, add a Laragon/Apache virtual host with `DocumentRoot` …`/easm/public`, or use Laragon’s “Quick add” for a site whose root is `public/`.
-
-After the first junction or vhost setup, **restart Laragon Apache** so `easm.test` resolves. Ensure `127.0.0.1 easm.test` is in your hosts file (Laragon usually adds it; otherwise add manually).
-
-4. Local `.env` (never commit it) should use Laragon MySQL, for example:
-
-```env
-APP_URL=http://easm.test
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=easm
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-Create an empty `easm` database in HeidiSQL / MySQL if needed, then open http://easm.test/install (or `/login` if already installed).
-
-### Without Laragon
-
-```bash
-composer install
-php artisan serve
-```
-
-Open http://127.0.0.1:8000/install against a local MySQL/MariaDB database, then sign in at `/login`. If `php artisan serve` reloads when the wizard writes `.env`, refresh the home page — install has already finished.
-
-Node and Vite are optional and are not required to boot, install, or hit `/health`.
-
+Demo data is clearly fake (en_GB, a fixed seed, `example.test` emails, Ofcom drama-range phone numbers): `php artisan demo:seed` loads it and `php artisan demo:reset` empties the local database and reloads it. Both refuse unless `APP_ENV=local`. See [docs/laragon/demo-data.md](docs/laragon/demo-data.md).
 ### Development logins
 
 Local QA accounts, one per role, all with password `password`:
@@ -193,9 +163,9 @@ PHPUnit treats the app as already installed (`APP_INSTALLED=true`) except in ins
 
 Shelters install from a clone or zip (Composer + `/install`) as above. Nothing deploys to shelter hosting.
 
-Each merged PR ships as a GitHub Release: a patch release per PR, a minor release when a milestone closes. CI (`.github/workflows/ci.yml`) runs tests on every PR and on `main`.
+Each milestone ships once, as one GitHub Release named by its version (see [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc)). CI (`.github/workflows/ci.yml`) runs the tests and builds the Docker image on every PR.
 
-Publishing a release runs `.github/workflows/deploy-cloudron.yml`, which builds `ghcr.io/apescic/easm:<version>` from the `Dockerfile` and updates the APES-owned Cloudron app (`https://easm.intranet.apes.org.uk`). Re-deploy a tag with `gh workflow run "Deploy to Cloudron" -f tag=vX.Y.Z`.
+Pushing the `vX.Y.Z` tag runs `.github/workflows/release.yml`: it builds `ghcr.io/apescic/easm:<version>` from the multi-stage `Dockerfile` (BuildKit layers cached in GitHub Actions), pushes it and publishes the Release. Deploying is a separate, manual step: `gh workflow run deploy-cloudron.yml -f tag=vX.Y.Z` updates the APES-owned Cloudron app (`https://easm.intranet.apes.org.uk`) to that image, checks `/health` reports the version, and rolls back to the previous image if it does not.
 
 Repository settings the deploy needs (Settings → Secrets and variables → Actions):
 

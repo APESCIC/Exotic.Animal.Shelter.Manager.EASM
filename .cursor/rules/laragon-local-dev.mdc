@@ -1,0 +1,24 @@
+---
+description: Live preview gate before any development work, and local development on Laragon with PHP 8.3 through FastCGI
+alwaysApply: true
+---
+
+# Laragon local development
+
+Laragon on Windows is the only supported local set-up for developing EASM. This repository is its own Laragon project at <http://easm.test>: Apache running PHP 8.3 (as in the Cloudron image) through FastCGI in its own virtual host, MySQL 8.4 (`easm_local`) and Browsersync live reload on port 5176, with the values in `docs/laragon/profile.json`. Never suggest containers, virtual machines, `php artisan serve` or any other local stack for development. The Dockerfile is only the Cloudron package.
+
+## Before any development work: the live preview gate
+
+Run this at the start of any development or coding work (code, tests, docs, config, installs or commits), after every branch switch, and before moving to another repository:
+
+1. **Load the latest version and updates.** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1`. It stops if tracked files are uncommitted, fetches, fast-forwards the branch, merges `origin/main` into it (never a rebase), runs `composer install` or `npm ci` when a lock file changed, and reports pending migrations. Ask before running migrations.
+2. **Start Laragon.** The same script checks that Laragon, Apache and MySQL are running, that `/health` shows the checked-out revision through FastCGI (`php_sapi` is `cgi-fcgi`) on PHP 8.3, and starts Browsersync on port 5176 if nothing listens there. Laragon's settings and files belong to Bambie: ask with AskQuestion before changing them.
+3. **Open it in Cursor's browser.** Open <http://easm.test>, confirm it loaded, report the URL, the live-reload port and a screenshot, then say "Preview ready, starting work". Call `SetActiveBranch` after a branch change.
+4. **If it won't load after two attempts, stop.** Report the blocker and ask how to proceed before doing any work.
+
+## FastCGI and PHP 8.3
+
+- `docs/laragon/easm.test.conf` is EASM's own vhost (installed as `C:\laragon\etc\apache2\sites-enabled\easm.test.conf` by `scripts\laragon-setup.ps1 -InstallVhost`). It runs `php-8.3.33-Win32-vs16-x64\php-cgi.exe` through mod_fcgid, while Laragon's other sites keep the global PHP.
+- Put the same PHP 8.3 folder first on `PATH` for Artisan, Composer and the tests.
+- Keep `public/.htaccess` free of `php_value` and `php_flag` outside `<IfModule php_module>`, and keep the `HTTP_AUTHORIZATION` rewrite rule.
+- Demo data: `php artisan demo:seed` and `php artisan demo:reset` (fake data only; both refuse unless `APP_ENV=local`). Logins: `docs/laragon/demo-data.md`.

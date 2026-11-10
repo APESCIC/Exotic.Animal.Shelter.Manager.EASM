@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LocalRevision;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -15,7 +16,7 @@ class HealthController extends Controller
     {
         $database = $this->databaseIsReachable();
 
-        return response()->json([
+        $body = [
             'status' => $database ? 'ok' : 'degraded',
             'app' => config('app.name'),
             'version' => config('app.version'),
@@ -23,7 +24,18 @@ class HealthController extends Controller
                 'app' => true,
                 'database' => $database,
             ],
-        ], $database ? 200 : 503);
+        ];
+
+        // The live preview gate checks the Laragon preview serves this checkout through FastCGI.
+        if (app()->environment('local')) {
+            $body['local'] = [
+                'php' => PHP_VERSION,
+                'php_sapi' => PHP_SAPI,
+                'git_revision' => (new LocalRevision(base_path()))->current(),
+            ];
+        }
+
+        return response()->json($body, $database ? 200 : 503);
     }
 
     private function databaseIsReachable(): bool
