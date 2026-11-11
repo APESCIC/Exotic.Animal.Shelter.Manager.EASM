@@ -1,3 +1,4 @@
+# Publishes one GitHub Release when a vX.Y.Z tag is pushed on main's version merge commit; it never runs on ordinary pushes.
 name: Release
 
 # One release per milestone. Pushing the vX.Y.Z tag on the milestone's merge commit
@@ -23,7 +24,7 @@ env:
 jobs:
   release:
     name: Build image and publish the release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: write

@@ -1,3 +1,4 @@
+# Deploys a published vX.Y.Z release to the APES Cloudron app, only when run by hand, and rolls back if /health doesn't report it.
 name: Deploy to Cloudron
 
 # Deploys the APES-owned EASM instance only; shelters self-host from a clone or zip.
@@ -28,7 +29,7 @@ env:
 jobs:
   deploy:
     name: Update the Cloudron app to the release image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       CLOUDRON_SERVER: ${{ secrets.CLOUDRON_SERVER }}

@@ -1,3 +1,4 @@
+# Checks every pull request's title and branch name carry the right version, such as [v0.6.2] ... (#151).
 name: milestone-version-check
 
 # PR titles and branch names must carry their milestone's version, never GitHub's milestone number.
