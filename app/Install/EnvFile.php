@@ -42,6 +42,26 @@ class EnvFile
         file_put_contents($path, $content);
     }
 
+    /**
+     * Remove keys from a .env file, leaving every other line as it was.
+     *
+     * @param  list<string>  $keys
+     */
+    public function remove(string $path, array $keys): void
+    {
+        if (! is_file($path)) {
+            return;
+        }
+
+        $content = (string) file_get_contents($path);
+
+        foreach ($keys as $key) {
+            $content = (string) preg_replace('/^'.preg_quote($key, '/').'=.*(\R|$)/m', '', $content);
+        }
+
+        file_put_contents($path, $content);
+    }
+
     private function encode(string $value): string
     {
         if ($value === '') {
