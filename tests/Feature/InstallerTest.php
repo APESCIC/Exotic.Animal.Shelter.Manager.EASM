@@ -228,6 +228,27 @@ class InstallerTest extends TestCase
         $this->assertFileDoesNotExist($this->installedPath);
     }
 
+    public function test_install_clears_a_cached_config_so_new_env_values_apply(): void
+    {
+        $cached = $this->app->getCachedConfigPath();
+        $this->assertFileDoesNotExist($cached);
+
+        file_put_contents($cached, '<?php return [];'.PHP_EOL);
+        $this->app->instance('config_loaded_from_cache', true);
+
+        try {
+            $this->post(route('install.store'), $this->validPayload())
+                ->assertSessionHasNoErrors()
+                ->assertRedirect('/');
+
+            $this->assertFileDoesNotExist($cached);
+        } finally {
+            if (is_file($cached)) {
+                unlink($cached);
+            }
+        }
+    }
+
     public function test_database_config_falls_back_to_cloudron_variables(): void
     {
         $cloudron = [

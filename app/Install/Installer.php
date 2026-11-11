@@ -76,6 +76,11 @@ class Installer
 
         $this->envFile->write($this->state->envPath(), $this->envValues($input, $source));
 
+        // A cached config (Cloudron's run.sh builds one) would hide the new .env values.
+        if (app()->configurationIsCached()) {
+            Artisan::call('config:clear');
+        }
+
         config([
             'app.name' => $input['organisation'],
             'app.timezone' => $input['timezone'],
