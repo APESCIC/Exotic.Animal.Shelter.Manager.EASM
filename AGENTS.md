@@ -4,11 +4,11 @@ Guidance for AI coding agents (Cursor and others). Setup, tests and releases are
 
 ## Local development (Laragon)
 
-Laragon on Windows is the only supported local set-up for developing EASM: <http://easm.test>, PHP 8.3 through FastCGI in its own vhost, MySQL 8.4 (`easm_local`), Browsersync on port 5176. Before any development or coding work, run the live preview gate in [`.cursor/rules/laragon-local-dev.mdc`](.cursor/rules/laragon-local-dev.mdc) (`scripts\preview.ps1`, then open the preview in Cursor's browser). Profile: [docs/laragon/profile.md](docs/laragon/profile.md). Demo data and logins: [docs/laragon/demo-data.md](docs/laragon/demo-data.md). The `Dockerfile` and `CloudronManifest.json` are only the Cloudron package; never use them for local development.
+Laragon on Windows is the only supported local set-up for developing EASM: <http://easm.test>, PHP 8.3 through FastCGI in its own vhost, MySQL 8.4 (`easm_local`), Browsersync on port 5176. Before any development or coding work, run the live preview gate in the [`local-setup`](.cursor/skills/local-setup/SKILL.md) skill (`scripts\preview.ps1`, then open the preview in Cursor's browser). Profile: [docs/laragon/profile.md](docs/laragon/profile.md). Demo data and logins: [docs/laragon/demo-data.md](docs/laragon/demo-data.md). The `Dockerfile` and `CloudronManifest.json` are only the Cloudron package; never use them for local development.
 
 ## Shipping and versioning
 
-Every milestone ships once, by its version (`v0.6.2`), never by GitHub's milestone number: every issue on one `milestone/vX-Y-Z-<slug>` branch behind one draft pull request, one merge commit into `main`, one tag, one Release and one Cloudron deploy of that tag. The single rule is [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc). Agents run it with the [`complete-next-version`](.cursor/skills/complete-next-version/SKILL.md) and [`release-version`](.cursor/skills/release-version/SKILL.md) skills, or `/complete-next-version`.
+Every milestone ships once, by its version (`v0.6.2`), never by GitHub's milestone number: one PR per issue into the `milestone/vX-Y-Z-<slug>` branch, one merge commit into `main`, one tag, one Release and one deploy of that tag. The detail is [`docs/shipping.md`](docs/shipping.md). Agents run it with the skills in [`.cursor/skills/`](.cursor/skills/), starting with `/start-next-version`.
 
 - `VERSION` is the single source of the version; `composer milestone:bump -- vX.Y.Z` syncs every other field.
 - `composer milestone:next`, `milestone:check-title`, `milestone:check-branch` and `milestone:check-release` (`scripts/milestone-version`). CI runs the title and branch checks on every pull request.

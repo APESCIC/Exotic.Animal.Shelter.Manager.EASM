@@ -165,7 +165,7 @@ PHPUnit treats the app as already installed (`APP_INSTALLED=true`) except in ins
 
 Shelters install from a clone or zip (Composer + `/install`) as above. Nothing deploys to shelter hosting.
 
-Each milestone ships once, as one GitHub Release named by its version (see [`.cursor/rules/version-shipping.mdc`](.cursor/rules/version-shipping.mdc)). CI (`.github/workflows/ci.yml`) runs the tests and builds the Docker image on every PR.
+Each milestone ships once, as one GitHub Release named by its version (see [`docs/shipping.md`](docs/shipping.md)). CI (`.github/workflows/ci.yml`) runs the tests and builds the Docker image on every PR.
 
 Pushing the `vX.Y.Z` tag runs `.github/workflows/release.yml`: it builds `ghcr.io/apescic/easm:<version>` from the multi-stage `Dockerfile` (BuildKit layers cached in GitHub Actions), pushes it and publishes the Release. Deploying is a separate, manual step: `gh workflow run deploy-cloudron.yml -f tag=vX.Y.Z` updates the APES-owned Cloudron app (`https://easm.intranet.apes.org.uk`) to that image, checks `/health` reports the version, and rolls back to the previous image if it does not.
 

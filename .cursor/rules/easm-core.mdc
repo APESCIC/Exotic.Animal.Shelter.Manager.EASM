@@ -1,0 +1,38 @@
+---
+description: EASM core rules - Laragon only, the live preview gate before any work, and the four-step ship-once flow by version number
+alwaysApply: true
+---
+
+# EASM core rules
+
+The plain-English guide is `AGENTS.md`; the detail is `docs/shipping.md`; terms are in `docs/glossary.md`. Don't repeat them here.
+
+## Before any work
+
+- Run the live preview gate first with the `local-setup` skill, and again after every branch switch. Don't edit, install or commit until both sites have loaded in Cursor's browser and you have said "Preview ready, starting work".
+- Laragon on Windows is the only local set-up (`http://easm.test`, PHP 8.3 through FastCGI, MySQL 8.4). Never suggest containers, virtual machines, `php artisan serve` or any other local stack.
+- Ask before running migrations or changing anything in Laragon.
+
+## How work ships (by version number, never milestone number)
+
+1. **Work:** one issue at a time, each on its own branch with a PR into the version branch `milestone/vX-Y-Z-<slug>` (skill `work-on-issue`), with the Work started, Progress update and Work complete comments in `docs/reports.md`.
+2. **Merge:** when every issue is closed, one PR from the version branch into `main`, merged once as a merge commit after the ship gate (skill `finish-version`).
+3. **Release:** one tag and one GitHub Release (skill `release-version`).
+4. **Deploy:** one deploy of that release, with evidence (skill `deploy-version`).
+
+Other skills: `start-next-version`, `plan-work`, `version-status`.
+
+## Always
+
+- "The next version" is what `composer milestone:next` prints: the open milestone with the lowest vX.Y.Z above the latest tag.
+- Ask the ship-gate question (`docs/shipping.md#the-ship-gate`) before any merge into `main`, tag, release or deploy. Hotfixes only with Bambie's written approval on the issue.
+- Ask with AskQuestion at real decisions: best option first, marked "(Recommended)", and a safe "Stop here".
+- Conventional Commits with `(Refs #<issue>)`. UK English. Assign issues to `apescic-director`.
+- Show the command output for every step you report as done.
+
+## Never
+
+- Force-push, `git reset --hard` or rebase a shared branch, or squash into `main`.
+- Delete issues or milestones, rename milestones, or change labels other than `area:` labels.
+- Print or commit tokens, `.env` contents, `APP_KEY` or credentials.
+- Add paid or third-party security scanners; use only free GitHub features.
