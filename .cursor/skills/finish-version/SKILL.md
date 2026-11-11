@@ -7,7 +7,11 @@ description: Finish a version once every issue is closed - merge main into the v
 
 The flow is in `docs/shipping.md`. Terms: `docs/glossary.md`.
 
-1. **Check every issue is closed.** Run `composer milestone:status -- vX.Y.Z`. Only the Epic may still be open. If any other issue is open, list it and **stop**.
+1. **Check every issue is closed.** Run `composer milestone:status -- vX.Y.Z`.
+   - It exits 1 while the Epic is open. That is expected here, because the Epic closes at close-out.
+   - A "[Task] Ship the milestone" issue may also still be open; it closes with the Epic.
+   - A parent issue whose sub-issues are all closed should already be closed (`work-on-issue` step 6). If one is still open, post Work complete on it and close it now.
+   - If anything else is open, list it and **stop**.
 2. **Bring `main` in.** On the version branch, run the `local-setup` skill (it merges `origin/main`), or run `git merge origin/main`. On a conflict, **stop and ask**.
 3. **Set the version once.**
 

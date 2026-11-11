@@ -68,6 +68,10 @@ One issue at a time, in the planned order. The comment templates are in `docs/re
    ```
 
 3. Check: `gh issue view <n> --json state,stateReason` shows `CLOSED` and `COMPLETED`. Don't start the next issue until it does.
+4. Roll up to the parent.
+   - Run `gh issue view <n> --json parent`. If there is a parent other than the Epic, list its sub-issues with `gh issue view <parent> --json subIssues`.
+   - If every sub-issue is now `CLOSED`, post a Work complete comment on the parent (listing its sub-issues and their PRs), close it with `--reason completed`, and repeat for its own parent.
+   - Never close the Epic here; it closes at close-out.
 
 ## 7. Next
 

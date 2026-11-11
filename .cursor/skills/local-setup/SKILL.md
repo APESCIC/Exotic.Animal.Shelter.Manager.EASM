@@ -39,7 +39,7 @@ Laragon is the only local set-up. Settings: `docs/laragon/profile.md`. Demo data
 
 ## Good to know
 
-- Put `C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64` first on `PATH` for `php`, `composer` and the tests.
+- In a new PowerShell window, put PHP 8.3 first on `PATH` before running `php`, `composer` or the tests, as in Start here step 3 of `AGENTS.md`.
 - `scripts\preview.ps1 -StopDevServer` stops live reload; its log is `storage\logs\browsersync.log`.
 - `php artisan demo:reset` empties the local database and reloads the demo data. It refuses unless `APP_ENV=local`.
 - Keep `public/.htaccess` free of `php_value` and `php_flag` outside `<IfModule php_module>`; FastCGI answers those with an error 500.
