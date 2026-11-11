@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\Artisan;
 
 class Installer
 {
+    private const DATABASE_KEYS = ['DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'];
+
     public function __construct(
         private InstallationState $state,
         private EnvFile $envFile,
         private DatabaseConnector $database,
+        private CloudronDatabase $cloudron = new CloudronDatabase,
     ) {}
 
     /**
@@ -22,8 +25,12 @@ class Installer
      */
     public function install(array $input): void
     {
-        if (! $this->managedDatabase() && ! app()->runningUnitTests()) {
-            $credentials = $this->credentials($input);
+        $source = $this->databaseSource($input);
+
+        if ($source !== DatabaseSource::Managed && ! app()->runningUnitTests()) {
+            $credentials = $source === DatabaseSource::Cloudron
+                ? $this->cloudron->credentials()
+                : $this->credentials($input);
             $this->database->test($credentials);
             $this->database->apply($credentials);
         }
@@ -63,7 +70,11 @@ class Installer
 
         // Write .env last. php artisan serve restarts when .env changes; doing
         // migrate + admin first avoids APP_INSTALLED=true with no admin user.
-        $this->envFile->write($this->state->envPath(), $this->envValues($input));
+        if ($source === DatabaseSource::Cloudron) {
+            $this->envFile->remove($this->state->envPath(), self::DATABASE_KEYS);
+        }
+
+        $this->envFile->write($this->state->envPath(), $this->envValues($input, $source));
 
         config([
             'app.name' => $input['organisation'],
@@ -93,7 +104,7 @@ class Installer
      * @param  array<string, mixed>  $input
      * @return array<string, string>
      */
-    private function envValues(array $input): array
+    private function envValues(array $input, DatabaseSource $source): array
     {
         $values = [
             'APP_NAME' => (string) $input['organisation'],
@@ -101,16 +112,18 @@ class Installer
             'APP_INSTALLED' => 'true',
         ];
 
-        if (! $this->managedDatabase()) {
-            $values += [
+        $values += match ($source) {
+            DatabaseSource::Managed => [],
+            DatabaseSource::Cloudron => ['DB_CONNECTION' => 'mysql'],
+            DatabaseSource::Custom => [
                 'DB_CONNECTION' => 'mysql',
                 'DB_HOST' => (string) $input['db_host'],
                 'DB_PORT' => (string) $input['db_port'],
                 'DB_DATABASE' => (string) $input['db_database'],
                 'DB_USERNAME' => (string) $input['db_username'],
                 'DB_PASSWORD' => (string) ($input['db_password'] ?? ''),
-            ];
-        }
+            ],
+        };
 
         if (blank(config('app.key'))) {
             $key = 'base64:'.base64_encode(random_bytes(32));
@@ -121,8 +134,19 @@ class Installer
         return $values;
     }
 
-    private function managedDatabase(): bool
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    private function databaseSource(array $input): DatabaseSource
     {
-        return (bool) config('easm.managed_database');
+        if (config('easm.managed_database')) {
+            return DatabaseSource::Managed;
+        }
+
+        if ($this->cloudron->available() && ($input['db_source'] ?? null) === DatabaseSource::Cloudron->value) {
+            return DatabaseSource::Cloudron;
+        }
+
+        return DatabaseSource::Custom;
     }
 }

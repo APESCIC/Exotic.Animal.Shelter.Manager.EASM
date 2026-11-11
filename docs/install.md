@@ -9,6 +9,7 @@ How a shelter installs EASM on its own web hosting. Developing EASM locally is d
 | cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | One `composer install`. Don't point the site at the repository root. |
 | Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document root and Composer step. |
 | VPS (Apache or nginx) | 8.3+ | MySQL or MariaDB | `public/` | HTTPS recommended. |
+| Cloudron LAMP app | 8.3 (`/app/data/PHP_VERSION`) | Cloudron MySQL addon, or your own | `public/` | The wizard offers Cloudron's database; see [Choosing the database](#choosing-the-database). |
 | Cloudron (APES instance) | 8.3 (image) | Cloudron MySQL addon | `public/` | Custom package in this repository; see [The APES Cloudron instance](#the-apes-cloudron-instance). |
 
 Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only, not on every request. One shelter per install; EASM is not multi-tenant software.
@@ -42,11 +43,19 @@ Then:
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
 4. Run `php artisan storage:link`, so animal photos and media under `storage/app/public` can be reached.
 5. Open the site in a browser. You are sent to `/install`.
-6. Enter the database details, organisation name, timezone (default Europe/London) and the first admin user.
+6. Enter the database details (or choose Cloudron's database, below), organisation name, timezone (default Europe/London) and the first admin user.
 
 The wizard writes `.env`, runs the migrations, creates that admin (role `admin`) and writes `storage/app/installed`. After that, `/install` won't run again. Sign in at `/login`; see [features.md](features.md) for what each role can do.
 
 Shelters install and update from a clone or a zip like this. Nothing is ever deployed to a shelter's hosting.
+
+### Choosing the database
+
+- **Most hosts:** the wizard asks for the database details and saves them as `DB_*` in `.env`.
+- **A Cloudron LAMP app:** Cloudron gives the app its MySQL database as `CLOUDRON_MYSQL_*` variables. The wizard then offers two choices:
+  - **Use the database Cloudron provides** (selected first). The wizard checks it can connect, sets `DB_CONNECTION=mysql` and removes any `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` lines from `.env`. EASM then reads Cloudron's variables on every request, so it keeps working when Cloudron changes them after a restore or clone. Nothing about the database is written to `.env`.
+  - **Enter my own database details:** the same form as other hosts. `DB_*` in `.env` always takes priority over Cloudron's variables.
+- **Hosts that write `DB_*` themselves:** set `EASM_MANAGED_DATABASE=true` and the wizard skips the database step.
 
 ## Health and version
 
