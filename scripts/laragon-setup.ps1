@@ -204,5 +204,5 @@ try {
 }
 
 Write-Step 'Done'
-Write-Ok "Live reload: npm run dev (Browsersync on port $($p.devServerPort), proxying $($p.appUrl))"
 Write-Ok "Before any work: powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1"
+Write-Ok "It checks the version against $($p.liveUrl) and starts live reload hidden (Browsersync on port $($p.devServerPort), proxying $($p.appUrl))."

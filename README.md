@@ -117,13 +117,15 @@ Laragon on Windows is the only supported local set-up for developing EASM. It is
    ```
 
    The first time, add `-InstallVhost` so Laragon serves EASM with PHP 8.3 through its own virtual host (`docs/laragon/easm.test.conf`), then restart Apache in Laragon.
-3. Before any work, run the live preview gate. It loads the latest code and dependencies, checks the preview serves them, and starts live reload:
+3. Before any work, run the live preview gate. It loads the latest code and dependencies, checks the preview serves them at the same version as the live Cloudron app (<https://easm.intranet.apes.org.uk/health>), and starts live reload in a hidden window, logging to `storage\logs\browsersync.log`:
 
    ```powershell
    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1
    ```
 
-4. Open <http://easm.test> (or <http://localhost:5176> for live reload while you edit views, JavaScript or CSS).
+   Stop live reload with `scripts\preview.ps1 -StopDevServer`. The local version comes from `VERSION` (through the `config/app.php` default), so `.env` has no `APP_VERSION`; the gate removes one if it finds it.
+
+4. Open <http://localhost:5176> (live reload of <http://easm.test> while you edit views, JavaScript or CSS) and <https://easm.intranet.apes.org.uk> to compare with the live app.
 
 Demo data is clearly fake (en_GB, a fixed seed, `example.test` emails, Ofcom drama-range phone numbers): `php artisan demo:seed` loads it and `php artisan demo:reset` empties the local database and reloads it. Both refuse unless `APP_ENV=local`. See [docs/laragon/demo-data.md](docs/laragon/demo-data.md).
 ### Development logins

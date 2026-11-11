@@ -13,8 +13,9 @@ EASM is its own Laragon project. These are the values it needs. [`profile.json`]
 | PHP extensions | bcmath, curl, fileinfo, gd, intl, mbstring, openssl, pdo_mysql, pdo_sqlite, zip |
 | Database | MySQL 8.4, `easm_local` on `127.0.0.1:3306`, user `root`, no password, `utf8mb4_unicode_ci` |
 | Node | 22, with npm |
-| Live reload | Browsersync on port 5176 (`npm run dev`), proxying `http://easm.test` |
-| Env file | `.env.laragon.example`, copied to `.env` by the setup script |
+| Live reload | Browsersync on port 5176 (`npm run dev`), proxying `http://easm.test`; `scripts/preview.ps1` starts it in a hidden window and `-StopDevServer` stops it |
+| Live app | `https://easm.intranet.apes.org.uk` (Cloudron); the preview gate checks its `/health` version matches the preview's |
+| Env file | `.env.laragon.example`, copied to `.env` by the setup script; no `APP_VERSION`, so the version comes from `VERSION` |
 
 `.env.example` stays production-safe, because self-hosting shelters and the Cloudron image start from it. Laragon's values live in `.env.laragon.example` instead.
 
