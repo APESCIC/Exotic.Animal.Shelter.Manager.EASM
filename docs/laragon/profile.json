@@ -3,6 +3,7 @@
     "folder": "C:\\laragon\\www\\easm",
     "hostname": "easm.test",
     "appUrl": "http://easm.test",
+    "liveUrl": "https://easm.intranet.apes.org.uk",
     "documentRoot": "public",
     "webServer": "apache",
     "apache": "2.4",

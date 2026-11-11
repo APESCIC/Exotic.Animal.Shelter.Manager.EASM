@@ -28,7 +28,7 @@ This is the one rule for how work ships in this repository. `AGENTS.md`, `CONTRI
 
 - Never write "Milestone 7", "#7", "[#7]", "M7" or "/milestone/7" in a branch, title, commit subject, tag or release.
 - Check names with `composer milestone:check-title -- "<title>"`, `composer milestone:check-branch -- "<branch>"` and `composer milestone:check-release -- vX.Y.Z "<release title>"`. CI runs the title and branch checks on every pull request.
-- Version fields: `VERSION` is the single source. `composer milestone:bump -- vX.Y.Z` sets it and syncs `config/app.php` (`APP_VERSION` default), `CloudronManifest.json` (`version`), `.env.example` and `.env.laragon.example`. Never edit them by hand.
+- Version fields: `VERSION` is the single source. `composer milestone:bump -- vX.Y.Z` sets it and syncs `config/app.php` (`APP_VERSION` default), `CloudronManifest.json` (`version`) and `.env.example`. Never edit them by hand. The Laragon `.env` has no `APP_VERSION`, so the local preview reports the `config/app.php` default; `scripts\preview.ps1` removes one if it finds it.
 
 ## The flow: one version ships once
 

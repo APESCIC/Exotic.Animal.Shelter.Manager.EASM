@@ -59,6 +59,7 @@ class LaragonProfileTest extends TestCase
 
         $this->assertSame($profile['project'].'.test', $profile['hostname']);
         $this->assertSame('C:\\laragon\\www\\'.$profile['project'], $profile['folder']);
+        $this->assertStringStartsWith('https://', $profile['liveUrl']);
         $this->assertStringContainsString('--proxy '.$profile['appUrl'].' --port '.$profile['devServerPort'], $package);
     }
 
@@ -100,6 +101,6 @@ class LaragonProfileTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $version);
         $this->assertSame($version, $manifest['version']);
         $this->assertStringContainsString("env('APP_VERSION', '{$version}')", (string) file_get_contents(base_path('config/app.php')));
-        $this->assertSame($version, $this->laragonEnv()['APP_VERSION']);
+        $this->assertArrayNotHasKey('APP_VERSION', $this->laragonEnv());
     }
 }
