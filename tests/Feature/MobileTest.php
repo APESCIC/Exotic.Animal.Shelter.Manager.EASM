@@ -191,6 +191,8 @@ class MobileTest extends TestCase
         $this->assertFileExists(public_path('images/pwa/easm-192.png'));
         $this->assertFileExists(public_path('images/pwa/easm-512.png'));
         $this->assertFileExists(public_path('images/pwa/easm.svg'));
+        $this->assertFileExists(public_path('images/pwa/easm-maskable.svg'));
+        $this->assertStringContainsString("'easm-shell-v3'", (string) file_get_contents(public_path('sw.js')));
 
         $this->actingAs(User::factory()->staff()->create())
             ->get(route('home'))

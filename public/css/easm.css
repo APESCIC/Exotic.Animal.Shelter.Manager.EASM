@@ -186,11 +186,19 @@ img {
 }
 
 .sidebar-brand {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     padding: var(--space-1) var(--space-2) var(--space-4);
     font-weight: 700;
     color: var(--color-text);
     text-decoration: none;
+}
+
+.sidebar-brand-icon {
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
 }
 
 .sidebar-brand small {

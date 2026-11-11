@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="EASM">
+  <title>EASM</title>
+  <rect width="512" height="512" fill="#FBF5E6"/>
+  <g transform="translate(256 256) scale(1.04) translate(-256 -253)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M235.7 159.2 A146 128 0 1 0 400.6 303.8 L369 293 A104 92 0 1 1 251.5 188.9 Z" fill="#1F5F2C"/>
+    <path d="M388 314 L387 300 A37 37 0 0 0 313 300" fill="none" stroke="#1F5F2C" stroke-width="24"/>
+    <path d="M313 300 A22 22 0 0 0 357 300 A10 10 0 0 0 337 300" fill="none" stroke="#1F5F2C" stroke-width="12"/>
+    <g fill="#4F9A3C">
+      <ellipse cx="148" cy="237" rx="15" ry="8" transform="rotate(-65 148 237)"/>
+      <ellipse cx="137" cy="298" rx="13" ry="8" transform="rotate(-98 137 298)"/>
+      <ellipse cx="165" cy="354" rx="15" ry="8" transform="rotate(-130 165 354)"/>
+      <ellipse cx="229" cy="389" rx="13" ry="7" transform="rotate(-165 229 389)"/>
+      <ellipse cx="304" cy="386" rx="11" ry="6" transform="rotate(160 304 386)"/>
+    </g>
+    <path d="M178 206 C182 226 192 236 212 236" fill="none" stroke="#4F9A3C" stroke-width="16"/>
+    <path d="M216 194 C192 178 188 132 214 96 C218 90 224 88 230 90 C266 100 304 116 324 138 C338 152 334 172 314 180 C286 190 248 198 216 194 Z" fill="#4F9A3C"/>
+    <circle cx="264" cy="140" r="21" fill="#8DC85E" stroke="#1F5F2C" stroke-width="6"/>
+    <circle cx="267" cy="140" r="9" fill="#1F5F2C"/>
+    <circle cx="271" cy="135" r="3" fill="#FFFFFF"/>
+    <path d="M262 178 C286 182 310 182 330 174 C344 168 344 152 332 152 C324 152 322 162 330 164" fill="none" stroke="#B8792B" stroke-width="6"/>
+    <path d="M184 258 L238 214 L292 258" fill="none" stroke="#1F5F2C" stroke-width="16"/>
+    <g fill="#B8792B">
+      <rect x="224" y="256" width="13" height="13" rx="2"/>
+      <rect x="241" y="256" width="13" height="13" rx="2"/>
+      <rect x="224" y="273" width="13" height="13" rx="2"/>
+      <rect x="241" y="273" width="13" height="13" rx="2"/>
+    </g>
+    <path d="M235 346 C205 344 190 324 192 300 C218 300 235 316 235 346 Z" fill="#1F5F2C"/>
+    <path d="M241 346 C243 316 260 300 286 300 C286 324 271 344 241 346 Z" fill="#4F9A3C"/>
+  </g>
+</svg>
