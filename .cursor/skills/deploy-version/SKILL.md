@@ -27,8 +27,10 @@ Only after a ship-gate answer in this chat that includes deploy. Deploy a publis
 
 ## Close out
 
-1. **Check every issue is closed.** `composer milestone:status -- vX.Y.Z`. If it lists any issue other than the Epic, list them and **stop**: never close a milestone with open issues.
-2. **Release summary.** Post the Release summary comment from `docs/reports.md` on the Epic, then close it: `gh issue close <epic> --reason completed`.
+1. **Check every issue is closed.** `composer milestone:status -- vX.Y.Z`. If it lists anything other than the Epic and a "[Task] Ship the milestone" issue, list it and **stop**: never close a milestone with open issues.
+2. **Release summary.** Post the Release summary comment from `docs/reports.md` on the Epic.
+   - If there is a "[Task] Ship the milestone" issue, post the same summary on it and close it: `gh issue close <task> --reason completed`.
+   - Then close the Epic: `gh issue close <epic> --reason completed`.
 3. **Run the check again.** `composer milestone:status -- vX.Y.Z` must say "Ready to close".
 4. **Close the milestone.** Get its number from the title, then close it:
 

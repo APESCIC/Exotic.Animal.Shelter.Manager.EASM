@@ -11,7 +11,7 @@ EASM (Exotic Animal Shelter Manager) is web software for one exotic-animal shelt
 Laragon on Windows is the only local set-up.
 1. Install and start [Laragon](https://laragon.org/) (Full), then clone this repository.
 2. Once, in PowerShell from the repository folder: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\laragon-setup.ps1 -SeedDemo`
-3. Before any work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` (the live preview gate).
+3. Before any work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` (the live preview gate). In each new PowerShell window, first run `$env:PATH = "C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64;$env:PATH"` so `php` and `composer` use PHP 8.3.
 4. Open <http://localhost:5176>, your local copy, which reloads as you save. Sign in as `admin@easm.test` with password `password` ([fake demo data](docs/laragon/demo-data.md)).
 5. In Cursor, `/local-setup` does steps 3 and 4 for you. Settings: [docs/laragon/profile.md](docs/laragon/profile.md).
 

@@ -49,13 +49,14 @@ Work is grouped into versions, such as `v0.6.2`. Each issue in a version gets it
    - When CI is green, merge it into the version branch with a merge commit (`gh pr merge <pr> --merge --delete-branch`).
    - Post **Work complete**, then close the issue with `gh issue close <n> --reason completed`. GitHub only closes issues by itself on merges into `main`.
    - Check the issue shows as closed before starting the next one.
+   - If that was the last open sub-issue of a parent (other than the Epic), post Work complete on the parent and close it too.
 5. An issue moves to a later version only with Bambie's approval. Comment why, then move it.
 
 The comment templates are in [reports.md](reports.md).
 
 ### 2. Merge (once per version)
 
-When every issue in the version is closed, apart from the Epic (the `finish-version` skill):
+When every issue in the version is closed, apart from the Epic and any "[Task] Ship the milestone" issue, which close at close-out (the `finish-version` skill). `composer milestone:status -- vX.Y.Z` still exits 1 at this point because the Epic is open; only other open issues should stop the merge.
 
 1. Merge `origin/main` into the version branch.
 2. Run `composer milestone:bump -- vX.Y.Z` as the last commit, `chore: release vX.Y.Z`, and push.
@@ -82,7 +83,7 @@ Use the `deploy-version` skill. Which deploy applies depends on the version:
 ### Close out
 
 1. `composer milestone:status -- vX.Y.Z`. It lists any open issues and refuses (exit 1) while one is open. If it refuses, list those issues and stop: never close a milestone with open issues.
-2. Post the **Release summary** comment on the Epic (see [reports.md](reports.md)). Close the Epic, then close the milestone: `gh api -X PATCH repos/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones/<number> -f state=closed`.
+2. Post the **Release summary** comment on the Epic (see [reports.md](reports.md)). Close any "[Task] Ship the milestone" issue with the same summary, then the Epic, then the milestone: `gh api -X PATCH repos/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones/<number> -f state=closed`.
 3. Merge `origin/main` into `dependencies`.
 
 ## The ship gate
