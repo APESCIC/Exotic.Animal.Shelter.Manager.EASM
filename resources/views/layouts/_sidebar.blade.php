@@ -61,8 +61,11 @@
 
 <aside class="sidebar" id="sidebar">
     <a class="sidebar-brand" href="{{ route('home') }}">
-        {{ config('app.name') }}
-        <small>Exotic species shelter</small>
+        <img class="sidebar-brand-icon" src="{{ asset('images/pwa/easm.svg') }}" alt="EASM" width="36" height="36">
+        <span>
+            {{ config('app.name') }}
+            <small>Exotic species shelter</small>
+        </span>
     </a>
 
     <nav aria-label="Main">

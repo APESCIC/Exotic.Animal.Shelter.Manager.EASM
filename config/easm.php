@@ -34,6 +34,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cloudron database
+    |--------------------------------------------------------------------------
+    |
+    | A Cloudron app gets its MySQL database as CLOUDRON_MYSQL_* variables.
+    | When they exist, the wizard offers that database or your own. Cloudron
+    | can change them on a restore or clone, so they are never copied to .env.
+    |
+    */
+
+    'cloudron_database' => [
+        'host' => env('CLOUDRON_MYSQL_HOST'),
+        'port' => env('CLOUDRON_MYSQL_PORT', '3306'),
+        'database' => env('CLOUDRON_MYSQL_DATABASE'),
+        'username' => env('CLOUDRON_MYSQL_USERNAME'),
+        'password' => env('CLOUDRON_MYSQL_PASSWORD'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Development auto-login
     |--------------------------------------------------------------------------
     |

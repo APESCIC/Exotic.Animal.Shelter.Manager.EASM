@@ -9,8 +9,7 @@ How a shelter installs EASM on its own web hosting. Developing EASM locally is d
 | cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | One `composer install`. Don't point the site at the repository root. |
 | Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document root and Composer step. |
 | VPS (Apache or nginx) | 8.3+ | MySQL or MariaDB | `public/` | HTTPS recommended. |
-| Cloudron (APES instance) | 8.3 (image) | Cloudron MySQL addon | `public/` | Custom package in this repository; see [The APES Cloudron instance](#the-apes-cloudron-instance). |
-
+| Cloudron LAMP app | 8.3 (`/app/data/PHP_VERSION`) | Cloudron MySQL addon, or your own | `public/` | The wizard offers Cloudron's database; see [Choosing the database](#choosing-the-database). |
 Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only, not on every request. One shelter per install; EASM is not multi-tenant software.
 
 PHP extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbstring`, `openssl`, `pdo`, `pdo_mysql`, `tokenizer`, `xml`, `zip`.
@@ -42,11 +41,19 @@ Then:
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
 4. Run `php artisan storage:link`, so animal photos and media under `storage/app/public` can be reached.
 5. Open the site in a browser. You are sent to `/install`.
-6. Enter the database details, organisation name, timezone (default Europe/London) and the first admin user.
+6. Enter the database details (or choose Cloudron's database, below), organisation name, timezone (default Europe/London) and the first admin user.
 
 The wizard writes `.env`, runs the migrations, creates that admin (role `admin`) and writes `storage/app/installed`. After that, `/install` won't run again. Sign in at `/login`; see [features.md](features.md) for what each role can do.
 
 Shelters install and update from a clone or a zip like this. Nothing is ever deployed to a shelter's hosting.
+
+### Choosing the database
+
+- **Most hosts:** the wizard asks for the database details and saves them as `DB_*` in `.env`.
+- **A Cloudron LAMP app:** Cloudron gives the app its MySQL database as `CLOUDRON_MYSQL_*` variables. The wizard then offers two choices:
+  - **Use the database Cloudron provides** (selected first). The wizard checks it can connect, sets `DB_CONNECTION=mysql` and removes any `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` and `DB_PASSWORD` lines from `.env`. EASM then reads Cloudron's variables on every request, so it keeps working when Cloudron changes them after a restore or clone. Nothing about the database is written to `.env`.
+  - **Enter my own database details:** the same form as other hosts. `DB_*` in `.env` always takes priority over Cloudron's variables.
+- **Hosts that write `DB_*` themselves:** set `EASM_MANAGED_DATABASE=true` and the wizard skips the database step.
 
 ## Health and version
 
@@ -54,17 +61,31 @@ Shelters install and update from a clone or a zip like this. Nothing is ever dep
 
 ## The APES Cloudron instance
 
-APES runs one copy at <https://easm.intranet.apes.org.uk> as a custom Cloudron package. v0.6.3 removes this package ([#142](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/142)), and after v0.9.0 the instance moves to a Cloudron LAMP app installed like any shared host. How releases reach it is in [shipping.md](shipping.md#4-deploy-once-per-version).
+APES runs one copy at <https://easm.intranet.apes.org.uk> on a Cloudron LAMP app (since v0.6.1). `deploy-cloudron.yml` deploys each release tag to it; how and when is in [shipping.md](shipping.md#4-deploy-once-per-version).
 
-- `release.yml` builds `ghcr.io/apescic/easm:<version>` from the multi-stage `Dockerfile` on each release tag, and `deploy-cloudron.yml` deploys that image.
-- The GHCR `easm` package must be public, or GHCR must be added as a private registry in Cloudron, so Cloudron can pull the image.
-- The first deploy replaces the app's current package and needs a manual run with `first_deploy=true`.
-- The database comes from the Cloudron MySQL addon. `cloudron/start.sh` writes `DB_*`, `APP_URL` and the mail settings into `/app/data/env`, and runs the migrations on every start. The install wizard skips the database step (`EASM_MANAGED_DATABASE=true`). Uploads and the install lock live in `/app/data/storage`.
+Layout on the app, all under `/app/data` (Cloudron backs it up):
 
-Repository settings the deploy needs (Settings → Secrets and variables → Actions; values are kept in APES Vault):
+| Path | What it holds |
+| --- | --- |
+| `releases/<tag>-<commit>-<run>/` | One folder per deployed release; the newest five are kept |
+| `easm` | Link to the live release. Apache serves `easm/public` (`apache/app.conf`) |
+| `shared/.env` | Settings shared by every release. The first deploy creates it from `deploy/cloudron/env.example` with a new `APP_KEY`; the install wizard writes the rest |
+| `shared/storage/` | Uploads, logs, sessions and the install lock |
+| `run.sh` | Starts the queue worker and scheduler once EASM is installed |
+| `PHP_VERSION` | Pinned to 8.3 by the first deploy |
+
+- **Database and mail:** EASM reads Cloudron's `CLOUDRON_MYSQL_*` and `CLOUDRON_MAIL_*` variables, so `shared/.env` has no `DB_*` or `MAIL_*` lines. In the wizard, choose "Use the database Cloudron provides".
+- **Config is never cached**, so the wizard's changes to `.env` and any new Cloudron credentials apply at once. Routes, events and views are cached per release.
+- **HTTPS:** Cloudron's `rpaf.conf` tells Apache the request came over HTTPS, so Laravel builds `https://` links.
+- **First deploy:** after it, open `/install` and complete the wizard, then restart the app so `run.sh` starts the queue worker and scheduler. Copy `APP_KEY` from `shared/.env` (Cloudron File Manager) into the password manager: without it, encrypted data can't be recovered from a backup.
+- **Rollback:** the workflow switches back by itself when a deploy fails. To do it by hand: `cloudron exec --app <id> -- bash /app/data/releases/<old>/deploy/cloudron/rollback-release.sh /app/data/releases/<old>`, then restart the app. Migrations are not undone; restore the pre-deploy backup if needed.
+
+The `production` environment the deploy needs (Settings → Environments → production; secret values are kept in APES Vault):
 
 | Name | Kind | Value |
 |------|------|-------|
-| `CLOUDRON_APP_ID` | variable | `7afd5173-8880-4e64-9c36-5f978d9c8f64` |
-| `CLOUDRON_SERVER` | secret | the Cloudron dashboard domain, such as `my.cloudron.apes.org.uk` |
-| `CLOUDRON_TOKEN` | secret | a Cloudron API token (Cloudron profile → API Tokens) |
+| `CLOUDRON_APP_ID` | variable | the LAMP app's ID (`cloudron list`) |
+| `CLOUDRON_SERVER` | secret | the Cloudron dashboard domain, `my.cloudron.apes.org.uk` |
+| `CLOUDRON_TOKEN` | secret | a Cloudron API token named `github-actions-easm` (Cloudron profile → API Tokens) |
+
+`Dockerfile`, `cloudron/` and the image build in `release.yml` belonged to the old custom Cloudron package and are no longer used by the deploy; v0.6.3 decides their removal ([#142](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/142)).

@@ -6,8 +6,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="theme-color" content="#1b4332">
         <link rel="manifest" href="{{ route('webmanifest') }}">
-        <link rel="icon" href="{{ asset('icons/easm.svg') }}" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="{{ asset('icons/easm-192.png') }}">
+        <link rel="icon" href="{{ asset('images/pwa/easm.svg') }}" type="image/svg+xml">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/pwa/easm-180.png') }}">
         <title>@yield('title', config('app.name'))</title>
         <script>
             (function () {

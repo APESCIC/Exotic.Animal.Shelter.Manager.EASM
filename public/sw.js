@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var SHELL_CACHE = 'easm-shell-v1';
+var SHELL_CACHE = 'easm-shell-v3';
 var PAGE_CACHE = 'easm-pages';
 var BASE = self.location.pathname.replace(/sw\.js$/, '');
 var SHELL = [
@@ -13,8 +13,8 @@ var SHELL = [
     'js/offline-queue.js',
     'js/signature-pad.js',
     'js/qr-scan.js',
-    'icons/easm.svg',
-    'icons/easm-192.png',
+    'images/pwa/easm.svg',
+    'images/pwa/easm-192.png',
     'offline.html',
 ].map(function (path) {
     return BASE + path;

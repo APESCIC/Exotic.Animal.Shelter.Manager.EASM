@@ -188,13 +188,34 @@ class MobileTest extends TestCase
 
         $this->assertFileExists(public_path('sw.js'));
         $this->assertFileExists(public_path('offline.html'));
-        $this->assertFileExists(public_path('icons/easm-192.png'));
-        $this->assertFileExists(public_path('icons/easm-512.png'));
+        $this->assertFileExists(public_path('images/pwa/easm-192.png'));
+        $this->assertFileExists(public_path('images/pwa/easm-512.png'));
+        $this->assertFileExists(public_path('images/pwa/easm.svg'));
+        $this->assertFileExists(public_path('images/pwa/easm-maskable.svg'));
+        $this->assertStringContainsString("'easm-shell-v3'", (string) file_get_contents(public_path('sw.js')));
 
         $this->actingAs(User::factory()->staff()->create())
             ->get(route('home'))
             ->assertSee('rel="manifest"', false)
             ->assertSee('name="csrf-token"', false)
             ->assertSee('data-offline-status', false);
+    }
+
+    public function test_public_assets_avoid_the_apache_icons_alias(): void
+    {
+        $manifest = $this->get(route('webmanifest'))->assertOk()->json();
+
+        foreach ($manifest['icons'] as $icon) {
+            $path = parse_url($icon['src'], PHP_URL_PATH);
+            $this->assertStringStartsNotWith('/icons/', $path);
+            $this->assertFileExists(public_path(ltrim($path, '/')));
+        }
+
+        $this->assertDirectoryDoesNotExist(public_path('icons'));
+        $this->assertStringNotContainsString("'icons/", (string) file_get_contents(public_path('sw.js')));
+
+        $this->actingAs(User::factory()->staff()->create())
+            ->get(route('home'))
+            ->assertDontSee('/icons/', false);
     }
 }

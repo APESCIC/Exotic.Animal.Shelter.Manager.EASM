@@ -160,6 +160,95 @@ class InstallerTest extends TestCase
         $this->assertSame(1, User::query()->where('role', UserRole::Admin)->count());
     }
 
+    public function test_cloudron_database_choice_is_offered_only_on_cloudron(): void
+    {
+        $this->get(route('install.show'))
+            ->assertOk()
+            ->assertDontSee('name="db_source"', false)
+            ->assertSee('name="db_database"', false);
+
+        $this->useCloudronDatabase();
+
+        $this->get(route('install.show'))
+            ->assertOk()
+            ->assertSee('Use the database Cloudron provides')
+            ->assertSee('Enter my own database details')
+            ->assertSee('value="cloudron" checked', false)
+            ->assertSee('name="db_database"', false)
+            ->assertDontSee('cloudron_user')
+            ->assertDontSee('cloudron_db');
+    }
+
+    public function test_cloudron_database_install_keeps_credentials_out_of_env(): void
+    {
+        $this->useCloudronDatabase();
+
+        $this->post(route('install.store'), $this->payloadWithoutDatabase() + ['db_source' => 'cloudron'])
+            ->assertRedirect('/');
+
+        $this->assertFileExists($this->installedPath);
+
+        $env = (string) file_get_contents($this->envPath);
+        $this->assertStringContainsString('APP_INSTALLED=true', $env);
+        $this->assertStringContainsString('DB_CONNECTION=mysql', $env);
+        foreach (['DB_HOST=', 'DB_PORT=', 'DB_DATABASE=', 'DB_USERNAME=', 'DB_PASSWORD='] as $key) {
+            $this->assertStringNotContainsString(PHP_EOL.$key, $env);
+        }
+        $this->assertStringNotContainsString('cloudron_secret', $env);
+        $this->assertSame(1, User::query()->where('role', UserRole::Admin)->count());
+    }
+
+    public function test_custom_database_on_cloudron_writes_its_credentials(): void
+    {
+        $this->useCloudronDatabase();
+
+        $this->post(route('install.store'), $this->validPayload() + ['db_source' => 'custom'])
+            ->assertRedirect('/');
+
+        $env = (string) file_get_contents($this->envPath);
+        $this->assertStringContainsString('DB_HOST=127.0.0.1', $env);
+        $this->assertStringContainsString('DB_DATABASE=easm_shelter', $env);
+        $this->assertStringContainsString('DB_USERNAME=easm_user', $env);
+        $this->assertStringContainsString('DB_PASSWORD=easm_secret', $env);
+        $this->assertStringNotContainsString('cloudron_secret', $env);
+    }
+
+    public function test_cloudron_install_needs_a_choice_and_custom_needs_details(): void
+    {
+        $this->useCloudronDatabase();
+
+        $this->from(route('install.show'))
+            ->post(route('install.store'), $this->payloadWithoutDatabase())
+            ->assertSessionHasErrors('db_source');
+
+        $this->from(route('install.show'))
+            ->post(route('install.store'), $this->payloadWithoutDatabase() + ['db_source' => 'custom'])
+            ->assertSessionHasErrors(['db_host', 'db_database', 'db_username']);
+
+        $this->assertFileDoesNotExist($this->installedPath);
+    }
+
+    public function test_install_clears_a_cached_config_so_new_env_values_apply(): void
+    {
+        $cached = $this->app->getCachedConfigPath();
+        $this->assertFileDoesNotExist($cached);
+
+        file_put_contents($cached, '<?php return [];'.PHP_EOL);
+        $this->app->instance('config_loaded_from_cache', true);
+
+        try {
+            $this->post(route('install.store'), $this->validPayload())
+                ->assertSessionHasNoErrors()
+                ->assertRedirect('/');
+
+            $this->assertFileDoesNotExist($cached);
+        } finally {
+            if (is_file($cached)) {
+                unlink($cached);
+            }
+        }
+    }
+
     public function test_health_endpoint_still_works_after_install(): void
     {
         $this->post(route('install.store'), $this->validPayload())
@@ -190,5 +279,26 @@ class InstallerTest extends TestCase
             'admin_password' => 'a-secure-password',
             'admin_password_confirmation' => 'a-secure-password',
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function payloadWithoutDatabase(): array
+    {
+        return array_diff_key($this->validPayload(), array_flip([
+            'db_host', 'db_port', 'db_database', 'db_username', 'db_password',
+        ]));
+    }
+
+    private function useCloudronDatabase(): void
+    {
+        config(['easm.cloudron_database' => [
+            'host' => 'mysql.cloudron',
+            'port' => '3306',
+            'database' => 'cloudron_db',
+            'username' => 'cloudron_user',
+            'password' => 'cloudron_secret',
+        ]]);
     }
 }

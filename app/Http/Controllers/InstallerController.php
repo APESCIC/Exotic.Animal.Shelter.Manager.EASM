@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\InstallRequest;
+use App\Install\CloudronDatabase;
 use App\Install\DatabaseConnectionException;
 use App\Install\Installer;
 use Illuminate\Http\RedirectResponse;
@@ -14,12 +15,19 @@ class InstallerController extends Controller
     /**
      * Show the first-run installer wizard.
      */
-    public function show(): View
+    public function show(CloudronDatabase $cloudron): View
     {
         return view('installer', [
             'timezones' => timezone_identifiers_list(),
             'managedDatabase' => (bool) config('easm.managed_database'),
-            'dbDefaults' => [
+            'cloudronDatabase' => $cloudron->available(),
+            // Cloudron's own database details stay off this public page.
+            'dbDefaults' => $cloudron->available() ? [
+                'host' => '',
+                'port' => '3306',
+                'database' => '',
+                'username' => '',
+            ] : [
                 'host' => (string) config('database.connections.mysql.host', '127.0.0.1'),
                 'port' => (string) config('database.connections.mysql.port', '3306'),
                 'database' => (string) config('database.connections.mysql.database', 'easm'),

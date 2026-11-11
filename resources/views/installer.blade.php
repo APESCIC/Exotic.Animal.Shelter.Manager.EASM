@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Install {{ config('app.name') }}</title>
+        <link rel="icon" href="{{ asset('images/pwa/easm.svg') }}" type="image/svg+xml">
         <style>
             :root { color-scheme: light dark; }
             body {
@@ -40,9 +41,14 @@
                 margin: 1rem 0;
             }
             .hint { margin: 0 0 1rem; color: #444; }
+            label.choice { display: flex; gap: 0.5rem; align-items: center; font-weight: 400; }
+            label.choice input { width: auto; }
+            form:has(#db_source_cloudron:checked) .custom-database { display: none; }
+            .logo { display: block; width: 10rem; height: auto; margin: 0 0 1rem; }
         </style>
     </head>
     <body>
+        <img class="logo" src="{{ asset('images/easm-logo.svg') }}" alt="EASM" width="160" height="183">
         <h1>Install Exotic Animal Shelter Manager</h1>
         <p class="hint">One shelter per install. After Composer install, this wizard writes database settings, creates the first admin, and then locks so it cannot be run again.</p>
 
@@ -64,21 +70,30 @@
             @else
             <fieldset>
                 <legend>Database</legend>
+                @if ($cloudronDatabase)
+                <p class="hint">Cloudron provides a MySQL database for this app. Use it, or enter the details of another database.</p>
+                <label class="choice"><input type="radio" id="db_source_cloudron" name="db_source" value="cloudron" @checked(old('db_source', 'cloudron') === 'cloudron')> Use the database Cloudron provides</label>
+                <label class="choice"><input type="radio" id="db_source_custom" name="db_source" value="custom" @checked(old('db_source') === 'custom')> Enter my own database details</label>
+                @else
                 <p class="hint">Create an empty MySQL or MariaDB database in the host panel, then enter its credentials.</p>
+                @endif
+
+                <div class="custom-database">
                 <label for="db_host">Host</label>
-                <input id="db_host" name="db_host" value="{{ old('db_host', $dbDefaults['host']) }}" required autocomplete="off">
+                <input id="db_host" name="db_host" value="{{ old('db_host', $dbDefaults['host']) }}" @required(! $cloudronDatabase) autocomplete="off">
 
                 <label for="db_port">Port</label>
-                <input id="db_port" name="db_port" type="number" min="1" max="65535" value="{{ old('db_port', $dbDefaults['port']) }}" required>
+                <input id="db_port" name="db_port" type="number" min="1" max="65535" value="{{ old('db_port', $dbDefaults['port']) }}" @required(! $cloudronDatabase)>
 
                 <label for="db_database">Database name</label>
-                <input id="db_database" name="db_database" value="{{ old('db_database', $dbDefaults['database']) }}" required autocomplete="off">
+                <input id="db_database" name="db_database" value="{{ old('db_database', $dbDefaults['database']) }}" @required(! $cloudronDatabase) autocomplete="off">
 
                 <label for="db_username">Username</label>
-                <input id="db_username" name="db_username" value="{{ old('db_username', $dbDefaults['username']) }}" required autocomplete="off">
+                <input id="db_username" name="db_username" value="{{ old('db_username', $dbDefaults['username']) }}" @required(! $cloudronDatabase) autocomplete="off">
 
                 <label for="db_password">Password</label>
                 <input id="db_password" name="db_password" type="password" value="{{ old('db_password') }}" autocomplete="new-password">
+                </div>
             </fieldset>
             @endif
 
