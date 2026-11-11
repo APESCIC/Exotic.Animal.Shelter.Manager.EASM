@@ -3,7 +3,8 @@
 
 /*
  * Milestone version helper: prints the next milestone's version, branch and PR title, checks titles and
- * branch names, and sets the version fields once per milestone, as .cursor/rules/version-shipping.mdc says.
+ * branch names, lists a milestone's open issues, and sets the version fields once per milestone, as
+ * docs/shipping.md says.
  * Needs only PHP; no composer install.
  *
  * Run "php scripts/milestone-version help" for the commands.
