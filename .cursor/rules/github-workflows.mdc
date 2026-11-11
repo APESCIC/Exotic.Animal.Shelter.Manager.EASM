@@ -1,0 +1,18 @@
+---
+description: How to write and change GitHub Actions workflows in EASM - least privilege, pinned actions, tag-only release and deploy
+globs: .github/workflows/**
+alwaysApply: false
+---
+
+# GitHub Actions workflows
+
+- Start each workflow with a one-line comment saying, in plain English, what it does and when it runs.
+- Set `permissions:` at the top to the least the workflow needs; widen it only on the job that needs more.
+- Pin every action to a full commit SHA, with its version in a comment: `uses: actions/checkout@<sha> # v7.0.1`.
+- Use `persist-credentials: false` on every checkout unless a later step pushes.
+- Give every job `timeout-minutes` and `runs-on: ubuntu-24.04`. Cache dependencies where it saves time.
+- Never rename a job's `name:`. The required checks on `main` match those names, so a rename blocks every merge until the APES IT Administrator updates them.
+- Only `release.yml` releases, and only on a pushed `v*.*.*` tag on `main`. Only `deploy-cloudron.yml` deploys, run by hand with a published release tag. Nothing releases or deploys on an ordinary push or pull request.
+- Secrets come only from GitHub Actions secrets. Pass them and any pull-request text through `env:`, never straight into `run:`, and never print them.
+- Use only free GitHub features.
+- When a workflow changes, update its row in `docs/workflows.md`.
