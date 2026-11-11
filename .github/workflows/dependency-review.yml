@@ -1,7 +1,5 @@
+# Fails a pull request that adds a dependency with a known high or critical vulnerability (free GitHub feature).
 name: dependency-review
-
-# Free for public repositories: fails a pull request that adds a dependency
-# with a known high or critical vulnerability.
 
 on:
   pull_request:
