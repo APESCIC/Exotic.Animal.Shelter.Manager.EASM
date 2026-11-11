@@ -52,9 +52,9 @@ Hotfixes only with Bambie's written approval on the issue. The full guide is [do
 - Never commit straight to `main`. Never squash, rebase or force-push a shared branch.
 - Nothing goes into `main`, and nothing is tagged, released or deployed, without Bambie's answer to the ship gate.
 - Never write tokens, passwords, `.env` contents or `APP_KEY` into code, docs or comments.
-- Security checks use only free GitHub features: Dependabot, dependency review and CodeQL.
+- Security checks use only free GitHub features ([docs/workflows.md](docs/workflows.md)).
 - UK English. Commit messages: `fix: what changed (Refs #123)`.
 
 ## Where to find more
 
-[docs/shipping.md](docs/shipping.md) (how a version ships) · [docs/reports.md](docs/reports.md) (report and comment templates) · [docs/install.md](docs/install.md) · [docs/roadmap.md](docs/roadmap.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [.cursor/skills/](.cursor/skills/)
+[docs/shipping.md](docs/shipping.md) (how a version ships) · [docs/reports.md](docs/reports.md) (report and comment templates) · [docs/workflows.md](docs/workflows.md) (what CI runs) · [docs/install.md](docs/install.md) · [docs/roadmap.md](docs/roadmap.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [.cursor/skills/](.cursor/skills/)

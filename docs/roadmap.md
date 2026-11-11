@@ -15,42 +15,42 @@
 
 Finish a milestone before starting the next. The plan epic is [#1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) (no milestone).
 
-Status (05/11/2026): v0.1.0 to v0.6.0 are done. Next is v0.9.0, starting with #77. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
+Status (11/11/2026): v0.1.0 to v0.6.0 are done. Next are the patch versions v0.6.1 PWA icon fix, v0.6.2 Repo standards and v0.6.3 Move to Cloudron LAMP, then v0.9.0, starting with #77. `composer milestone:next` always prints the next one. Live progress is on the [milestones page](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all).
 
-### v0.1.0 Foundation: generic hosting ([milestone/1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/1), epic #2) — done
+### v0.1.0 Foundation: generic hosting ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.1.0+Foundation%3A+generic+hosting%22), epic #2) — done
 
 1. #9 scaffold (Laravel + PHP 8 + MySQL)
 2. #10 installer wizard
 3. #11 auth/roles (admin, staff, volunteer, readonly)
 4. #15 settings (org, UK locale, timezone)
 
-### v0.2.0 Animals, people and movements ([milestone/2](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/2), epic #3) — done
+### v0.2.0 Animals, people and movements ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.2.0+Animals%2C+people+and+movements%22), epic #3) — done
 
 1. #12 animal records (photo, enclosure, CITES, DWA)
 2. #14 people/contacts
 3. #13 movements (intake, hold, quarantine, foster, trial adoption, adopt, reclaim, transfer, deceased — first movements; quarantine for exotic intake)
 4. #28 lost/found matching
 
-### v0.3.0 Medical, diary and care ([milestone/3](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/3), epic #4) — done
+### v0.3.0 Medical, diary and care ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.3.0+Medical%2C+diary+and+care%22), epic #4) — done
 
 1. #16 vaccinations/tests/treatments/diets
 2. #17 staff diary/tasks
 3. #18 media attachments
 4. #31 custom fields (after #12 enclosure/CITES/DWA; does not block first animal records)
 
-### v0.4.0 Public adoption and applications ([milestone/4](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/4), epic #5) — done
+### v0.4.0 Public adoption and applications ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.4.0+Public+adoption+and+applications%22), epic #5) — done
 
 1. #19 adoptable website and public API
 2. #20 online applications
 
-### v0.4.5 UI and UX modernisation ([milestone/8](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/8), epic #56) — done
+### v0.4.5 UI and UX modernisation ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.4.5+UI+and+UX+modernisation%22), epic #56) — done
 
 1. #56 design tokens, light/dark, sidebar and top bar layout, badges (plain CSS/JS under `public/`; no npm build for shelters)
 2. #60 dashboard alerts and counters
 3. #58 global search and command palette
 4. #59 animal record tabs and sticky save
 
-### v0.5.0 Documents, publishing, finance and stock ([milestone/5](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/5), epic #6) — done
+### v0.5.0 Documents, publishing, finance and stock ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.5.0+Documents%2C+publishing%2C+finance+and+stock%22), epic #6) — done
 
 1. #21 document templates/e-sign
 2. #22 publish to partner sites (generic CSV/JSON/RSS partner feed; see [publishing.md](publishing.md))
@@ -60,7 +60,7 @@ Status (05/11/2026): v0.1.0 to v0.6.0 are done. Next is v0.9.0, starting with #7
 
 Also shipped: #67 Dependabot fixes. #47 (Laravel Boost) was dropped because it conflicts with removing AI-agent files (#99).
 
-### v0.5.5 Enclosures, husbandry and compliance ([milestone/9](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/9), epic #115) — done
+### v0.5.5 Enclosures, husbandry and compliance ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.5.5+Enclosures%2C+husbandry+and+compliance%22), epic #115) — done
 
 1. #61 enclosures as a first-class entity
 2. #62 environment and equipment logs (reminders run when the dashboard or diary loads, or via `php artisan easm:reminders`; no cron)
@@ -69,7 +69,7 @@ Also shipped: #67 Dependabot fixes. #47 (Laravel Boost) was dropped because it c
 
 Also shipped: #116 development auto-login and QA role accounts (local only).
 
-### v0.6.0 Reporting, rota and mobile ([milestone/6](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/6), epic #8) — done
+### v0.6.0 Reporting, rota and mobile ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.6.0+Reporting%2C+rota+and+mobile%22), epic #8) — done
 
 1. #25 occupancy, intake/outcome and animal timeline reports with CSV
 2. #26 mobile PWA care tasks (offline queue, enclosure QR labels and scan, camera photo, e-sign) and staff/volunteer rota
@@ -78,7 +78,7 @@ Also shipped: #116 development auto-login and QA role accounts (local only).
 
 Also shipped: #114 GitHub Actions on Node 24 runtimes.
 
-### v0.9.0 Install and update system ([milestone/11](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/11), epic #76)
+### v0.9.0 Install and update system ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v0.9.0+Install+and+update+system%22), epic #76)
 
 Browser-only install and update on shared hosting (no shell, Composer, cron or Node for shelters).
 
@@ -100,13 +100,13 @@ Browser-only install and update on shared hosting (no shell, Composer, cron or N
 
 Optional CLI layers (not blocking): #87 `easm:install`, #88 `easm:update` / `easm:check`.
 
-### v1.0.0 Production-ready self-host ([milestone/7](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/7), epic #7)
+### v1.0.0 Production-ready self-host ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v1.0.0+Production-ready+self-host%22), epic #7)
 
 1. #27 backup/security/first production install pack
 2. #34 bounded /health DB timeout and nginx front-controller docs
 3. #68 per-record audit log
 4. #134 apply APHA's answer on adoption-fee rehoming and Article 10
 
-### v1.1.0 Optional: animal control ([milestone/10](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestone/10))
+### v1.1.0 Optional: animal control ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v1.1.0+Optional%3A+animal+control%22))
 
 1. #24 animal control (municipal ASM; does not block v1.0.0)

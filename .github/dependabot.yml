@@ -1,6 +1,6 @@
 # Updates go to the long-lived `dependencies` branch, never straight to `main`.
 # Each milestone branch merges `origin/dependencies` when work on it starts, so
-# updates ship inside the milestone's single merge. See AGENTS.md.
+# updates ship inside the milestone's single merge. See docs/workflows.md.
 version: 2
 updates:
   - package-ecosystem: composer

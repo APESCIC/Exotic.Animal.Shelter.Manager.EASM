@@ -80,4 +80,4 @@ When every issue in the version is closed, `/finish-version`, `/release-version`
 - `composer test` runs PHPUnit. Tests treat the app as already installed (`APP_INSTALLED=true`), apart from the installer tests.
 - `.gitattributes` keeps line endings consistent across Windows and Linux.
 - Optional: `git config core.hooksPath .githooks` checks your branch name before each push (skip once with `git push --no-verify`).
-- Pull requests use [the template](.github/pull_request_template.md), and new issues use the [Task or Bug form](.github/ISSUE_TEMPLATE/).
+- Pull requests use [the template](.github/pull_request_template.md), and new issues use the [Task or Bug form](.github/ISSUE_TEMPLATE/). What CI runs, and what to do when a check fails, is in [docs/workflows.md](docs/workflows.md).
