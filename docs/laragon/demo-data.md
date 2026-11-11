@@ -27,4 +27,21 @@ One per role, all with the password `password` (from `DevUserSeeder`, which refu
 | Volunteer | `volunteer@easm.test` |
 | Read only | `readonly@easm.test` |
 
-With `DEV_AUTO_LOGIN=true` in `.env`, the sidebar's **Development: sign in as** list switches between them.
+`php artisan db:seed` creates them when `APP_ENV=local`, or run `php artisan db:seed --class=DevUserSeeder`.
+
+## Skip the login screen
+
+Add to your local `.env`:
+
+```env
+DEV_AUTO_LOGIN=true
+DEV_AUTO_LOGIN_ROLE=admin
+```
+
+- Guests are then signed in as the test login for `DEV_AUTO_LOGIN_ROLE`; missing accounts are created on first use.
+- The sidebar gains a **Development: sign in as** list to switch roles, also reachable at `/dev/login-as/{role}`.
+- Signing out pauses auto-login for that browser session, so the login page stays usable; pick a role on the login page to resume.
+- The installer, `/login`, `/adopt`, `/apply` and `/feeds` are never auto-logged-in.
+- To turn it off, set `DEV_AUTO_LOGIN=false` (then `php artisan config:clear` if config is cached).
+
+Auto-login and `/dev/login-as` only work when `APP_ENV=local`. In any other environment the flag is ignored and the route returns 404.
