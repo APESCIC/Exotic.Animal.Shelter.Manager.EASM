@@ -1,15 +1,16 @@
+# Deploys a published vX.Y.Z release to the APES Cloudron app, only when run by hand, and rolls back if /health doesn't report it.
 name: Deploy to Cloudron
 
-# Deploys the APES-owned EASM instance only. Shelters self-host from a clone or zip.
+# Deploys the APES-owned EASM instance only; shelters self-host from a clone or zip.
+# Run by hand after the release: gh workflow run deploy-cloudron.yml -f tag=vX.Y.Z
+# The image was built and pushed by release.yml, so nothing is built here. If the
+# new version does not report healthy, the app goes back to the previous image.
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to deploy (blank = latest release)
-        required: false
-        default: ''
+        description: Published release tag to deploy (vX.Y.Z)
+        required: true
       first_deploy:
         description: Allow switching the Cloudron app from its current package (e.g. LAMP) to EASM
         type: boolean
@@ -17,7 +18,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: deploy-cloudron
@@ -28,8 +28,9 @@ env:
 
 jobs:
   deploy:
-    name: Build image and update Cloudron app
-    runs-on: ubuntu-latest
+    name: Update the Cloudron app to the release image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     env:
       CLOUDRON_SERVER: ${{ secrets.CLOUDRON_SERVER }}
       CLOUDRON_TOKEN: ${{ secrets.CLOUDRON_TOKEN }}
@@ -48,66 +49,52 @@ jobs:
             exit 1
           fi
 
-      - name: Resolve release tag
+      - name: Check the tag is a published release
         id: tag
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
           INPUT_TAG: ${{ inputs.tag }}
         run: |
-          tag="${RELEASE_TAG:-$INPUT_TAG}"
-          if [ -z "$tag" ]; then
-            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
-          fi
-          version="${tag#v}"
-          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
-            echo "::error::Tag '$tag' is not a semver release tag (vX.Y.Z)."
+          set -euo pipefail
+          version="${INPUT_TAG#v}"
+          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || [ "v$version" != "$INPUT_TAG" ]; then
+            echo "::error::'$INPUT_TAG' is not a release tag (vX.Y.Z)."
             exit 1
           fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [ "$(gh release view "$INPUT_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null)" != "false" ]; then
+            echo "::error::$INPUT_TAG has no published GitHub Release. Push the tag so release.yml builds the image and publishes it."
+            exit 1
+          fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.tag.outputs.tag }}
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
 
-      - uses: docker/setup-buildx-action@v4
-
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: true
-          build-args: EASM_VERSION=${{ steps.tag.outputs.version }}
-          tags: |
-            ${{ env.IMAGE }}:${{ steps.tag.outputs.version }}
-            ${{ env.IMAGE }}:latest
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.version=${{ steps.tag.outputs.version }}
-
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
 
       - name: Install Cloudron CLI
         run: npm install --global cloudron@9
 
-      - name: Set manifest version
+      - name: Note the live version for a rollback
+        id: before
         run: |
-          jq --arg v "${{ steps.tag.outputs.version }}" '.version = $v' CloudronManifest.json > manifest.tmp
-          mv manifest.tmp CloudronManifest.json
+          set -euo pipefail
+          location="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Location/ {print $2}')"
+          previous="$(curl -fsS "https://$location/health" | jq -r '.version // empty' || true)"
+          echo "location=$location" >> "$GITHUB_OUTPUT"
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          echo "Live version before the deploy: ${previous:-unknown}"
 
       - name: Update Cloudron app
         env:
           FIRST_DEPLOY: ${{ inputs.first_deploy }}
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
+          set -euo pipefail
           current="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Manifest Id/ {print $2}')"
           force=""
           if [ "$current" != "$EASM_MANIFEST_ID" ]; then
@@ -118,17 +105,43 @@ jobs:
             force="--force"
           fi
           cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" \
-            update --app "$CLOUDRON_APP_ID" --image "$IMAGE:${{ steps.tag.outputs.version }}" $force
+            update --app "$CLOUDRON_APP_ID" --image "$IMAGE:$VERSION" $force
 
       - name: Check deployed health
+        id: health
+        env:
+          LOCATION: ${{ steps.before.outputs.location }}
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          location="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Location/ {print $2}')"
-          for attempt in 1 2 3 4 5 6; do
-            if curl -fsS "https://$location/health" | tee /dev/stderr | grep -q '"version":"${{ steps.tag.outputs.version }}"'; then
-              echo "Deployed ${{ steps.tag.outputs.version }} to https://$location"
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if curl -fsS "https://$LOCATION/health" | tee /dev/stderr | grep -q "\"version\":\"$VERSION\""; then
+              echo "Deployed $VERSION to https://$LOCATION"
               exit 0
             fi
             sleep 10
           done
-          echo "::error::https://$location/health did not report version ${{ steps.tag.outputs.version }}."
+          echo "::error::https://$LOCATION/health did not report version $VERSION."
+          exit 1
+
+      - name: Roll back to the previous image
+        if: failure() && steps.health.outcome == 'failure' && steps.before.outputs.previous != ''
+        env:
+          PREVIOUS: ${{ steps.before.outputs.previous }}
+          LOCATION: ${{ steps.before.outputs.location }}
+        run: |
+          set -euo pipefail
+          if ! echo "$PREVIOUS" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::The previous version '$PREVIOUS' is not a release, so there is no image to roll back to. Restore the pre-update backup in Cloudron."
+            exit 1
+          fi
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" \
+            update --app "$CLOUDRON_APP_ID" --image "$IMAGE:$PREVIOUS"
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if curl -fsS "https://$LOCATION/health" | grep -q "\"version\":\"$PREVIOUS\""; then
+              echo "::warning::Rolled back to $PREVIOUS. Migrations from the failed release were not undone."
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "::error::Rollback to $PREVIOUS did not report healthy. Restore the pre-update backup in Cloudron."
           exit 1

@@ -1,0 +1,35 @@
+name: Task
+description: A piece of work for a version, such as a feature, a chore or a docs change
+title: "[Task] "
+labels: [task]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Plain UK English, please. Add the issue to its version's milestone (for example `v0.6.3 Move to Cloudron LAMP`). When work starts, Cursor posts **Work started**, **Progress update** and **Work complete** comments here (docs/reports.md).
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be true when this is done, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem it solves or who it helps.
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: Checks that prove it is done.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Anything this issue does not cover.
