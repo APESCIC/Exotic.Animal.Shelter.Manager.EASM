@@ -18,8 +18,6 @@ tests
 phpunit.xml
 package.json
 package-lock.json
-vite.config.js
-resources/css
 scripts/local
 scripts/laragon-setup.ps1
 scripts/preview.ps1
