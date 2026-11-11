@@ -202,7 +202,7 @@ try {
         if (-not $nodeDir) { Stop-Preview 1 "Laragon has no Node $($p.node). Add it with Menu > Tools > Quick add." }
         $log = Join-Path $repo 'storage\logs\browsersync.log'
         Start-Process -FilePath $env:ComSpec -ArgumentList '/d', '/s', '/c', "`"npm run dev > `"$log`" 2>&1`"" -WorkingDirectory $repo -WindowStyle Hidden
-        $deadline = (Get-Date).AddSeconds(15)
+        $deadline = (Get-Date).AddSeconds(60)
         while (-not (Get-Listener $p.devServerPort) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }
         if (-not (Get-Listener $p.devServerPort)) {
             $tail = if (Test-Path $log) { (Get-Content $log -Tail 15) -join "`n" } else { '(no log)' }
