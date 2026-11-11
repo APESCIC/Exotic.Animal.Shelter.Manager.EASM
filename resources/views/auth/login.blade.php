@@ -5,6 +5,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Sign in · {{ config('app.name') }}</title>
+        <link rel="icon" href="{{ asset('images/pwa/easm.svg') }}" type="image/svg+xml">
         <style>
             :root { color-scheme: light dark; }
             body {
@@ -50,9 +51,11 @@
                 background: #fffbeb;
             }
             .dev-login h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+            .logo { display: block; width: 10rem; height: auto; margin: 0 0 1rem; }
         </style>
     </head>
     <body>
+        <img class="logo" src="{{ asset('images/easm-logo.svg') }}" alt="EASM" width="160" height="183">
         <h1>Sign in</h1>
         <p class="hint">Email and password for this shelter. No Cloudron or external SSO in v0.1.</p>
 

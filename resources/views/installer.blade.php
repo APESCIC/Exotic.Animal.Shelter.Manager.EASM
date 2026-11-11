@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Install {{ config('app.name') }}</title>
+        <link rel="icon" href="{{ asset('images/pwa/easm.svg') }}" type="image/svg+xml">
         <style>
             :root { color-scheme: light dark; }
             body {
@@ -43,9 +44,11 @@
             label.choice { display: flex; gap: 0.5rem; align-items: center; font-weight: 400; }
             label.choice input { width: auto; }
             form:has(#db_source_cloudron:checked) .custom-database { display: none; }
+            .logo { display: block; width: 10rem; height: auto; margin: 0 0 1rem; }
         </style>
     </head>
     <body>
+        <img class="logo" src="{{ asset('images/easm-logo.svg') }}" alt="EASM" width="160" height="183">
         <h1>Install Exotic Animal Shelter Manager</h1>
         <p class="hint">One shelter per install. After Composer install, this wizard writes database settings, creates the first admin, and then locks so it cannot be run again.</p>
 

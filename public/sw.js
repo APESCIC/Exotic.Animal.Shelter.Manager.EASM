@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var SHELL_CACHE = 'easm-shell-v2';
+var SHELL_CACHE = 'easm-shell-v3';
 var PAGE_CACHE = 'easm-pages';
 var BASE = self.location.pathname.replace(/sw\.js$/, '');
 var SHELL = [

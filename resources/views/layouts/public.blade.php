@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>@yield('title', $organisationName ?? config('app.name'))</title>
+        <link rel="icon" href="{{ asset('images/pwa/easm.svg') }}" type="image/svg+xml">
         <style>
             :root { color-scheme: light dark; }
             body {
@@ -63,13 +64,18 @@
             }
             header { margin-bottom: 1.5rem; }
             header nav a { margin-right: 0.75rem; }
+            .brand { display: flex; align-items: center; gap: 0.75rem; }
+            .brand .logo { width: 5rem; height: auto; }
         </style>
         @stack('head')
     </head>
     <body>
         @unless (!empty($embed))
             <header>
-                <p><strong>{{ $organisationName ?? config('app.name') }}</strong></p>
+                <p class="brand">
+                    <img class="logo" src="{{ asset('images/easm-logo.svg') }}" alt="EASM" width="80" height="91">
+                    <strong>{{ $organisationName ?? config('app.name') }}</strong>
+                </p>
                 <nav>
                     <a href="{{ route('public.adopt.index') }}">Adoptable animals</a>
                     <a href="{{ route('public.apply.index') }}">Apply</a>
