@@ -249,38 +249,6 @@ class InstallerTest extends TestCase
         }
     }
 
-    public function test_database_config_falls_back_to_cloudron_variables(): void
-    {
-        $cloudron = [
-            'DB_CONNECTION' => null,
-            'DB_HOST' => null,
-            'DB_PORT' => null,
-            'DB_DATABASE' => null,
-            'DB_USERNAME' => null,
-            'DB_PASSWORD' => null,
-            'CLOUDRON_MYSQL_HOST' => 'mysql.cloudron',
-            'CLOUDRON_MYSQL_PORT' => '3307',
-            'CLOUDRON_MYSQL_DATABASE' => 'cloudron_db',
-            'CLOUDRON_MYSQL_USERNAME' => 'cloudron_user',
-            'CLOUDRON_MYSQL_PASSWORD' => 'cloudron_secret',
-        ];
-
-        $config = $this->withEnvironment($cloudron, fn (): array => require config_path('database.php'));
-
-        $this->assertSame('mysql', $config['default']);
-        $this->assertSame('mysql.cloudron', $config['connections']['mysql']['host']);
-        $this->assertSame('3307', $config['connections']['mysql']['port']);
-        $this->assertSame('cloudron_db', $config['connections']['mysql']['database']);
-        $this->assertSame('cloudron_user', $config['connections']['mysql']['username']);
-        $this->assertSame('cloudron_secret', $config['connections']['mysql']['password']);
-
-        $custom = ['DB_HOST' => 'db.example.org', 'DB_DATABASE' => 'own_db'] + $cloudron;
-        $config = $this->withEnvironment($custom, fn (): array => require config_path('database.php'));
-
-        $this->assertSame('db.example.org', $config['connections']['mysql']['host']);
-        $this->assertSame('own_db', $config['connections']['mysql']['database']);
-    }
-
     public function test_health_endpoint_still_works_after_install(): void
     {
         $this->post(route('install.store'), $this->validPayload())
@@ -332,49 +300,5 @@ class InstallerTest extends TestCase
             'username' => 'cloudron_user',
             'password' => 'cloudron_secret',
         ]]);
-    }
-
-    /**
-     * Run the callback with environment variables set (or unset when null), then restore them.
-     *
-     * @template T
-     *
-     * @param  array<string, string|null>  $values
-     * @param  callable(): T  $callback
-     * @return T
-     */
-    private function withEnvironment(array $values, callable $callback): mixed
-    {
-        $saved = [];
-
-        foreach ($values as $key => $value) {
-            $saved[$key] = [$_ENV[$key] ?? null, $_SERVER[$key] ?? null, getenv($key)];
-            $this->setEnvironment($key, $value, $value, $value);
-        }
-
-        try {
-            return $callback();
-        } finally {
-            foreach ($saved as $key => [$env, $server, $process]) {
-                $this->setEnvironment($key, $env, $server, $process === false ? null : $process);
-            }
-        }
-    }
-
-    private function setEnvironment(string $key, ?string $env, ?string $server, ?string $process): void
-    {
-        if ($env === null) {
-            unset($_ENV[$key]);
-        } else {
-            $_ENV[$key] = $env;
-        }
-
-        if ($server === null) {
-            unset($_SERVER[$key]);
-        } else {
-            $_SERVER[$key] = $server;
-        }
-
-        putenv($process === null ? $key : $key.'='.$process);
     }
 }

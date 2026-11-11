@@ -10,20 +10,18 @@ Only after a ship-gate answer in this chat that includes deploy. Deploy a publis
 ## Deploy
 
 1. **Check the release is published.** `gh release view vX.Y.Z --json isDraft,url` shows `isDraft` false. If it doesn't, **stop**.
-2. **Pick the deploy that applies:**
-   - **`.github/workflows/deploy-cloudron.yml` exists (up to v0.6.2):**
+2. **Deploy the tag to the Cloudron LAMP app** with `.github/workflows/deploy-cloudron.yml`, run from the tag itself:
 
-     ```powershell
-     gh workflow run deploy-cloudron.yml -f tag=vX.Y.Z
-     gh run list --workflow deploy-cloudron.yml --limit 1 --json databaseId,url
-     gh run watch <id> --exit-status
-     (Invoke-RestMethod https://easm.intranet.apes.org.uk/health).version
-     ```
+   ```powershell
+   gh workflow run deploy-cloudron.yml --ref vX.Y.Z -f tag=vX.Y.Z
+   gh run list --workflow deploy-cloudron.yml --limit 1 --json databaseId,url
+   gh run watch <id> --exit-status
+   (Invoke-RestMethod https://easm.intranet.apes.org.uk/health).version
+   ```
 
-     Evidence: the run link, and `/health` showing `X.Y.Z`.
-   - **The workflow is gone (from v0.6.3, until the Cloudron LAMP move):** don't deploy anything. The evidence is the line "No deploy stage for this version" in the release summary.
-   - **After the move to a Cloudron LAMP app:** **stop**. The assistant updates the app by hand with the web updater, with Bambie's approval. Evidence: `/health` showing the new version.
-3. **If the deploy fails, stop and ask.** The workflow rolls back to the previous image by itself; report what it says. Never retry with `first_deploy=true` without Bambie's approval.
+   - It runs in the `production` environment, which accepts only `v*` tags. If GitHub asks for an environment approval, Bambie approves it in the run page.
+   - Evidence: the run link, and `/health` showing `X.Y.Z`.
+3. **If the deploy fails, stop and ask.** The workflow switches back to the previous release by itself; report what it says. Migrations are not undone, and the pre-deploy backup is in Cloudron.
 
 ## Close out
 
