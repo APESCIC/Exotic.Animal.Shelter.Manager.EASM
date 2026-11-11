@@ -1,20 +1,17 @@
-# Deploys a published vX.Y.Z release to the APES Cloudron app, only when run by hand, and rolls back if /health doesn't report it.
+# Deploys a published vX.Y.Z release to the APES Cloudron LAMP app, only when run by hand from that tag, and rolls back if /health doesn't report it.
 name: Deploy to Cloudron
 
 # Deploys the APES-owned EASM instance only; shelters self-host from a clone or zip.
-# Run by hand after the release: gh workflow run deploy-cloudron.yml -f tag=vX.Y.Z
-# The image was built and pushed by release.yml, so nothing is built here. If the
-# new version does not report healthy, the app goes back to the previous image.
+# Run by hand after the release, from the tag itself:
+#   gh workflow run deploy-cloudron.yml --ref vX.Y.Z -f tag=vX.Y.Z
+# The production environment accepts only v* tags and holds the Cloudron settings.
+# Layout on the app: /app/data/releases/<id>, /app/data/shared, and /app/data/easm (the live link).
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Published release tag to deploy (vX.Y.Z)
+        description: Published release tag to deploy (vX.Y.Z). Run the workflow from the same tag.
         required: true
-      first_deploy:
-        description: Allow switching the Cloudron app from its current package (e.g. LAMP) to EASM
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -23,19 +20,20 @@ concurrency:
   group: deploy-cloudron
   cancel-in-progress: false
 
-env:
-  IMAGE: ghcr.io/apescic/easm
-
 jobs:
   deploy:
+    # The job name predates the LAMP move; job names are never renamed (docs/workflows.md).
     name: Update the Cloudron app to the release image
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://easm.intranet.apes.org.uk
     env:
       CLOUDRON_SERVER: ${{ secrets.CLOUDRON_SERVER }}
       CLOUDRON_TOKEN: ${{ secrets.CLOUDRON_TOKEN }}
       CLOUDRON_APP_ID: ${{ vars.CLOUDRON_APP_ID }}
-      EASM_MANIFEST_ID: uk.org.apes.easm
+      APP_URL: https://easm.intranet.apes.org.uk
 
     steps:
       - name: Check Cloudron settings
@@ -45,7 +43,7 @@ jobs:
           [ -n "$CLOUDRON_TOKEN" ] || missing="$missing secret CLOUDRON_TOKEN"
           [ -n "$CLOUDRON_APP_ID" ] || missing="$missing variable CLOUDRON_APP_ID"
           if [ -n "$missing" ]; then
-            echo "::error::Missing:$missing. Add them under Settings > Secrets and variables > Actions."
+            echo "::error::Missing:$missing. Add them to the production environment (Settings > Environments)."
             exit 1
           fi
 
@@ -61,87 +59,172 @@ jobs:
             echo "::error::'$INPUT_TAG' is not a release tag (vX.Y.Z)."
             exit 1
           fi
+          if [ "$GITHUB_REF" != "refs/tags/$INPUT_TAG" ]; then
+            echo "::error::Run this workflow from the tag: gh workflow run deploy-cloudron.yml --ref $INPUT_TAG -f tag=$INPUT_TAG (got $GITHUB_REF)."
+            exit 1
+          fi
           if [ "$(gh release view "$INPUT_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null)" != "false" ]; then
-            echo "::error::$INPUT_TAG has no published GitHub Release. Push the tag so release.yml builds the image and publishes it."
+            echo "::error::$INPUT_TAG has no published GitHub Release. Push the tag so release.yml publishes it."
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release_id=$INPUT_TAG-${GITHUB_SHA::7}-$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag }}
           persist-credentials: false
 
+      - name: Check VERSION matches the tag
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          if [ "$(tr -d '[:space:]' < VERSION)" != "$VERSION" ]; then
+            echo "::error::VERSION says $(cat VERSION), not $VERSION."
+            exit 1
+          fi
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, curl, pdo_mysql, bcmath, intl, zip, gd
+          coverage: none
+          tools: composer:v2
+
+      - name: Find the Composer cache folder
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php8.3-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.3-
+
+      # EASM's front end is static files in public/, so there is no Node build.
+      - name: Install production dependencies
+        run: composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Build the release archive
+        env:
+          RELEASE_ID: ${{ steps.tag.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          rm -rf release && mkdir release
+          rsync -a \
+            --exclude='/.git' --exclude='/.github' --exclude='/.githooks' --exclude='/.cursor' \
+            --exclude='/node_modules' --exclude='/tests' --exclude='/docs' --exclude='/release' \
+            --exclude='/storage' --exclude='/public/storage' --exclude='/bootstrap/cache/*.php' \
+            --exclude='/.env' --exclude='/.env.laragon.example' --exclude='/phpunit.xml' \
+            --exclude='/package.json' --exclude='/package-lock.json' \
+            --exclude='/scripts/local' --exclude='/scripts/*.ps1' \
+            --exclude='/database/seeders/Demo*' \
+            --exclude='/Dockerfile' --exclude='/.dockerignore' --exclude='/cloudron' --exclude='/CloudronManifest.json' \
+            ./ release/
+          echo "$GITHUB_SHA" > release/REVISION
+          tar -czf "$RELEASE_ID.tar.gz" -C release .
+          ls -lh "$RELEASE_ID.tar.gz"
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
 
       - name: Install Cloudron CLI
-        run: npm install --global cloudron@9
+        run: npm install --global cloudron@9.0.4
 
-      - name: Note the live version for a rollback
+      - name: Back up the app before the deploy
+        run: cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" backup create --app "$CLOUDRON_APP_ID"
+
+      - name: Note the live release for a rollback
         id: before
         run: |
           set -euo pipefail
-          location="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Location/ {print $2}')"
-          previous="$(curl -fsS "https://$location/health" | jq -r '.version // empty' || true)"
-          echo "location=$location" >> "$GITHUB_OUTPUT"
-          echo "previous=$previous" >> "$GITHUB_OUTPUT"
-          echo "Live version before the deploy: ${previous:-unknown}"
+          previous="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" exec --app "$CLOUDRON_APP_ID" -- \
+            bash -c 'readlink -f /app/data/easm 2>/dev/null || true' | tail -n1 | tr -d '\r')"
+          echo "Live release before the deploy: ${previous:-none (first deploy)}"
+          echo "path=$previous" >> "$GITHUB_OUTPUT"
 
-      - name: Update Cloudron app
+      - name: Upload the release
         env:
-          FIRST_DEPLOY: ${{ inputs.first_deploy }}
-          VERSION: ${{ steps.tag.outputs.version }}
+          RELEASE_ID: ${{ steps.tag.outputs.release_id }}
         run: |
           set -euo pipefail
-          current="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" status --app "$CLOUDRON_APP_ID" | awk -F':[ \t]*' '/^Manifest Id/ {print $2}')"
-          force=""
-          if [ "$current" != "$EASM_MANIFEST_ID" ]; then
-            if [ "$FIRST_DEPLOY" != "true" ]; then
-              echo "::error::Cloudron app $CLOUDRON_APP_ID runs '$current', not EASM. Re-run this workflow manually with first_deploy=true to switch it (Cloudron backs up first)."
-              exit 1
-            fi
-            force="--force"
-          fi
-          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" \
-            update --app "$CLOUDRON_APP_ID" --image "$IMAGE:$VERSION" $force
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" push --app "$CLOUDRON_APP_ID" \
+            "$RELEASE_ID.tar.gz" "/tmp/$RELEASE_ID.tar.gz"
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" exec --app "$CLOUDRON_APP_ID" -- \
+            bash -c "set -e; mkdir -p /app/data/releases/$RELEASE_ID; tar -xzf /tmp/$RELEASE_ID.tar.gz -C /app/data/releases/$RELEASE_ID; rm -f /tmp/$RELEASE_ID.tar.gz"
 
-      - name: Check deployed health
-        id: health
+      - name: Migrate and switch to the release
+        id: activate
+        continue-on-error: true
         env:
-          LOCATION: ${{ steps.before.outputs.location }}
+          RELEASE_ID: ${{ steps.tag.outputs.release_id }}
+        run: |
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" exec --app "$CLOUDRON_APP_ID" -- \
+            bash "/app/data/releases/$RELEASE_ID/deploy/cloudron/activate-release.sh" "/app/data/releases/$RELEASE_ID"
+
+      - name: Restart the app
+        id: restart
+        if: steps.activate.outcome == 'success'
+        continue-on-error: true
+        run: cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" restart --app "$CLOUDRON_APP_ID"
+
+      - name: Check /health reports the release
+        id: verify
+        if: steps.restart.outcome == 'success'
+        continue-on-error: true
+        env:
           VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            if curl -fsS "https://$LOCATION/health" | tee /dev/stderr | grep -q "\"version\":\"$VERSION\""; then
-              echo "Deployed $VERSION to https://$LOCATION"
+          for attempt in $(seq 1 18); do
+            live_version="$(curl -fsS --max-time 10 "$APP_URL/health" | jq -r '.version // empty' 2>/dev/null || true)"
+            live_revision="$(cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" exec --app "$CLOUDRON_APP_ID" -- \
+              cat /app/data/easm/REVISION 2>/dev/null | tail -n1 | tr -d '\r' || true)"
+            if [ "$live_version" = "$VERSION" ] && [ "$live_revision" = "$GITHUB_SHA" ]; then
+              echo "$APP_URL/health reports $VERSION at $GITHUB_SHA"
               exit 0
             fi
+            echo "Attempt $attempt: version '${live_version:-none}', revision '${live_revision:-unknown}'"
             sleep 10
           done
-          echo "::error::https://$LOCATION/health did not report version $VERSION."
+          echo "::error::$APP_URL/health did not report $VERSION at $GITHUB_SHA."
           exit 1
 
-      - name: Roll back to the previous image
-        if: failure() && steps.health.outcome == 'failure' && steps.before.outputs.previous != ''
+      - name: Roll back to the previous release
+        id: rollback
+        if: always() && (steps.activate.outcome == 'failure' || steps.restart.outcome == 'failure' || steps.verify.outcome == 'failure')
         env:
-          PREVIOUS: ${{ steps.before.outputs.previous }}
-          LOCATION: ${{ steps.before.outputs.location }}
+          PREVIOUS: ${{ steps.before.outputs.path }}
         run: |
           set -euo pipefail
-          if ! echo "$PREVIOUS" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "::error::The previous version '$PREVIOUS' is not a release, so there is no image to roll back to. Restore the pre-update backup in Cloudron."
+          if [ -z "$PREVIOUS" ]; then
+            echo "::error::This was the first deploy, so there is no release to roll back to. Check the app's logs; the pre-deploy backup is in Cloudron."
             exit 1
           fi
-          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" \
-            update --app "$CLOUDRON_APP_ID" --image "$IMAGE:$PREVIOUS"
-          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            if curl -fsS "https://$LOCATION/health" | grep -q "\"version\":\"$PREVIOUS\""; then
-              echo "::warning::Rolled back to $PREVIOUS. Migrations from the failed release were not undone."
-              exit 1
-            fi
-            sleep 10
-          done
-          echo "::error::Rollback to $PREVIOUS did not report healthy. Restore the pre-update backup in Cloudron."
-          exit 1
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" exec --app "$CLOUDRON_APP_ID" -- \
+            bash "$PREVIOUS/deploy/cloudron/rollback-release.sh" "$PREVIOUS"
+          cloudron --server "$CLOUDRON_SERVER" --token "$CLOUDRON_TOKEN" restart --app "$CLOUDRON_APP_ID"
+          echo "::warning::Rolled back to $(basename "$PREVIOUS"). Migrations from the failed release were not undone."
+
+      - name: Summary
+        if: always()
+        env:
+          RELEASE_ID: ${{ steps.tag.outputs.release_id }}
+          ACTIVATE: ${{ steps.activate.outcome }}
+          VERIFY: ${{ steps.verify.outcome }}
+          ROLLBACK: ${{ steps.rollback.outcome }}
+        run: |
+          {
+            echo "## Cloudron deploy"
+            echo "- Release: \`${RELEASE_ID:-none}\` (\`$GITHUB_SHA\`)"
+            echo "- Activate: \`${ACTIVATE:-skipped}\`"
+            echo "- Verify: \`${VERIFY:-skipped}\`"
+            echo "- Rollback: \`${ROLLBACK:-not needed}\`"
+            echo "- Migrations are never rolled back automatically; the pre-deploy backup covers the database."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$VERIFY" != "success" ]; then
+            echo "::error::The deploy did not verify. Check the rollback result and the app before retrying."
+            exit 1
+          fi

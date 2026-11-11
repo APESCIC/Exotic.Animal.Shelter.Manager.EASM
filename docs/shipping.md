@@ -74,11 +74,18 @@ Tag the merge commit and push the tag (the `release-version` skill). `release.ym
 
 ### 4. Deploy (once per version)
 
-Use the `deploy-version` skill. Which deploy applies depends on the version:
+Use the `deploy-version` skill. The APES instance is a Cloudron LAMP app (since v0.6.1), deployed from GitHub Actions:
 
-- **Up to v0.6.2: Cloudron tag deploy.** `gh workflow run deploy-cloudron.yml -f tag=vX.Y.Z`, then `gh run watch <id> --exit-status`. The workflow refuses a tag without a published Release, updates the Cloudron app to that tag's image, checks `/health` reports the version, and rolls back to the previous image if it doesn't. Evidence: the run URL, and <https://easm.intranet.apes.org.uk/health> showing the version.
-- **From v0.6.3 until the Cloudron LAMP move: no deploy.** v0.6.3 removes the Cloudron image and `deploy-cloudron.yml` (#142, #147). The live app stays on its last image. Record "No deploy stage for this version" on the Epic.
-- **After the move to a Cloudron LAMP app (after v0.9.0):** the APES instance is updated by hand with the v0.9.0 web updater, done by the assistant with Bambie's approval. Evidence: `/health` showing the new version.
+```powershell
+gh workflow run deploy-cloudron.yml --ref vX.Y.Z -f tag=vX.Y.Z
+gh run list --workflow deploy-cloudron.yml --limit 1 --json databaseId,url
+gh run watch <id> --exit-status
+```
+
+- Run it from the tag (`--ref vX.Y.Z`). It runs in the `production` environment, which accepts only `v*` tags and holds the Cloudron settings.
+- The workflow refuses a tag without a published Release or whose `VERSION` differs. It builds the release with Composer, backs up the app, uploads the release to `/app/data/releases/<id>`, runs `deploy/cloudron/activate-release.sh` (migrations once installed, then the switch of `/app/data/easm`), restarts the app and checks `/health` reports the version and the `REVISION`. If any of that fails, it switches back to the previous release.
+- Migrations are never undone automatically; the pre-deploy backup covers the database.
+- Evidence: the run URL, and <https://easm.intranet.apes.org.uk/health> showing the version.
 
 ### Close out
 
