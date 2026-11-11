@@ -48,6 +48,13 @@ class MilestoneVersionCliTest extends TestCase
                     ? ['number' => 100, 'title' => 'Milestone 7: Fix login', 'body' => "Closes #42\n", 'milestone' => null]
                     : null;
             }
+
+            public function openIssues(int $milestoneNumber): array
+            {
+                return $milestoneNumber === 5
+                    ? [['number' => 42, 'title' => '[Chore] Fix login'], ['number' => 43, 'title' => '[Task] Export CSV']]
+                    : [];
+            }
         };
 
         $out = fopen('php://memory', 'w+');
@@ -188,6 +195,33 @@ class MilestoneVersionCliTest extends TestCase
             rmdir($this->root.'/scripts');
             rmdir($this->root);
         }
+    }
+
+    public function test_status_refuses_while_issues_are_open(): void
+    {
+        [$exitCode, $out, $err] = $this->cli('status', 'v1.9.0');
+
+        $this->assertSame(Cli::FAILED, $exitCode);
+        $this->assertStringContainsString('Open issues: 2', $out);
+        $this->assertStringContainsString('#42 [Chore] Fix login', $out);
+        $this->assertStringContainsString('Not ready to close: 2 issue(s)', $err);
+    }
+
+    public function test_status_is_ready_when_every_issue_is_closed(): void
+    {
+        [$exitCode, $out] = $this->cli('status', 'v1.10.0');
+
+        $this->assertSame(Cli::OK, $exitCode);
+        $this->assertStringContainsString('Ready to close: every issue in "v1.10.0 Beta: Search" is closed.', $out);
+    }
+
+    public function test_status_fails_for_a_version_with_no_open_milestone(): void
+    {
+        [$exitCode, , $err] = $this->cli('status', 'v3.0.0');
+
+        $this->assertSame(Cli::FAILED, $exitCode);
+        $this->assertStringContainsString('No open milestone has version v3.0.0', $err);
+        $this->assertSame(Cli::USAGE, $this->cli('status')[0]);
     }
 
     public function test_unknown_command_is_a_usage_error(): void

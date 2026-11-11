@@ -13,5 +13,5 @@ Every milestone ships once, by its version (`v0.6.2`), never by GitHub's milesto
 - `VERSION` is the single source of the version; `composer milestone:bump -- vX.Y.Z` syncs every other field.
 - `composer milestone:next`, `milestone:check-title`, `milestone:check-branch` and `milestone:check-release` (`scripts/milestone-version`). CI runs the title and branch checks on every pull request.
 - Dependabot opens grouped weekly pull requests into the `dependencies` branch, never `main`.
-- Security checks use only free GitHub features: Dependabot, dependency review and CodeQL (JavaScript and Actions; CodeQL has no PHP support, so PHP is covered by the tests and Pint).
+- Security checks use only free GitHub features: Dependabot, dependency review and CodeQL (JavaScript and Actions; CodeQL has no PHP support, so PHP is covered by the tests and Pint). CodeQL runs as GitHub's default setup, enforced by the organisation; a CodeQL workflow file would fail alongside it, so the repo has none.
 - Optional local check before each push: `git config core.hooksPath .githooks`.

@@ -26,4 +26,11 @@ interface GitHub
      * @return ?array{number: int, title: string, body: string, milestone: ?string}
      */
     public function pullRequest(int $number): ?array;
+
+    /**
+     * Open issues in a milestone, without pull requests.
+     *
+     * @return list<array{number: int, title: string}>
+     */
+    public function openIssues(int $milestoneNumber): array;
 }
