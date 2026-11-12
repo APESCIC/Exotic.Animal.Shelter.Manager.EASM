@@ -20,7 +20,7 @@ RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction --no
 COPY . .
 RUN composer dump-autoload --optimize --no-dev --no-interaction --no-scripts --ignore-platform-reqs
 
-FROM php:8.3.36-apache@sha256:a800bbd2c0aa322702259ed475556b2cbc311076a8d3c4bba9bfe96838745472
+FROM php:8.5.12-apache@sha256:08af36df144462d84c7f16190557eec06cb9f656882685610b712a15eec54d46
 
 COPY --from=mlocati/php-extension-installer:2.13.2@sha256:4fd45396c16685266d32bf147a24ecd5e81029d3820295895bf4a90131190ac9 /usr/bin/install-php-extensions /usr/local/bin/
 
