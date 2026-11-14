@@ -75,6 +75,7 @@ Hotfixes only with Bambie's written approval on the issue. The full guide is [do
 - Never write tokens, passwords, `.env` contents or `APP_KEY` into code, docs or comments.
 - Security checks use only free GitHub features ([docs/workflows.md](docs/workflows.md)).
 - UK English. Commit messages: `fix: what changed (Refs #123)`.
+- Published Releases also get a shared-hosting zip from `release-package.yml` (`release: published` only): `easm-X.Y.Z.zip`, `SHA256SUMS` and a minisign signature. Public key: `resources/keys/easm-release.minisign.pub`. Private key: repository secret `MINISIGN_SECRET_KEY` (never in git).
 
 ## Where to find more
 

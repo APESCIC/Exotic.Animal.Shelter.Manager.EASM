@@ -16,7 +16,19 @@ PHP extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbs
 
 ## Install
 
-Clone the repository or unzip a release, then run Composer **once**:
+Prefer a published GitHub Release zip (includes `vendor/` and static assets; no Composer or Node on the host):
+
+```bash
+# optional: verify the signature and checksum from the Release assets
+minisign -Vm easm-X.Y.Z.zip -p resources/keys/easm-release.minisign.pub
+sha256sum -c SHA256SUMS
+unzip easm-X.Y.Z.zip
+cd easm-X.Y.Z   # or the folder name from the archive
+```
+
+The Release package workflow attaches `easm-X.Y.Z.zip`, `SHA256SUMS` and the `.minisig` when the Release is published (see [workflows.md](workflows.md#release-package-signing)).
+
+Or clone and run Composer **once**:
 
 ```bash
 git clone https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM.git
@@ -24,15 +36,7 @@ cd Exotic.Animal.Shelter.Manager.EASM
 composer install --no-dev --optimize-autoloader
 ```
 
-From a zip:
-
-```bash
-unzip easm.zip
-cd easm   # the folder name may match the release archive
-composer install --no-dev --optimize-autoloader
-```
-
-`composer install` copies `.env.example` to `.env` when needed and fills `APP_KEY` if it is empty. It does not migrate, and does not mark the app installed.
+`composer install` copies `.env.example` to `.env` when needed and fills `APP_KEY` if it is empty. The zip path skips that step until the wizard writes `.env`. Neither path migrates or marks the app installed by itself.
 
 Then:
 

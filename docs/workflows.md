@@ -11,6 +11,7 @@ Every automatic check and job in this repository, what starts it, and what to do
 | `milestone-version-check.yml`: `milestone-version-check` | Every pull request (opened, edited or pushed) | Checks the PR title and branch name carry the right version and no milestone number | Use `composer milestone:pr-title -- <issue>` for the title, and `composer milestone:branch -- --issue <issue>` for the branch name. Edit the title; the check re-runs. |
 | `dependency-review.yml`: `dependency-review` | Every pull request | Fails if the PR adds a dependency with a known high or critical vulnerability | Pick a fixed version of that dependency, or ask Bambie. |
 | `release.yml`: `Build image and publish the release` (name kept from the image build, removed in v0.6.3) | Only when a `vX.Y.Z` tag is pushed | Checks the tag matches `VERSION` and is on `main`, and publishes the GitHub Release | Stop and ask. Never move or re-push a tag. Usually `VERSION` wasn't bumped in the version PR. |
+| `release-package.yml`: `Build and attach release package` | Only when a GitHub Release is published (`release: published`), never on ordinary push or pull request | Builds `easm-X.Y.Z.zip` with `composer install --no-dev` and static `public/` assets (no Node build), writes `SHA256SUMS`, signs with minisign (`MINISIGN_SECRET_KEY`), verifies with `resources/keys/easm-release.minisign.pub`, and attaches all three to the Release | Open the failed step. If the secret is missing, ask Bambie (`apescic-director` holds the private key). Never put the private key in the repository. |
 | `deploy-cloudron.yml`: `Update the Cloudron app to the release image` (name kept from the image deploy) | Only by hand, from the tag: `gh workflow run deploy-cloudron.yml --ref vX.Y.Z -f tag=vX.Y.Z`. Runs in the `production` environment (only `v*` tags) | Refuses a tag without a published Release, builds the release with Composer, backs up the APES Cloudron LAMP app, uploads and activates the release (`deploy/cloudron/`), restarts, checks `/health` and `REVISION`, and switches back to the previous release otherwise | It has already switched back. Read the log and stop and ask. Migrations are not undone; the pre-deploy backup is in Cloudron. |
 
 Nothing releases or deploys on an ordinary push or pull request. Every workflow starts with read-only permissions, widens them only for the job that needs them, pins each action to a commit, and doesn't keep the checkout's credentials.
@@ -52,6 +53,15 @@ The repository has no CODEOWNERS, labeler, auto-assign or release-drafter config
 | `CLOUDRON_APP_ID` (variable) | The APES Cloudron LAMP app (`cloudron list`) |
 
 To replace the token: create a new one in Cloudron (profile → API Tokens), paste it over `CLOUDRON_TOKEN` in the environment, then revoke the old one in Cloudron. `gh secret list --env production` and `gh variable list --env production` show the names (never the values).
+
+## Release package signing
+
+`release-package.yml` signs `easm-X.Y.Z.zip` with [minisign](https://jedisct1.github.io/minisign/). The private key is the repository Actions secret `MINISIGN_SECRET_KEY` (held by `apescic-director`). The public key ships in the app at `resources/keys/easm-release.minisign.pub` (key id `0263FE993EE2A87C`). Shelters verify a download with:
+
+```bash
+minisign -Vm easm-X.Y.Z.zip -p resources/keys/easm-release.minisign.pub
+sha256sum -c SHA256SUMS
+```
 
 ## Required checks on `main`
 
