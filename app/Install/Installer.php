@@ -113,6 +113,8 @@ class Installer
     {
         $values = [
             'APP_NAME' => (string) $input['organisation'],
+            'APP_ENV' => 'production',
+            'APP_DEBUG' => 'false',
             'APP_TIMEZONE' => (string) $input['timezone'],
             'APP_INSTALLED' => 'true',
         ];

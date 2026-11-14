@@ -79,6 +79,8 @@ class InstallerTest extends TestCase
         $this->assertStringContainsString('DB_USERNAME=easm_user', $env);
         $this->assertStringContainsString('DB_PASSWORD=easm_secret', $env);
         $this->assertStringContainsString('APP_NAME="APES CIC Rescue"', $env);
+        $this->assertStringContainsString('APP_ENV=production', $env);
+        $this->assertStringContainsString('APP_DEBUG=false', $env);
         $this->assertStringContainsString('APP_TIMEZONE=Europe/London', $env);
         $this->assertStringContainsString('APP_INSTALLED=true', $env);
 
