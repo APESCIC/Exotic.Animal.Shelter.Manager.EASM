@@ -49,9 +49,9 @@ Then:
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
 4. Public media: the installer (and `php artisan easm:ensure-public-storage`) creates `public/storage` with a symlink when the host allows it. If `symlink()` is disabled, uploads still display through the application `/storage/{path}` route. PHP temporary files stay under `storage/framework/tmp` inside the app tree (helpful under `open_basedir`).
 5. Open the site in a browser. You are sent to `/install`.
-6. Enter the database details (or choose Cloudron's database, below), organisation name, timezone (default Europe/London) and the first admin user.
+6. Follow the stepped wizard: host requirements → database test → organisation and first admin → migrations (one per request, so a 30-second PHP limit is fine) → finish. The finish step writes a production `.env` (including `APP_KEY` when missing), creates the admin, and locks the installer.
 
-The wizard writes `.env`, runs the migrations, creates that admin (role `admin`) and writes `storage/app/installed`. After that, `/install` won't run again. Sign in at `/login`; see [features.md](features.md) for what each role can do.
+The wizard writes `.env`, runs the migrations in chunks, creates that admin (role `admin`) and writes `storage/app/installed`. After that, `/install` won't run again. Sign in at `/login`; see [features.md](features.md) for what each role can do.
 
 Shelters install and update from a clone or a zip like this. Nothing is ever deployed to a shelter's hosting.
 
