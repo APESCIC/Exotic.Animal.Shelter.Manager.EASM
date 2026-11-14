@@ -171,10 +171,27 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Copy environment file
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          # No MySQL service on this job — match phpunit.xml so artisan/bootstrap cannot hang on TCP.
+          mkdir -p database
+          touch database/database.sqlite
+          php -r '$e=file_get_contents(".env"); $e=preg_replace("/^DB_CONNECTION=.*/m","DB_CONNECTION=sqlite",$e); $e=preg_replace("/^SESSION_DRIVER=.*/m","SESSION_DRIVER=array",$e); $e=preg_replace("/^CACHE_STORE=.*/m","CACHE_STORE=array",$e); $e=preg_replace("/^QUEUE_CONNECTION=.*/m","QUEUE_CONNECTION=sync",$e); file_put_contents(".env",$e);'
 
       - name: Generate app key
-        run: php artisan key:generate --ansi
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ${{ github.workspace }}/database/database.sqlite
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+        run: php artisan key:generate --ansi --force
 
       - name: Run constrained-host matrix
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ${{ github.workspace }}/database/database.sqlite
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
         run: bash scripts/ci/constrained-host-run.sh
