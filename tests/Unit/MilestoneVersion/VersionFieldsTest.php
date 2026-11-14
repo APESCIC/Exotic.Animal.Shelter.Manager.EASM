@@ -17,14 +17,14 @@ class VersionFieldsTest extends TestCase
         mkdir($this->root.'/config', recursive: true);
         mkdir($this->root.'/notes');
         file_put_contents($this->root.'/VERSION', "0.4.7\n");
-        file_put_contents($this->root.'/CloudronManifest.json', "{\n    \"id\": \"uk.org.apes.easm\",\n    \"version\": \"0.0.0\",\n    \"manifestVersion\": 2\n}\n");
+        file_put_contents($this->root.'/app.json', "{\n    \"name\": \"easm\",\n    \"version\": \"0.0.0\",\n    \"private\": true\n}\n");
         file_put_contents($this->root.'/config/app.php', "<?php\nreturn ['version' => env('APP_VERSION', '0.4.7')];\n");
         file_put_contents($this->root.'/notes/_template.json', "{\n  \"version\": \"vX.Y.Z\",\n  \"published\": false\n}\n");
     }
 
     protected function tearDown(): void
     {
-        foreach (['VERSION', 'CloudronManifest.json', 'config/app.php', 'notes/_template.json', 'notes/v1.3.0.json'] as $file) {
+        foreach (['VERSION', 'app.json', 'config/app.php', 'notes/_template.json', 'notes/v1.3.0.json'] as $file) {
             if (is_file($this->root.'/'.$file)) {
                 unlink($this->root.'/'.$file);
             }
@@ -39,7 +39,7 @@ class VersionFieldsTest extends TestCase
         return new VersionFields($this->root, [
             'fields' => [
                 ['file' => 'VERSION', 'type' => 'plain'],
-                ['file' => 'CloudronManifest.json', 'type' => 'json', 'key' => 'version'],
+                ['file' => 'app.json', 'type' => 'json', 'key' => 'version'],
                 ['file' => 'config/app.php', 'type' => 'regex', 'pattern' => "env\\('APP_VERSION', '([^']*)'\\)"],
             ],
             'releaseNote' => ['template' => 'notes/_template.json', 'path' => 'notes/{tag}.json'],
@@ -52,11 +52,11 @@ class VersionFieldsTest extends TestCase
         $changes = $this->fields()->bump($version);
 
         $this->assertSame("1.3.0\n", (string) file_get_contents($this->root.'/VERSION'));
-        $this->assertStringContainsString('"version": "1.3.0"', (string) file_get_contents($this->root.'/CloudronManifest.json'));
-        $this->assertStringContainsString('"manifestVersion": 2', (string) file_get_contents($this->root.'/CloudronManifest.json'));
+        $this->assertStringContainsString('"version": "1.3.0"', (string) file_get_contents($this->root.'/app.json'));
+        $this->assertStringContainsString('"private": true', (string) file_get_contents($this->root.'/app.json'));
         $this->assertStringContainsString("env('APP_VERSION', '1.3.0')", (string) file_get_contents($this->root.'/config/app.php'));
         $this->assertStringContainsString('"version": "v1.3.0"', (string) file_get_contents($this->root.'/notes/v1.3.0.json'));
-        $this->assertSame(['VERSION', 'CloudronManifest.json', 'config/app.php', 'notes/v1.3.0.json'], array_column($changes, 'file'));
+        $this->assertSame(['VERSION', 'app.json', 'config/app.php', 'notes/v1.3.0.json'], array_column($changes, 'file'));
         $this->assertSame([], $this->fields()->mismatches($version));
     }
 
@@ -73,7 +73,7 @@ class VersionFieldsTest extends TestCase
         $problems = $this->fields()->mismatches(SemVer::parse('v1.3.0'));
 
         $this->assertCount(3, $problems);
-        $this->assertStringContainsString('CloudronManifest.json holds "0.0.0", not 1.3.0', implode("\n", $problems));
+        $this->assertStringContainsString('app.json holds "0.0.0", not 1.3.0', implode("\n", $problems));
     }
 
     public function test_replace_all_updates_repeated_footer_versions_but_not_excluded_history(): void

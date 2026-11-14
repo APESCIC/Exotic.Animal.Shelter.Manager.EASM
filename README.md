@@ -17,7 +17,8 @@ The full list is in [docs/features.md](docs/features.md).
 | I want to… | Go to |
 | --- | --- |
 | Install EASM for a shelter | [docs/install.md](docs/install.md): one `composer install`, then the `/install` wizard |
-| Develop EASM on my PC | [Start here in AGENTS.md](AGENTS.md#start-here): Laragon on Windows, five steps |
+| Run EASM behind Cloudflare or another HTTPS proxy | Set `EASM_TRUSTED_PROXIES` ([docs/install.md](docs/install.md#behind-an-https-proxy)) |
+| Develop EASM on my PC | [Start here in AGENTS.md](AGENTS.md#start-here): Laravel Herd on Windows, five steps |
 | Contribute a change | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ## Links

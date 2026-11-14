@@ -9,7 +9,7 @@ use RuntimeException;
  * fields are never edited by hand. Each field is one of:
  *
  *   {"file": "VERSION", "type": "plain"}                                  the whole file is the version
- *   {"file": "CloudronManifest.json", "type": "json", "key": "version"}   the first "key": "..." value
+ *   {"file": "package.json", "type": "json", "key": "version"}            the first "key": "..." value
  *   {"file": "config/app.php", "type": "regex", "pattern": "..."}         capture group 1 of the pattern
  *   {"type": "replace-all", "dir": "public", "pattern": "*.html",        every copy of the old version, for
  *    "exclude": ["public/changelog/index.html"]}                         version text repeated in static pages

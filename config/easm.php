@@ -24,9 +24,9 @@ return [
     | Platform-managed database
     |--------------------------------------------------------------------------
     |
-    | When the hosting platform writes DB_* itself (the Cloudron package does
-    | this on every start), the wizard skips the database step and never
-    | overwrites those keys.
+    | When the hosting platform writes DB_* into .env itself (some managed
+    | hosts do this on every start), the wizard skips the database step and
+    | never overwrites those keys.
     |
     */
 

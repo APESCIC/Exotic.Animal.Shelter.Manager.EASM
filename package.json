@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "browser-sync start --proxy http://easm.test --port 5176 --ui-port 5186 --no-open --files \"resources/views/**/*.blade.php\" \"public/js/**/*.js\" \"public/css/**/*.css\" \"app/**/*.php\" \"routes/**/*.php\""
+        "dev": "browser-sync start --config bs-config.cjs --proxy https://easm.test --port 5176 --ui-port 5186 --no-open --files \"resources/views/**/*.blade.php\" \"public/js/**/*.js\" \"public/css/**/*.css\" \"app/**/*.php\" \"routes/**/*.php\""
     },
     "devDependencies": {
         "browser-sync": "^3.0.4"

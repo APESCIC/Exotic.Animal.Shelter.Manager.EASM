@@ -55,6 +55,18 @@ Shelters install and update from a clone or a zip like this. Nothing is ever dep
   - **Enter my own database details:** the same form as other hosts. `DB_*` in `.env` always takes priority over Cloudron's variables.
 - **Hosts that write `DB_*` themselves:** set `EASM_MANAGED_DATABASE=true` and the wizard skips the database step.
 
+### Behind an HTTPS proxy
+
+When something in front of EASM ends HTTPS and passes the request on over plain HTTP (Cloudflare, a load balancer, many shared hosts), EASM sees `http` and builds `http://` links and redirects. Set `EASM_TRUSTED_PROXIES` in `.env` so it believes the proxy's `X-Forwarded-*` headers:
+
+| Value | Use it when |
+| --- | --- |
+| empty (the default) | Nothing is in front of EASM, or the web server already tells PHP the request was HTTPS (a Cloudron LAMP app does, through Apache's `rpaf.conf`) |
+| `*` | The proxy is the only way in, so whatever connects is the proxy |
+| `10.0.0.5,173.245.48.0/20` | The site can also be reached directly; list the proxy addresses or ranges (for Cloudflare, its published IP ranges) |
+
+Run `php artisan config:clear` after changing it if the config is cached.
+
 ## Health and version
 
 `GET /health` returns the app's status, name and version as JSON (`"status":"ok"` and a `version` field). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. It works before and after the installer. Laravel's own `GET /up` check is also available.
@@ -87,5 +99,3 @@ The `production` environment the deploy needs (Settings → Environments → pro
 | `CLOUDRON_APP_ID` | variable | the LAMP app's ID (`cloudron list`) |
 | `CLOUDRON_SERVER` | secret | the Cloudron dashboard domain, `my.cloudron.apes.org.uk` |
 | `CLOUDRON_TOKEN` | secret | a Cloudron API token named `github-actions-easm` (Cloudron profile → API Tokens) |
-
-`Dockerfile`, `cloudron/` and the image build in `release.yml` belonged to the old custom Cloudron package and are no longer used by the deploy; v0.6.3 decides their removal ([#142](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/142)).

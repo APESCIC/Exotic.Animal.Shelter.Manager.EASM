@@ -117,11 +117,10 @@ jobs:
             --exclude='/.git' --exclude='/.github' --exclude='/.githooks' --exclude='/.cursor' \
             --exclude='/node_modules' --exclude='/tests' --exclude='/docs' --exclude='/release' \
             --exclude='/storage' --exclude='/public/storage' --exclude='/bootstrap/cache/*.php' \
-            --exclude='/.env' --exclude='/.env.laragon.example' --exclude='/phpunit.xml' \
-            --exclude='/package.json' --exclude='/package-lock.json' \
+            --exclude='/.env' --exclude='/.env.herd.example' --exclude='/phpunit.xml' \
+            --exclude='/package.json' --exclude='/package-lock.json' --exclude='/bs-config.cjs' \
             --exclude='/scripts/local' --exclude='/scripts/*.ps1' \
             --exclude='/database/seeders/Demo*' \
-            --exclude='/Dockerfile' --exclude='/.dockerignore' --exclude='/cloudron' --exclude='/CloudronManifest.json' \
             ./ release/
           echo "$GITHUB_SHA" > release/REVISION
           tar -czf "$RELEASE_ID.tar.gz" -C release .

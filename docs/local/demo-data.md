@@ -1,6 +1,6 @@
 # Demo data
 
-The demo data is clearly fake and only for the Laragon preview. `database/seeders/DemoSeeder.php` uses Faker in `en_GB` with a fixed seed (`20261109`), so every run gives the same records.
+The demo data is clearly fake and only for the local Herd preview. `database/seeders/DemoSeeder.php` uses Faker in `en_GB` with a fixed seed (`20261109`), so every run gives the same records.
 
 | Command | What it does |
 | --- | --- |

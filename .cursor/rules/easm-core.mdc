@@ -1,5 +1,5 @@
 ---
-description: EASM core rules - Laragon only, the live preview gate before any work, and the four-step ship-once flow by version number
+description: EASM core rules - Laravel Herd only, the live preview gate before any work, and the four-step ship-once flow by version number
 alwaysApply: true
 ---
 
@@ -10,8 +10,8 @@ The plain-English guide is `AGENTS.md`; the detail is `docs/shipping.md`; terms 
 ## Before any work
 
 - Run the live preview gate first with the `local-setup` skill, and again after every branch switch. Don't edit, install or commit until both sites have loaded in Cursor's browser and you have said "Preview ready, starting work".
-- Laragon on Windows is the only local set-up (`http://easm.test`, PHP 8.3 through FastCGI, MySQL 8.4). Never suggest containers, virtual machines, `php artisan serve` or any other local stack.
-- Ask before running migrations or changing anything in Laragon.
+- Laravel Herd on Windows is the only local set-up (`https://easm.test`, PHP 8.3 through FastCGI, MySQL 8.4). Never suggest containers, virtual machines, `php artisan serve` or any other local stack.
+- Ask before running migrations or changing Herd's sites, services or `.env`.
 
 ## How work ships (by version number, never milestone number)
 

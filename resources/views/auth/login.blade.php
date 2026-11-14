@@ -57,7 +57,7 @@
     <body>
         <img class="logo" src="{{ asset('images/easm-logo.svg') }}" alt="EASM" width="160" height="183">
         <h1>Sign in</h1>
-        <p class="hint">Email and password for this shelter. No Cloudron or external SSO in v0.1.</p>
+        <p class="hint">Email and password for this shelter. No external SSO.</p>
 
         @if ($errors->any())
             <div class="errors" role="alert">
