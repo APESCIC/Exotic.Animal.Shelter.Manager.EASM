@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Update EASM</h1>
-    <p class="hint">Resumable browser update. Each step is a short request so a 30-second PHP limit is fine. Keep this tab open until it finishes; if it stops, reload and continue. If a step fails, EASM restores the previous version from the pre-update backup and turns maintenance mode off.</p>
+    <p class="hint">Resumable browser update. Each step is a short request so a 30-second PHP limit is fine. Keep this tab open until it finishes; if it stops, reload and continue. If a step fails, EASM restores the previous version from the pre-update backup and turns maintenance mode off. While maintenance is on, the public sees a 503 page; this progress page stays available after the maintenance bypass cookie is set.</p>
 
     <section class="card" data-updater
              data-status-url="{{ route('admin.update.status.json') }}"
@@ -49,14 +49,31 @@
     <section class="card">
         <h2>Progress</h2>
         <p data-updater-message class="hint">{{ ($state['status'] ?? 'idle') === 'idle' ? 'No update in progress.' : 'Status: '.$state['status'] }}</p>
-        @if (! empty($state['context']['recovery_token']))
+        @if ($recoveryToken)
             <p class="hint">If Laravel will not boot after a failed update, open
-                <a href="{{ url('/recover.php?token='.$state['context']['recovery_token']) }}"><code>/recover.php</code></a>
+                <a href="{{ url('/recover.php?token='.$recoveryToken) }}"><code>/recover.php</code></a>
                 with the recovery token (plain PHP; does not load <code>vendor/</code>).
             </p>
         @endif
+        @if ($bypassPath)
+            <p class="hint" data-bypass-hint>Maintenance bypass for this admin session:
+                <a href="{{ url($bypassPath) }}" data-bypass-link><code>{{ $bypassPath }}</code></a>
+                (public visitors still see the 503 maintenance page).
+            </p>
+        @endif
+        <ol class="update-steps" data-updater-steps aria-label="Update steps">
+            @foreach (($state['steps_ui'] ?? []) as $step)
+                <li data-step-id="{{ $step['id'] }}" data-step-status="{{ $step['status'] }}">
+                    <span class="update-step-label">{{ $step['label'] }}</span>
+                    <span class="update-step-status">{{ $step['status'] }}</span>
+                </li>
+            @endforeach
+        </ol>
         <pre data-updater-log class="update-notes" aria-live="polite">{{ json_encode($state, JSON_PRETTY_PRINT) }}</pre>
-        <p><button type="button" class="button" data-updater-continue>Continue / run next step</button></p>
+        <p>
+            <button type="button" class="button" data-updater-continue>Continue / run next step</button>
+            <button type="button" class="button button-primary" data-updater-run-all>Run remaining steps</button>
+        </p>
     </section>
 
     <p><a href="{{ route('admin.dashboard') }}">Back to administration</a></p>
@@ -69,19 +86,51 @@
     if (!root) return;
     var log = document.querySelector('[data-updater-log]');
     var message = document.querySelector('[data-updater-message]');
+    var steps = document.querySelector('[data-updater-steps]');
     var uploadStatus = document.querySelector('[data-upload-status]');
     var csrf = root.getAttribute('data-csrf');
     var chunkSize = 4 * 1000 * 1000;
+    var runningAll = false;
 
     function show(result) {
         if (message) message.textContent = result.message || result.error || '';
-        if (log) log.textContent = JSON.stringify(result.state || result, null, 2);
+        var state = result.state || result;
+        if (log) log.textContent = JSON.stringify(state, null, 2);
+        renderSteps(state);
+        if (result.maintenance_bypass_path) {
+            ensureBypass(result.maintenance_bypass_path);
+        }
+    }
+
+    function renderSteps(state) {
+        if (!steps || !state || !state.steps_ui) return;
+        state.steps_ui.forEach(function (step) {
+            var li = steps.querySelector('[data-step-id="' + step.id + '"]');
+            if (!li) return;
+            li.setAttribute('data-step-status', step.status);
+            var status = li.querySelector('.update-step-status');
+            if (status) status.textContent = step.status;
+        });
     }
 
     function setUploadStatus(text) {
         if (!uploadStatus) return;
         uploadStatus.hidden = !text;
         uploadStatus.textContent = text || '';
+    }
+
+    async function ensureBypass(path) {
+        if (!path) return;
+        var link = document.querySelector('[data-bypass-link]');
+        var hint = document.querySelector('[data-bypass-hint]');
+        if (link) link.setAttribute('href', path);
+        if (link) link.textContent = path;
+        if (hint) hint.hidden = false;
+        try {
+            await fetch(path, { credentials: 'same-origin', redirect: 'follow' });
+        } catch (e) {
+            // Cookie may still be set via redirect; continue.
+        }
     }
 
     async function postJson(url, body) {
@@ -93,12 +142,13 @@
                 'X-CSRF-TOKEN': csrf,
                 'X-Requested-With': 'XMLHttpRequest'
             },
+            credentials: 'same-origin',
             body: body ? JSON.stringify(body) : '{}'
         });
         var data = await response.json().catch(function () { return {}; });
         if (!response.ok) {
-            show({ message: data.message || ('HTTP ' + response.status), state: data.state || data });
-            throw new Error(data.message || ('HTTP ' + response.status));
+            show({ message: data.message || data.error || ('HTTP ' + response.status), state: data.state || data, error: data.error || data.message });
+            throw new Error(data.message || data.error || ('HTTP ' + response.status));
         }
         show(data);
         return data;
@@ -123,6 +173,7 @@
                     'X-CSRF-TOKEN': csrf,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
+                credentials: 'same-origin',
                 body: form
             });
             var data = await response.json().catch(function () { return {}; });
@@ -159,6 +210,21 @@
         setUploadStatus('Upload ready.');
     }
 
+    async function runRemaining() {
+        if (runningAll) return;
+        runningAll = true;
+        try {
+            var guard = 0;
+            while (guard < 80) {
+                guard += 1;
+                var data = await postJson(root.getAttribute('data-step-url'));
+                if (data.done || data.error) break;
+            }
+        } finally {
+            runningAll = false;
+        }
+    }
+
     var form = document.querySelector('[data-updater-start]');
     if (form) {
         form.addEventListener('submit', function (event) {
@@ -168,6 +234,8 @@
                 delete data.package_file;
                 delete data.signature_file;
                 return postJson(root.getAttribute('data-start-url'), data);
+            }).then(function () {
+                return runRemaining();
             }).catch(function (err) {
                 setUploadStatus(err.message || String(err));
             });
@@ -178,6 +246,13 @@
     if (cont) {
         cont.addEventListener('click', function () {
             postJson(root.getAttribute('data-step-url')).catch(function () {});
+        });
+    }
+
+    var runAll = document.querySelector('[data-updater-run-all]');
+    if (runAll) {
+        runAll.addEventListener('click', function () {
+            runRemaining().catch(function () {});
         });
     }
 })();

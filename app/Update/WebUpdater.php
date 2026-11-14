@@ -67,6 +67,8 @@ class WebUpdater
 
         $recoveryToken = (new RecoveryToken($this->workRoot))->issue();
         $context['recovery_token'] = $recoveryToken;
+        $context['maintenance_secret'] = $context['maintenance_secret']
+            ?? bin2hex(random_bytes(16));
 
         return $this->machine->start($targetVersion, $context);
     }
@@ -252,11 +254,18 @@ class WebUpdater
      */
     private function maintenanceOn(array $context): array
     {
+        $secret = (string) ($context['maintenance_secret'] ?? '');
+        if ($secret === '') {
+            $secret = bin2hex(random_bytes(16));
+            $context['maintenance_secret'] = $secret;
+        }
+
         Artisan::call('down', [
             '--retry' => 60,
-            '--secret' => (string) ($context['maintenance_secret'] ?? 'easm-update'),
+            '--secret' => $secret,
         ]);
         $context['maintenance'] = true;
+        $context['maintenance_bypass_path'] = '/'.$secret;
 
         return ['step_done' => true, 'context' => $context, 'message' => 'Maintenance mode on.'];
     }

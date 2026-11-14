@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Update\UpdateException;
+use App\Update\UpdateStatePresenter;
 use App\Update\WebUpdater;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,16 +13,29 @@ use Illuminate\View\View;
 
 class UpdaterController extends Controller
 {
+    public function __construct(
+        private UpdateStatePresenter $presenter = new UpdateStatePresenter,
+    ) {}
+
     public function index(WebUpdater $updater): View
     {
+        $state = $this->presenter->present($updater->status());
+
         return view('admin.update.index', [
-            'state' => $updater->status(),
+            'state' => $state,
+            'bypassPath' => $this->bypassPath($updater->status()),
+            'recoveryToken' => $this->recoveryToken($updater->status()),
         ]);
     }
 
     public function status(WebUpdater $updater): JsonResponse
     {
-        return response()->json(['state' => $updater->status()]);
+        $raw = $updater->status();
+
+        return response()->json([
+            'state' => $this->presenter->present($raw),
+            'maintenance_bypass_path' => $this->bypassPath($raw),
+        ]);
     }
 
     public function start(Request $request, WebUpdater $updater): JsonResponse
@@ -56,16 +70,49 @@ class UpdaterController extends Controller
 
         return response()->json([
             'message' => 'Update started.',
-            'state' => $state,
+            'state' => $this->presenter->present($state),
+            'maintenance_bypass_path' => $this->bypassPath($state),
+            'recovery_token' => $this->recoveryToken($state),
         ]);
     }
 
     public function step(WebUpdater $updater): JsonResponse
     {
         $result = $updater->runNextStep(owner: 'admin-'.(string) auth()->id());
+        $rawState = is_array($result['state'] ?? null) ? $result['state'] : $updater->status();
+        $result['state'] = $this->presenter->present($rawState);
+        $result['maintenance_bypass_path'] = $this->bypassPath($rawState);
 
         $status = isset($result['error']) ? 422 : 200;
 
         return response()->json($result, $status);
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function bypassPath(array $state): ?string
+    {
+        $path = $state['context']['maintenance_bypass_path'] ?? null;
+        if (is_string($path) && $path !== '') {
+            return $path;
+        }
+
+        $secret = $state['context']['maintenance_secret'] ?? null;
+        if (is_string($secret) && $secret !== '' && ! empty($state['context']['maintenance'])) {
+            return '/'.$secret;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function recoveryToken(array $state): ?string
+    {
+        $token = $state['context']['recovery_token'] ?? null;
+
+        return is_string($token) && $token !== '' ? $token : null;
     }
 }
