@@ -217,9 +217,10 @@ class UpdateStateMachine
     /**
      * Mark a step failed; keeps the session so resume can retry the same step.
      *
+     * @param  array<string, mixed>  $contextMerge
      * @return array<string, mixed>
      */
-    public function failStep(UpdateStep $step, string $message): array
+    public function failStep(UpdateStep $step, string $message, array $contextMerge = []): array
     {
         $this->assertLocked();
         $state = $this->requireRunningState();
@@ -234,6 +235,9 @@ class UpdateStateMachine
         $state['status'] = self::STATUS_FAILED;
         $state['current_step'] = $step->value;
         $state['error'] = $message;
+        if ($contextMerge !== []) {
+            $state['context'] = array_merge(is_array($state['context'] ?? null) ? $state['context'] : [], $contextMerge);
+        }
         $this->store->write($state);
         $this->lock->release();
 
