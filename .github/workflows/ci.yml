@@ -161,10 +161,13 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ runner.os }}-php8.3-constrained-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-php8.3-constrained-
+          # Same key as the PHP 8.3 job so a cold constrained run reuses a warm cache.
+          key: composer-${{ runner.os }}-php8.3-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.3-
 
       - name: Install Composer dependencies
+        env:
+          COMPOSER_PROCESS_TIMEOUT: '300'
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Copy environment file
