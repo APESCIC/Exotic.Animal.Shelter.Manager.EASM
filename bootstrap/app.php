@@ -3,6 +3,7 @@
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\PublicStorageController;
 use App\Http\Middleware\AutoLoginDevUser;
+use App\Http\Middleware\CheckForUpdates;
 use App\Http\Middleware\EnsureInstallerAccess;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureInstallerAccess::class,
         ], append: [
             AutoLoginDevUser::class,
+            CheckForUpdates::class,
         ]);
 
         $middleware->api(prepend: [

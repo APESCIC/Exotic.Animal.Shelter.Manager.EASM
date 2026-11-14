@@ -90,6 +90,25 @@ return [
         'keep' => (int) env('EASM_BACKUPS_KEEP', 3),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Update check (poor-man's scheduler)
+    |--------------------------------------------------------------------------
+    |
+    | Admins trigger at most one GitHub Releases check per day on page load.
+    | Optional EASM_UPDATE_CRON_TOKEN enables GET /cron/update-check?token=…
+    | for hosts that can hit a URL on a schedule. Failures stay quiet.
+    |
+    */
+
+    'updates' => [
+        'enabled' => filter_var(env('EASM_UPDATE_CHECK', true), FILTER_VALIDATE_BOOLEAN),
+        'repository' => env('EASM_UPDATE_REPO', 'APESCIC/Exotic.Animal.Shelter.Manager.EASM'),
+        'channel' => env('EASM_UPDATE_CHANNEL', 'stable'),
+        'check_interval_hours' => (int) env('EASM_UPDATE_CHECK_HOURS', 24),
+        'cron_token' => env('EASM_UPDATE_CRON_TOKEN'),
+    ],
+
     'dev_login' => [
         'auto_login' => filter_var(env('DEV_AUTO_LOGIN', false), FILTER_VALIDATE_BOOLEAN),
         'role' => env('DEV_AUTO_LOGIN_ROLE', 'admin'),

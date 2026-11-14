@@ -6,7 +6,9 @@ use App\Backup\BackupService;
 use App\Install\InstallationState;
 use App\Models\Setting;
 use App\Support\SharedHosting;
+use App\Update\UpdateChecker;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
 
@@ -32,6 +34,19 @@ class AppServiceProvider extends ServiceProvider
     public function boot(InstallationState $installation): void
     {
         Paginator::useBootstrapFour();
+
+        View::composer('layouts.app', function ($view): void {
+            $notice = null;
+            $user = auth()->user();
+            if ($user?->role->isAdmin()) {
+                try {
+                    $notice = app(UpdateChecker::class)->status();
+                } catch (Throwable) {
+                    $notice = null;
+                }
+            }
+            $view->with('updateNotice', $notice);
+        });
 
         if (! $installation->isInstalled()) {
             // The wizard runs before MySQL tables exist. Do not use database

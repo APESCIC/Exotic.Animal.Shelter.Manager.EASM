@@ -22,6 +22,8 @@ The updater uses `install/package/` to download a Release zip over HTTPS in chun
 
 Before an update, the pure-PHP backup service dumps the database in short chunks (no `mysqldump`), zips `.env` and `storage`, and keeps the newest three under `storage/app/backups` (never under `public/`). Admins can download them from Administration → Backups.
 
+Admins see an update banner when GitHub has a newer stable Release. The check runs at most once a day when an admin loads a page (no cron required). If the host can hit a URL on a schedule, set `EASM_UPDATE_CRON_TOKEN` and call `GET /cron/update-check?token=…`. When GitHub is blocked the banner says to check manually; the page still loads.
+
 Prefer a published GitHub Release zip (includes `vendor/` and static assets; no Composer or Node on the host):
 
 ```bash
