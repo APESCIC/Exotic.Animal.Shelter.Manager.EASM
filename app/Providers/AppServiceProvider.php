@@ -7,6 +7,7 @@ use App\Install\ChunkedMigrator;
 use App\Install\InstallationState;
 use App\Models\Setting;
 use App\Support\SharedHosting;
+use App\Update\ReleaseUpload;
 use App\Update\UpdateChecker;
 use App\Update\UpdateStateMachine;
 use App\Update\WebUpdater;
@@ -43,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
                 backups: $app->make(BackupService::class),
                 migrator: $app->make(ChunkedMigrator::class),
                 extractor: new SafeZipExtractor(backend: $backend),
+            );
+        });
+        $this->app->singleton(ReleaseUpload::class, function () {
+            return new ReleaseUpload(
+                root: (string) config('easm.updates.state_path', storage_path('app/update')).'/uploads',
             );
         });
         SharedHosting::ensureAppTempDirectory();
