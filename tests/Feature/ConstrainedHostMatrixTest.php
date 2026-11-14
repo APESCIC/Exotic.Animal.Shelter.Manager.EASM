@@ -127,7 +127,8 @@ class ConstrainedHostMatrixTest extends TestCase
             'upload_max_filesize should be 8M, got '.$upload
         );
         if (getenv('EASM_EXPECT_NO_ZIPARCHIVE') === '1') {
-            $this->assertFalse(extension_loaded('zip'));
+            $disabledClasses = strtolower((string) ini_get('disable_classes'));
+            $this->assertStringContainsString('ziparchive', $disabledClasses);
         }
         if (getenv('EASM_EXPECT_NO_MYSQLDUMP') === '1') {
             $this->assertFalse($this->mysqldumpOnPath());

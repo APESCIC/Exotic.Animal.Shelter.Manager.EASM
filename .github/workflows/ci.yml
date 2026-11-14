@@ -141,12 +141,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup PHP (no zip extension)
+      - name: Setup PHP
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.3'
-          # Intentionally omit zip so ZipArchive is unavailable (pure-PHP extract path).
-          extensions: mbstring, xml, curl, pdo_sqlite, bcmath, intl, gd, sodium
+          # zip stays available for Composer install; the constrained-host script
+          # disables ZipArchive via disable_classes so the pure-PHP extract path runs.
+          extensions: mbstring, xml, curl, pdo_sqlite, bcmath, intl, gd, sodium, zip
           coverage: none
           tools: composer:v2
 
