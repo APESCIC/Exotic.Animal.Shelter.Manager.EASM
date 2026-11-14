@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\PublishingController;
+use App\Http\Controllers\Admin\ReleaseUploadController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UpdaterController;
 use App\Http\Controllers\AnimalController;
@@ -268,5 +269,8 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
         Route::get('/update/status.json', [UpdaterController::class, 'status'])->name('update.status.json');
         Route::post('/update/start', [UpdaterController::class, 'start'])->name('update.start');
         Route::post('/update/step', [UpdaterController::class, 'step'])->name('update.step');
+        Route::post('/update/upload/begin', [ReleaseUploadController::class, 'begin'])->name('update.upload.begin');
+        Route::post('/update/upload/chunk', [ReleaseUploadController::class, 'chunk'])->name('update.upload.chunk');
+        Route::post('/update/upload/finish', [ReleaseUploadController::class, 'finish'])->name('update.upload.finish');
     });
 });
