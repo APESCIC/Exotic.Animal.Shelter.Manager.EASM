@@ -71,7 +71,7 @@ The wizard writes `.env` (including `APP_KEY` when missing), runs migrations in 
 
 ## Cloudron LAMP
 
-For a Cloudron LAMP app (including the APES instance), follow [docs/hosting/cloudron-lamp.md](docs/hosting/cloudron-lamp.md) (issue #146). That guide covers PHP 8.3, DocumentRoot, health checks and the web updater on Cloudron.
+For a Cloudron LAMP app (including the APES instance), follow [docs/hosting/cloudron-lamp.md](docs/hosting/cloudron-lamp.md). That guide covers PHP 8.3, DocumentRoot, health checks, Cloudron MySQL/mail, the web updater, backups, and turning off phpMyAdmin/SFTP.
 
 ## Related
 
