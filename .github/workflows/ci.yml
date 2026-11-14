@@ -177,18 +177,16 @@ jobs:
           if [ ! -f .env ]; then cp .env.example .env; fi
           mkdir -p database
           touch database/database.sqlite
-          php -r '
-            $e = file_get_contents(".env");
-            $e = preg_replace("/^DB_CONNECTION=.*/m", "DB_CONNECTION=sqlite", $e);
-            $e = preg_replace("/^DB_DATABASE=.*/m", "DB_DATABASE=database/database.sqlite", $e);
-            $e = preg_replace("/^SESSION_DRIVER=.*/m", "SESSION_DRIVER=array", $e);
-            $e = preg_replace("/^CACHE_STORE=.*/m", "CACHE_STORE=array", $e);
-            $e = preg_replace("/^QUEUE_CONNECTION=.*/m", "QUEUE_CONNECTION=sync", $e);
-            if (preg_match("/^APP_KEY=\s*$/m", $e) === 1) {
-                $e = preg_replace("/^APP_KEY=.*$/m", "APP_KEY=base64:".base64_encode(random_bytes(32)), $e, 1);
-            }
-            file_put_contents(".env", $e);
-          '
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=database/database.sqlite|' .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
+          sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          if grep -qE '^APP_KEY=\s*$' .env; then
+            KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
+            sed -i "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env
+          fi
+          grep -E '^(DB_CONNECTION|SESSION_DRIVER|CACHE_STORE|QUEUE_CONNECTION)=' .env
 
       - name: Run constrained-host matrix
         env:
