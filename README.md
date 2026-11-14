@@ -16,7 +16,10 @@ The full list is in [docs/features.md](docs/features.md).
 
 | I want to… | Go to |
 | --- | --- |
-| Install EASM for a shelter | [docs/install.md](docs/install.md): one `composer install`, then the `/install` wizard |
+| Install EASM for a shelter (browser / File Manager) | [INSTALL.md](INSTALL.md): Release zip, then `/install` |
+| Upgrade an installed shelter | [UPGRADING.md](UPGRADING.md) |
+| Install on a Cloudron LAMP app | [docs/hosting/cloudron-lamp.md](docs/hosting/cloudron-lamp.md) |
+| Host detail (nginx, proxies, APES deploy) | [docs/install.md](docs/install.md) |
 | Run EASM behind Cloudflare or another HTTPS proxy | Set `EASM_TRUSTED_PROXIES` ([docs/install.md](docs/install.md#behind-an-https-proxy)) |
 | Develop EASM on my PC | [Start here in AGENTS.md](AGENTS.md#start-here): Laravel Herd on Windows, five steps |
 | Contribute a change | [CONTRIBUTING.md](CONTRIBUTING.md) |
@@ -40,7 +43,7 @@ location ~ \.php$ {
 }
 ```
 
-Adjust `root` and `fastcgi_pass` to the host. cPanel and Plesk Apache vhosts already honour `.htaccess`. Full install steps are in [docs/install.md](docs/install.md).
+Adjust `root` and `fastcgi_pass` to the host. cPanel and Plesk Apache vhosts already honour `.htaccess`. Operator install steps are in [INSTALL.md](INSTALL.md); host detail is in [docs/install.md](docs/install.md).
 
 `GET /health` returns JSON status and version. On MySQL/MariaDB it uses a 2-second connect timeout so a silent packet drop returns 503 instead of holding a PHP worker for the driver default (often about 60 seconds).
 
