@@ -19,6 +19,7 @@
             <a class="button" href="{{ route('admin.document-templates.index') }}">Document templates</a>
             <a class="button" href="{{ route('admin.publishing.edit') }}">Partner feed</a>
             <a class="button" href="{{ route('admin.backups.index') }}">Backups</a>
+            <a class="button" href="{{ route('admin.update.index') }}">Update</a>
         </section>
     </div>
 @endsection
