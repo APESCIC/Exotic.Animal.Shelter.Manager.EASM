@@ -17,7 +17,7 @@ EASM runs locally as its own Laravel Herd site. These are the values it needs. [
 | Live app | `https://easm.intranet.apes.org.uk` (Cloudron); the preview gate checks its `/health` version matches the preview's |
 | Env file | `.env.herd.example`, copied to `.env` by the setup script; no `APP_VERSION`, so the version comes from `VERSION` |
 
-`.env.example` stays production-safe, because self-hosting shelters and the Cloudron image start from it. Herd's values live in `.env.herd.example` instead.
+`.env.example` stays production-safe, because self-hosting shelters start from it. Herd's values live in `.env.herd.example` instead.
 
 ## PHP on the command line
 

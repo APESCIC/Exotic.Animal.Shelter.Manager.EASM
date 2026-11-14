@@ -99,5 +99,3 @@ The `production` environment the deploy needs (Settings → Environments → pro
 | `CLOUDRON_APP_ID` | variable | the LAMP app's ID (`cloudron list`) |
 | `CLOUDRON_SERVER` | secret | the Cloudron dashboard domain, `my.cloudron.apes.org.uk` |
 | `CLOUDRON_TOKEN` | secret | a Cloudron API token named `github-actions-easm` (Cloudron profile → API Tokens) |
-
-`Dockerfile`, `cloudron/` and the image build in `release.yml` belonged to the old custom Cloudron package and are no longer used by the deploy; v0.6.3 decides their removal ([#142](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/142)).

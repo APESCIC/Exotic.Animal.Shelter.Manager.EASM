@@ -4,8 +4,8 @@
 
 - Self-hosted PHP/MySQL app for ordinary web hosting. One Composer install step. One shelter per install.
 - Stack: **Laravel + PHP 8 + MySQL/MariaDB**.
-- APES runs its own instance on Cloudron (packaging: `Dockerfile`, `CloudronManifest.json`, `cloudron/`). That package must not change how ordinary hosting installs work.
-- No Cloudron OIDC/staff login. Local admin must work on day one everywhere, Cloudron included. Do **not** copy MyAPES-Account Cloudron auth.
+- APES runs its own instance on a Cloudron LAMP app (since v0.6.1), deployed from each release tag by `deploy-cloudron.yml`; the custom Cloudron package was removed in v0.6.3. Nothing about it may change how ordinary hosting installs work.
+- No OIDC or external staff login. Local admin must work on day one on every host. Do **not** copy MyAPES-Account's platform login.
 - Do **not** fork Animal Shelter Manager (ASM / [sheltermanager.com](https://sheltermanager.com)). Use it as a feature baseline only.
 - Exotic species stay free-text. Animal records get a **primary photo** plus enclosure/CITES/DWA on #12 (the primary photo does not wait for v0.3 media / #18).
 - Animal control (#24) is municipal ASM; it must **not** block v1.0.0.
