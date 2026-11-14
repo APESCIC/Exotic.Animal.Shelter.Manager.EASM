@@ -5,6 +5,7 @@ namespace App\Install;
 use App\Enums\UserRole;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\SharedHosting;
 use Illuminate\Support\Facades\Artisan;
 
 class Installer
@@ -75,6 +76,9 @@ class Installer
         }
 
         $this->envFile->write($this->state->envPath(), $this->envValues($input, $source));
+
+        SharedHosting::ensureAppTempDirectory();
+        SharedHosting::ensurePublicStorage();
 
         // A cached config (Cloudron's run.sh builds one) would hide the new .env values.
         if (app()->configurationIsCached()) {

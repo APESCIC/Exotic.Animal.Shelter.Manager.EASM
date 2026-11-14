@@ -45,9 +45,9 @@ composer install --no-dev --optimize-autoloader
 Then:
 
 1. Create an empty MySQL or MariaDB database in the host panel.
-2. Point the site's document root at `public/`. Apache uses `public/.htaccess`. nginx needs `try_files` (see the [README nginx section](../README.md#document-root-and-nginx)).
+2. Point the site's document root at `public/` whenever the host allows it. Apache uses `public/.htaccess`. nginx needs `try_files` (see the [README nginx section](../README.md#document-root-and-nginx)). If the panel can only use the repository root, the root `index.php` and `.htaccess` fall back into `public/` and return **403** for `.env`, `storage/`, `vendor/` and `composer.json`. Prefer a real `public/` document root; the root fallback is a last resort, not a security substitute.
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
-4. Run `php artisan storage:link`, so animal photos and media under `storage/app/public` can be reached.
+4. Public media: the installer (and `php artisan easm:ensure-public-storage`) creates `public/storage` with a symlink when the host allows it. If `symlink()` is disabled, uploads still display through the application `/storage/{path}` route. PHP temporary files stay under `storage/framework/tmp` inside the app tree (helpful under `open_basedir`).
 5. Open the site in a browser. You are sent to `/install`.
 6. Enter the database details (or choose Cloudron's database, below), organisation name, timezone (default Europe/London) and the first admin user.
 

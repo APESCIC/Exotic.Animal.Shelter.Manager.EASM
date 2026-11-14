@@ -78,6 +78,7 @@ Hotfixes only with Bambie's written approval on the issue. The full guide is [do
 - Published Releases also get a shared-hosting zip from `release-package.yml` (`release: published` only): `easm-X.Y.Z.zip`, `SHA256SUMS` and a minisign signature. Public key: `resources/keys/easm-release.minisign.pub`. Private key: repository secret `MINISIGN_SECRET_KEY` (never in git).
 - Pre-install host check: open `/check.php` (plain PHP under `install/requirements/`, no Laravel). After install it locks. Herd serves it via `LocalValetDriver.php` (must extend `Valet\Drivers\LaravelValetDriver`).
 - Release download helpers live in `install/package/` (`Easm\Package\`): chunked HTTPS download, SHA-256 + minisign (sodium) verify, and safe zip extract with a pure-PHP fallback when `ZipArchive` is missing.
+- Shared hosting: prefer document root `public/`. Root `index.php` + `.htaccess` are a fallback (403 for `.env`, `storage`, `vendor`, `composer.json`). Public uploads use a symlink when possible, otherwise the `/storage/{path}` route (`easm:ensure-public-storage`). Temp files go under `storage/framework/tmp`.
 
 ## Where to find more
 

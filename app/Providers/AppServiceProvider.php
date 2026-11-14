@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Install\InstallationState;
 use App\Models\Setting;
+use App\Support\SharedHosting;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
@@ -16,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(InstallationState::class);
+        SharedHosting::ensureAppTempDirectory();
     }
 
     /**
