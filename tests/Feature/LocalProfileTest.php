@@ -94,7 +94,7 @@ class LocalProfileTest extends TestCase
 
         $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $version);
         $this->assertStringContainsString("APP_VERSION={$version}\n", str_replace("\r\n", "\n", (string) file_get_contents(base_path('.env.example'))));
-        $this->assertStringContainsString("env('APP_VERSION', '{$version}')", (string) file_get_contents(base_path('config/app.php')));
+        $this->assertStringContainsString("file_get_contents(dirname(__DIR__).DIRECTORY_SEPARATOR.'VERSION')", (string) file_get_contents(base_path('config/app.php')));
         $this->assertArrayNotHasKey('APP_VERSION', $this->herdEnv());
     }
 }

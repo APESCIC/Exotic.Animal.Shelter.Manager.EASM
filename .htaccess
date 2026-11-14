@@ -1,0 +1,35 @@
+# EASM shared-hosting fallback when the document root cannot be set to public/.
+#
+# Prefer pointing the site document root at public/ (see docs/install.md).
+# Serving from the repository root exposes more of the tree to Apache; this
+# file denies the sensitive paths and forwards everything else into public/.
+# It is not a substitute for a correct document root on hosts that allow one.
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)^(\.env|composer\.(json|lock)|artisan)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)^(\.env|composer\.(json|lock)|artisan)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Forbidden: secrets, source, vendor and writable storage.
+    RewriteRule ^(?i:(\.env|composer\.(json|lock)|artisan))(/|$) - [F,L]
+    RewriteRule ^(?i:(storage|vendor|bootstrap|app|config|database|resources|routes|tests|scripts|install|\.git|\.github|\.cursor|\.githooks))(/|$) - [F,L]
+
+    # Already under public/ — do not loop.
+    RewriteRule ^public/ - [L]
+
+    # Front-controller and static assets live in public/.
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes

@@ -1,13 +1,13 @@
 # Install EASM on a host
 
-How a shelter installs EASM on its own web hosting. Developing EASM locally is different: see [Start here in AGENTS.md](../AGENTS.md#start-here). Terms are in the [glossary](glossary.md).
+How a shelter installs EASM on its own web hosting. **Browser-only shared hosting (cPanel / Plesk File Manager):** start with [INSTALL.md](../INSTALL.md). **Upgrades:** [UPGRADING.md](../UPGRADING.md). **Cloudron LAMP:** [hosting/cloudron-lamp.md](hosting/cloudron-lamp.md). Developing EASM locally is different: see [Start here in AGENTS.md](../AGENTS.md#start-here). Terms are in the [glossary](glossary.md).
 
 ## Hosting
 
 | Host type | PHP | Database | Document root | Notes |
 |-----------|-----|----------|---------------|--------|
-| cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | One `composer install`. Don't point the site at the repository root. |
-| Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document root and Composer step. |
+| cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | Prefer the Release zip ([INSTALL.md](../INSTALL.md)). Don't point the site at the application root. |
+| Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document root; Release zip path in [INSTALL.md](../INSTALL.md). |
 | VPS (Apache or nginx) | 8.3+ | MySQL or MariaDB | `public/` | HTTPS recommended. |
 | Cloudron LAMP app | 8.3 (`/app/data/PHP_VERSION`) | Cloudron MySQL addon, or your own | `public/` | The wizard offers Cloudron's database; see [Choosing the database](#choosing-the-database). |
 Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only, not on every request. One shelter per install; EASM is not multi-tenant software.
@@ -16,7 +16,29 @@ PHP extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbs
 
 ## Install
 
-Clone the repository or unzip a release, then run Composer **once**:
+Before installing, open `/check.php` in the browser. It is plain PHP (no Laravel) and reports PHP version, extensions, writable folders, document root, and other host limits, with UK English fixes. After install it locks and will not run again on that shelter. On Laravel Herd locally, `LocalValetDriver.php` serves `/check.php` outside the front controller.
+
+The updater uses `install/package/` to download a Release zip over HTTPS in chunks, verify its SHA-256 and minisign signature with libsodium (public key `resources/keys/easm-release.minisign.pub`), then extract it safely. Extraction prefers `ZipArchive` and falls back to a pure-PHP reader; both paths reject zip-slip, absolute paths, symbolic links and oversized entries.
+
+Before an update, the pure-PHP backup service dumps the database in short chunks (no `mysqldump`), zips `.env` and `storage`, and keeps the newest three under `storage/app/backups` (never under `public/`). Admins can download them from Administration → Backups.
+
+Admins see an update banner when GitHub has a newer stable Release. The check runs at most once a day when an admin loads a page (no cron required). If the host can hit a URL on a schedule, set `EASM_UPDATE_CRON_TOKEN` and call `GET /cron/update-check?token=…`. When GitHub is blocked the banner says to check manually; the page still loads.
+
+The web updater keeps its progress in `storage/app/update/state.json` with a single-run lock file. If a request times out or the tab is closed mid-step, reloading resumes from the last incomplete step without corrupting completed work. Admins run it from Administration → Update (password re-entry, CSRF). Steps are short AJAX calls: preflight, backup, maintenance on, download, verify, extract, swap (keeps `.env` and `storage/`), migrate, clear caches, health, maintenance off. Extraction falls back to pure PHP when `ZipArchive` is unavailable. When the host blocks outbound HTTPS, upload the Release zip and `.minisig` in browser chunks (each under 4&nbsp;MiB for an 8&nbsp;M `upload_max_filesize`). If any step fails, the updater rolls back automatically: it restores the pre-swap code snapshot (when the swap had already run), restores the database and `.env`/`storage` from the pre-update backup, turns maintenance mode off, and leaves `/health` OK on the previous version. While an update is running, a random token is written to `storage/app/update/recovery.token`. If Laravel will not boot afterwards, open `/recover.php?token=…` (plain PHP, no `vendor/`) to roll back, finish/clear the session, or turn maintenance off; a wrong or missing token returns 403, and a successful action deletes the token. The admin progress page shows a step list; logs are redacted so `APP_KEY` and the database password never appear. Maintenance mode uses a random bypass secret: the public gets a 503 page, while the admin keeps the progress page after the bypass cookie is set.
+
+Prefer a published GitHub Release zip (includes `vendor/` and static assets; no Composer or Node on the host):
+
+```bash
+# optional: verify the signature and checksum from the Release assets
+minisign -Vm easm-X.Y.Z.zip -p resources/keys/easm-release.minisign.pub
+sha256sum -c SHA256SUMS
+unzip easm-X.Y.Z.zip
+cd easm-X.Y.Z   # or the folder name from the archive
+```
+
+The Release package workflow attaches `easm-X.Y.Z.zip`, `SHA256SUMS` and the `.minisig` when the Release is published (see [workflows.md](workflows.md#release-package-signing)).
+
+Or clone and run Composer **once**:
 
 ```bash
 git clone https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM.git
@@ -24,26 +46,18 @@ cd Exotic.Animal.Shelter.Manager.EASM
 composer install --no-dev --optimize-autoloader
 ```
 
-From a zip:
-
-```bash
-unzip easm.zip
-cd easm   # the folder name may match the release archive
-composer install --no-dev --optimize-autoloader
-```
-
-`composer install` copies `.env.example` to `.env` when needed and fills `APP_KEY` if it is empty. It does not migrate, and does not mark the app installed.
+`composer install` copies `.env.example` to `.env` when needed and fills `APP_KEY` if it is empty. The zip path skips that step until the wizard writes `.env`. Neither path migrates or marks the app installed by itself.
 
 Then:
 
 1. Create an empty MySQL or MariaDB database in the host panel.
-2. Point the site's document root at `public/`.
+2. Point the site's document root at `public/` whenever the host allows it. Apache uses `public/.htaccess`. nginx needs `try_files` (see the [README nginx section](../README.md#document-root-and-nginx)). If the panel can only use the repository root, the root `index.php` and `.htaccess` fall back into `public/` and return **403** for `.env`, `storage/`, `vendor/` and `composer.json`. Prefer a real `public/` document root; the root fallback is a last resort, not a security substitute.
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
-4. Run `php artisan storage:link`, so animal photos and media under `storage/app/public` can be reached.
+4. Public media: the installer (and `php artisan easm:ensure-public-storage`) creates `public/storage` with a symlink when the host allows it. If `symlink()` is disabled, uploads still display through the application `/storage/{path}` route. PHP temporary files stay under `storage/framework/tmp` inside the app tree (helpful under `open_basedir`).
 5. Open the site in a browser. You are sent to `/install`.
-6. Enter the database details (or choose Cloudron's database, below), organisation name, timezone (default Europe/London) and the first admin user.
+6. Follow the stepped wizard: host requirements → database test → organisation and first admin → migrations (one per request, so a 30-second PHP limit is fine) → finish. The finish step writes a production `.env` (including `APP_KEY` when missing), creates the admin, and locks the installer.
 
-The wizard writes `.env`, runs the migrations, creates that admin (role `admin`) and writes `storage/app/installed`. After that, `/install` won't run again. Sign in at `/login`; see [features.md](features.md) for what each role can do.
+The wizard writes `.env`, runs the migrations in chunks, creates that admin (role `admin`) and writes `storage/app/installed`. After that, `/install` won't run again. Sign in at `/login`; see [features.md](features.md) for what each role can do.
 
 Shelters install and update from a clone or a zip like this. Nothing is ever deployed to a shelter's hosting.
 
@@ -69,7 +83,7 @@ Run `php artisan config:clear` after changing it if the config is cached.
 
 ## Health and version
 
-`GET /health` returns the app's status, name and version as JSON (`"status":"ok"` and a `version` field). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. It works before and after the installer. Laravel's own `GET /up` check is also available.
+`GET /health` returns the app's status, name and version as JSON (`"status":"ok"`, a `version` field from the `VERSION` file, and `schema` as the last applied migration name). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. On MySQL/MariaDB the check uses a 2-second connect timeout so a silent packet drop returns 503 instead of holding a PHP worker for the driver default. It works before and after the installer. Laravel's own `GET /up` check is also available.
 
 ## The APES Cloudron instance
 

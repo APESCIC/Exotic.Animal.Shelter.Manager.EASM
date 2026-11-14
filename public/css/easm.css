@@ -767,6 +767,50 @@ form.is-dirty .save-bar-status {
     color: var(--color-warning-text);
 }
 
+.update-notes {
+    margin: var(--space-2) 0 0;
+    padding: var(--space-3);
+    max-height: 12rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    font-size: 0.875rem;
+    background: var(--color-surface, #fff);
+    border-radius: var(--radius-sm);
+}
+
+.update-steps {
+    list-style: none;
+    margin: var(--space-3) 0;
+    padding: 0;
+    border: 1px solid var(--color-border, #ddd6c8);
+    border-radius: var(--radius-sm);
+}
+
+.update-steps li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0.55rem 0.85rem;
+    border-bottom: 1px solid var(--color-border, #ddd6c8);
+}
+
+.update-steps li:last-child {
+    border-bottom: 0;
+}
+
+.update-steps [data-step-status="completed"] .update-step-status {
+    color: var(--color-success-text, #2f6f5e);
+}
+
+.update-steps [data-step-status="in_progress"] .update-step-status,
+.update-steps [data-step-status="failed"] .update-step-status {
+    color: var(--color-warning-text, #9a6700);
+}
+
+.update-steps [data-step-status="failed"] .update-step-status {
+    color: var(--color-danger-text, #9b2c2c);
+}
+
 .errors {
     background: var(--color-danger-bg);
     color: var(--color-danger-text);

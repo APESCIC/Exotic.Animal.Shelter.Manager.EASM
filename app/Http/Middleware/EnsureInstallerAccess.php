@@ -31,6 +31,11 @@ class EnsureInstallerAccess
                 abort(403, 'This shelter is already installed.');
             }
 
+            // JSON clients (requirements step) still receive a locked report.
+            if ($request->expectsJson()) {
+                return $next($request);
+            }
+
             return redirect('/');
         }
 

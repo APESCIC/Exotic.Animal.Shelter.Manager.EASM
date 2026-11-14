@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\PublicStorageController;
 use App\Http\Middleware\AutoLoginDevUser;
+use App\Http\Middleware\CheckForUpdates;
 use App\Http\Middleware\EnsureInstallerAccess;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -19,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function (): void {
             Route::get('/health', HealthController::class)->name('health');
+            // Fallback when public/storage cannot be a symlink (shared hosting).
+            Route::get('/storage/{path}', PublicStorageController::class)
+                ->where('path', '.*')
+                ->name('storage.public');
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -33,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureInstallerAccess::class,
         ], append: [
             AutoLoginDevUser::class,
+            CheckForUpdates::class,
         ]);
 
         $middleware->api(prepend: [

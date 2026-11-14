@@ -20,12 +20,13 @@ return [
     | Application Version
     |--------------------------------------------------------------------------
     |
-    | Reported by GET /health. Bump this when cutting a release. Settings UI
-    | for display date formats remains a later issue (#15).
+    | Reported by GET /health. The VERSION file is the source of truth;
+    | composer milestone:bump updates it (and .env.example). APP_VERSION in
+    | .env overrides when set. Settings UI for display date formats is #15.
     |
     */
 
-    'version' => env('APP_VERSION', '0.6.3'),
+    'version' => env('APP_VERSION') ?: trim((string) @file_get_contents(dirname(__DIR__).DIRECTORY_SEPARATOR.'VERSION')),
 
     /*
     |--------------------------------------------------------------------------
