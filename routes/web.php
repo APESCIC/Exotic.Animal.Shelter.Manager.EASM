@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\PublishingController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\UpdaterController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
@@ -263,5 +264,9 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
         Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
         Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
         Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('backups.download');
+        Route::get('/update', [UpdaterController::class, 'index'])->name('update.index');
+        Route::get('/update/status', [UpdaterController::class, 'status'])->name('update.status');
+        Route::post('/update/start', [UpdaterController::class, 'start'])->name('update.start');
+        Route::post('/update/step', [UpdaterController::class, 'step'])->name('update.step');
     });
 });

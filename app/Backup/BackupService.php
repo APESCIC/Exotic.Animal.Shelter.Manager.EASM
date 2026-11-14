@@ -101,8 +101,9 @@ class BackupService
 
         try {
             $env = base_path('.env');
-            if (is_file($env)) {
-                $zip->addFile($env, '.env');
+            if (is_file($env) && is_readable($env)) {
+                // addFromString avoids ZipArchive::close read errors with addFile on Windows.
+                $zip->addFromString('.env', (string) file_get_contents($env));
             }
 
             $storage = storage_path();
@@ -111,7 +112,7 @@ class BackupService
             );
             $backupRoot = realpath($this->root) ?: $this->root;
             foreach ($iterator as $file) {
-                if (! $file->isFile()) {
+                if (! $file->isFile() || ! $file->isReadable()) {
                     continue;
                 }
                 $absolute = $file->getPathname();
@@ -120,10 +121,18 @@ class BackupService
                     continue;
                 }
                 $relative = 'storage/'.ltrim(str_replace('\\', '/', substr($absolute, strlen($storage))), '/');
-                if (str_starts_with($relative, 'storage/app/backups/')) {
+                if (str_starts_with($relative, 'storage/app/backups/')
+                    || str_starts_with($relative, 'storage/framework/testing/')
+                    || str_starts_with($relative, 'storage/framework/cache/')
+                    || str_starts_with($relative, 'storage/framework/sessions/')
+                    || str_starts_with($relative, 'storage/logs/')) {
                     continue;
                 }
-                $zip->addFile($absolute, $relative);
+                $contents = @file_get_contents($absolute);
+                if ($contents === false) {
+                    continue;
+                }
+                $zip->addFromString($relative, $contents);
             }
         } finally {
             $zip->close();

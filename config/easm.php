@@ -109,6 +109,7 @@ return [
         'cron_token' => env('EASM_UPDATE_CRON_TOKEN'),
         'state_path' => env('EASM_UPDATE_STATE_PATH', storage_path('app/update')),
         'lock_stale_seconds' => (int) env('EASM_UPDATE_LOCK_STALE', 120),
+        'zip_backend' => env('EASM_UPDATE_ZIP_BACKEND', 'auto'),
     ],
 
     'dev_login' => [

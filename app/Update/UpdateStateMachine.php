@@ -268,6 +268,22 @@ class UpdateStateMachine
         return $state;
     }
 
+    /**
+     * Persist context without changing step status (for chunked download/extract).
+     *
+     * @param  array<string, mixed>  $contextMerge
+     * @return array<string, mixed>
+     */
+    public function mergeContext(array $contextMerge): array
+    {
+        $this->assertLocked();
+        $state = $this->requireState();
+        $state['context'] = array_merge(is_array($state['context'] ?? null) ? $state['context'] : [], $contextMerge);
+        $this->store->write($state);
+
+        return $state;
+    }
+
     public function release(): void
     {
         $this->lock->release();
