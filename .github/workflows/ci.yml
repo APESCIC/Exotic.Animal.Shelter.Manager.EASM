@@ -135,6 +135,7 @@ jobs:
   # Job name is part of the required-check set on main — never rename it.
   constrained-host:
     name: Constrained host
+    needs: [tests]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -149,7 +150,7 @@ jobs:
           php-version: '8.3'
           # zip stays available for Composer install; the constrained-host script
           # disables ZipArchive via disable_classes so the pure-PHP extract path runs.
-          extensions: mbstring, xml, curl, pdo_sqlite, bcmath, intl, gd, sodium, zip
+          extensions: mbstring, xml, curl, pdo_sqlite, pdo_mysql, bcmath, intl, gd, sodium, zip
           coverage: none
           tools: composer:v2
 
@@ -167,13 +168,14 @@ jobs:
 
       - name: Install Composer dependencies
         env:
-          COMPOSER_PROCESS_TIMEOUT: '300'
-        run: composer install --prefer-dist --no-interaction --no-progress
+          COMPOSER_PROCESS_TIMEOUT: '180'
+          COMPOSER_NO_INTERACTION: '1'
+        # --no-scripts avoids artisan during install; discover runs after .env is SQLite.
+        run: composer install --prefer-dist --no-interaction --no-progress --no-scripts
 
       - name: Prepare SQLite environment
         run: |
-          # composer post-install may already have written .env + APP_KEY via ensure-env.php.
-          # Do not call `php artisan` here: with no MySQL service, bootstrap has hung on this job.
+          # --no-scripts skipped ensure-env / package:discover; do them after SQLite .env.
           if [ ! -f .env ]; then cp .env.example .env; fi
           mkdir -p database
           touch database/database.sqlite
@@ -187,6 +189,7 @@ jobs:
             sed -i "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env
           fi
           grep -E '^(DB_CONNECTION|SESSION_DRIVER|CACHE_STORE|QUEUE_CONNECTION)=' .env
+          php artisan package:discover --ansi
 
       - name: Run constrained-host matrix
         env:
