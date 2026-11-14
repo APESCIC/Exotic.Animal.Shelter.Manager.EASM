@@ -39,6 +39,11 @@ if [[ ! -f "$stage/public/check.php" ]]; then
   echo "error: public/check.php missing from the package" >&2
   exit 1
 fi
+# install/package/ ships the safe download / verify / extract helpers for the updater.
+if [[ ! -d "$stage/install/package" ]]; then
+  echo "error: install/package missing from the package" >&2
+  exit 1
+fi
 
 # Drop any .env that composer scripts might have created.
 rm -f "$stage/.env"

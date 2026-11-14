@@ -18,6 +18,8 @@ PHP extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbs
 
 Before installing, open `/check.php` in the browser. It is plain PHP (no Laravel) and reports PHP version, extensions, writable folders, document root, and other host limits, with UK English fixes. After install it locks and will not run again on that shelter. On Laravel Herd locally, `LocalValetDriver.php` serves `/check.php` outside the front controller.
 
+The updater uses `install/package/` to download a Release zip over HTTPS in chunks, verify its SHA-256 and minisign signature with libsodium (public key `resources/keys/easm-release.minisign.pub`), then extract it safely. Extraction prefers `ZipArchive` and falls back to a pure-PHP reader; both paths reject zip-slip, absolute paths, symbolic links and oversized entries.
+
 Prefer a published GitHub Release zip (includes `vendor/` and static assets; no Composer or Node on the host):
 
 ```bash
