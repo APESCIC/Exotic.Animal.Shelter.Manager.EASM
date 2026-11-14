@@ -1,11 +1,14 @@
 <?php
 
 use App\Enums\AnimalTab;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\PublishingController;
+use App\Http\Controllers\Admin\ReleaseUploadController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\UpdaterController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
@@ -42,6 +45,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\UpdateCheckCronController;
 use App\Http\Controllers\WaitingListEntryController;
 use App\Http\Controllers\WebManifestController;
 use App\Http\Middleware\DeduplicateClientRequests;
@@ -50,6 +54,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/install', [InstallerController::class, 'show'])->name('install.show');
 Route::post('/install', [InstallerController::class, 'store'])->name('install.store');
+Route::get('/install/requirements', [InstallerController::class, 'requirements'])->name('install.requirements');
+Route::post('/install/database', [InstallerController::class, 'database'])->name('install.database');
+Route::post('/install/details', [InstallerController::class, 'details'])->name('install.details');
+Route::post('/install/migrate', [InstallerController::class, 'migrate'])->name('install.migrate');
+Route::post('/install/finish', [InstallerController::class, 'finish'])->name('install.finish');
 
 Route::middleware(RedirectIfAuthenticated::class)->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -63,6 +72,10 @@ Route::post('/logout', [LoginController::class, 'destroy'])
 Route::get('/dev/login-as/{role}', DevLoginController::class)->name('dev.login-as');
 
 Route::get('/manifest.webmanifest', WebManifestController::class)->name('webmanifest');
+
+Route::get('/cron/update-check', UpdateCheckCronController::class)
+    ->middleware('throttle:30,1')
+    ->name('cron.update-check');
 
 Route::get('/adopt', [AdoptableAnimalController::class, 'index'])->name('public.adopt.index');
 Route::get('/adopt/embed', [AdoptableAnimalController::class, 'embed'])->name('public.adopt.embed');
@@ -249,5 +262,15 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
         Route::put('/publishing', [PublishingController::class, 'update'])->name('publishing.update');
         Route::post('/publishing/token', [PublishingController::class, 'regenerate'])->name('publishing.regenerate');
         Route::get('/publishing/adoptable.csv', [PublishingController::class, 'download'])->name('publishing.csv');
+        Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
+        Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
+        Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('backups.download');
+        Route::get('/update', [UpdaterController::class, 'index'])->name('update.index');
+        Route::get('/update/status.json', [UpdaterController::class, 'status'])->name('update.status.json');
+        Route::post('/update/start', [UpdaterController::class, 'start'])->name('update.start');
+        Route::post('/update/step', [UpdaterController::class, 'step'])->name('update.step');
+        Route::post('/update/upload/begin', [ReleaseUploadController::class, 'begin'])->name('update.upload.begin');
+        Route::post('/update/upload/chunk', [ReleaseUploadController::class, 'chunk'])->name('update.upload.chunk');
+        Route::post('/update/upload/finish', [ReleaseUploadController::class, 'finish'])->name('update.upload.finish');
     });
 });

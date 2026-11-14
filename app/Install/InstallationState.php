@@ -55,6 +55,60 @@ class InstallationState
      */
     public function markInstalled(): void
     {
+        $version = (string) config('app.version');
+        $now = now()->timezone('UTC')->toIso8601String();
+
+        $this->writeMarker([
+            'installed_at' => $now,
+            'installed_version' => $version,
+            'updated_at' => $now,
+            'updated_version' => $version,
+            // Kept for older readers until the updater lands.
+            'version' => $version,
+        ]);
+    }
+
+    /**
+     * Record that an update finished (installed_version stays as first install).
+     */
+    public function markUpdated(string $version): void
+    {
+        $existing = $this->readMarker();
+        $now = now()->timezone('UTC')->toIso8601String();
+
+        $this->writeMarker([
+            'installed_at' => $existing['installed_at'] ?? $now,
+            'installed_version' => $existing['installed_version'] ?? ($existing['version'] ?? $version),
+            'updated_at' => $now,
+            'updated_version' => $version,
+            'version' => $version,
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function readMarker(): array
+    {
+        $path = $this->installedPath();
+        if (! is_file($path)) {
+            return [];
+        }
+
+        try {
+            $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+
+            return is_array($decoded) ? $decoded : [];
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function writeMarker(array $payload): void
+    {
         $path = $this->installedPath();
         $directory = dirname($path);
 
@@ -62,11 +116,9 @@ class InstallationState
             throw new \RuntimeException("Unable to create install lock directory [{$directory}].");
         }
 
-        $payload = json_encode([
-            'installed_at' => now()->timezone('UTC')->toIso8601String(),
-            'version' => config('app.version'),
-        ], JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
-
-        file_put_contents($path, $payload.PHP_EOL);
+        file_put_contents(
+            $path,
+            json_encode($payload, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT).PHP_EOL,
+        );
     }
 }

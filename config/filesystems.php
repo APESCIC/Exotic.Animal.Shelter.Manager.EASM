@@ -33,7 +33,10 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Private files are downloaded through authenticated controllers
+            // (not the framework /storage serve route), so that path stays free
+            // for the public disk symlink or SharedHosting fallback route.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

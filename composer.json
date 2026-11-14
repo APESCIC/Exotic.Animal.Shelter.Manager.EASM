@@ -25,7 +25,10 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Easm\\Package\\": "install/package/",
+            "Easm\\Recovery\\": "install/recovery/",
+            "Easm\\Requirements\\": "install/requirements/"
         }
     },
     "autoload-dev": {

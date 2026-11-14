@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class HealthTest extends TestCase
@@ -13,12 +14,40 @@ class HealthTest extends TestCase
     {
         $response = $this->getJson('/health');
 
+        $fromFile = trim((string) file_get_contents(base_path('VERSION')));
+
         $response->assertOk()
             ->assertJsonPath('status', 'ok')
-            ->assertJsonPath('version', config('app.version'))
+            ->assertJsonPath('version', $fromFile)
             ->assertJsonPath('app', config('app.name'))
             ->assertJsonPath('checks.app', true)
-            ->assertJsonPath('checks.database', true);
+            ->assertJsonPath('checks.database', true)
+            ->assertJsonStructure(['schema']);
+    }
+
+    public function test_health_version_equals_the_version_file(): void
+    {
+        $fromFile = trim((string) file_get_contents(base_path('VERSION')));
+
+        $this->assertNotSame('', $fromFile);
+        $this->assertSame($fromFile, $this->getJson('/health')->assertOk()->json('version'));
+    }
+
+    public function test_health_schema_changes_after_a_migration(): void
+    {
+        $before = $this->getJson('/health')->assertOk()->json('schema');
+        $this->assertIsString($before);
+        $this->assertNotSame('', $before);
+
+        DB::table('migrations')->insert([
+            'migration' => '9999_99_99_999999_health_schema_probe',
+            'batch' => 9999,
+        ]);
+
+        $after = $this->getJson('/health')->assertOk()->json('schema');
+
+        $this->assertSame('9999_99_99_999999_health_schema_probe', $after);
+        $this->assertNotSame($before, $after);
     }
 
     public function test_health_adds_the_php_handler_and_revision_on_the_local_preview_only(): void

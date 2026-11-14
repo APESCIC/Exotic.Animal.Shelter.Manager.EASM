@@ -10,7 +10,7 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 
 ## Animals and care
 
-- **Animals:** admin and staff manage animal records at `/animals` (free-text species, primary photo, enclosure, CITES and DWA details, find and filter, a shelter view by location). Run `php artisan storage:link` once so primary photos and animal media are served.
+- **Animals:** admin and staff manage animal records at `/animals` (free-text species, primary photo, enclosure, CITES and DWA details, find and filter, a shelter view by location). Public photos use `public/storage` when a symlink is available, or the `/storage/{path}` route on hosts that block `symlink()`.
 - **Movements:** admin and staff record movements on an animal (intake, hold, quarantine, foster, trial adoption, adoption, reclaim, transfer, deceased), with history on the animal record. A deceased movement updates the animal's deceased date and death reason. Optional contact links use people from `/people`.
 - **Medical care:** admin and staff record vaccinations, tests, treatments, diets and daily observations from the animal record.
 - **Media:** admin and staff upload extra photos and PDFs to an animal (Media section), separate from the primary photo.

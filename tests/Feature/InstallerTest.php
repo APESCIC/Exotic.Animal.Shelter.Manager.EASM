@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
+use App\Install\ChunkedMigrator;
 use App\Install\DatabaseConnector;
 use App\Install\EnvFile;
 use App\Install\InstallationState;
 use App\Install\Installer;
+use App\Install\InstallWizard;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,6 +72,10 @@ class InstallerTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertFileExists($this->installedPath);
+        $marker = json_decode((string) file_get_contents($this->installedPath), true);
+        $this->assertIsArray($marker);
+        $this->assertSame(config('app.version'), $marker['installed_version']);
+        $this->assertSame(config('app.version'), $marker['updated_version']);
 
         $env = file_get_contents($this->envPath);
         $this->assertIsString($env);
@@ -79,6 +85,8 @@ class InstallerTest extends TestCase
         $this->assertStringContainsString('DB_USERNAME=easm_user', $env);
         $this->assertStringContainsString('DB_PASSWORD=easm_secret', $env);
         $this->assertStringContainsString('APP_NAME="APES CIC Rescue"', $env);
+        $this->assertStringContainsString('APP_ENV=production', $env);
+        $this->assertStringContainsString('APP_DEBUG=false', $env);
         $this->assertStringContainsString('APP_TIMEZONE=Europe/London', $env);
         $this->assertStringContainsString('APP_INSTALLED=true', $env);
 
@@ -123,11 +131,13 @@ class InstallerTest extends TestCase
             }
         };
 
-        $installer = new Installer(
+        $wizard = new InstallWizard(
             $this->app->make(InstallationState::class),
             $spy,
             $this->app->make(DatabaseConnector::class),
+            $this->app->make(ChunkedMigrator::class),
         );
+        $installer = new Installer($wizard);
 
         $installer->install($this->validPayload());
 
@@ -162,21 +172,24 @@ class InstallerTest extends TestCase
 
     public function test_cloudron_database_choice_is_offered_only_on_cloudron(): void
     {
-        $this->get(route('install.show'))
-            ->assertOk()
-            ->assertDontSee('name="db_source"', false)
-            ->assertSee('name="db_database"', false);
+        config(['easm.cloudron_database' => null, 'easm.managed_database' => false]);
+
+        $without = $this->get(route('install.show'));
+        $without->assertOk();
+        $this->assertStringNotContainsString('Use the database Cloudron provides', $without->getContent());
+        $this->assertStringContainsString('name="db_database"', $without->getContent());
 
         $this->useCloudronDatabase();
 
-        $this->get(route('install.show'))
-            ->assertOk()
-            ->assertSee('Use the database Cloudron provides')
-            ->assertSee('Enter my own database details')
-            ->assertSee('value="cloudron" checked', false)
-            ->assertSee('name="db_database"', false)
-            ->assertDontSee('cloudron_user')
-            ->assertDontSee('cloudron_db');
+        $with = $this->get(route('install.show'));
+        $with->assertOk();
+        $html = $with->getContent();
+        $this->assertStringContainsString('Use the database Cloudron provides', $html);
+        $this->assertStringContainsString('Enter my own database details', $html);
+        $this->assertStringContainsString('name="db_source"', $html);
+        $this->assertStringContainsString('value="cloudron"', $html);
+        $this->assertStringNotContainsString('cloudron_user', $html);
+        $this->assertStringNotContainsString('cloudron_db', $html);
     }
 
     public function test_cloudron_database_install_keeps_credentials_out_of_env(): void
