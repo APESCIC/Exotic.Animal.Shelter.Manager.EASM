@@ -2,6 +2,8 @@
 
 namespace App\Backup;
 
+use Easm\Package\PurePhpZipWriter;
+use Easm\Package\ZipArchiveSupport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use ZipArchive;
@@ -89,53 +91,24 @@ class BackupService
     {
         $path = $this->pathFor($id);
         $zipPath = $path.'/files.zip';
+        $files = $this->collectArchiveFiles();
 
-        if (! class_exists(ZipArchive::class)) {
-            throw new BackupException('ZipArchive is required to archive backup files.');
-        }
-
-        $zip = new ZipArchive;
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            throw new BackupException('Could not create the files archive.');
-        }
-
-        try {
-            $env = base_path('.env');
-            if (is_file($env) && is_readable($env)) {
-                // addFromString avoids ZipArchive::close read errors with addFile on Windows.
-                $zip->addFromString('.env', (string) file_get_contents($env));
+        if (ZipArchiveSupport::isUsable()) {
+            $zip = new ZipArchive;
+            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                throw new BackupException('Could not create the files archive.');
             }
 
-            $storage = storage_path();
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($storage, \FilesystemIterator::SKIP_DOTS)
-            );
-            $backupRoot = realpath($this->root) ?: $this->root;
-            foreach ($iterator as $file) {
-                if (! $file->isFile() || ! $file->isReadable()) {
-                    continue;
+            try {
+                foreach ($files as $name => $contents) {
+                    // addFromString avoids ZipArchive::close read errors with addFile on Windows.
+                    $zip->addFromString($name, $contents);
                 }
-                $absolute = $file->getPathname();
-                $real = realpath($absolute) ?: $absolute;
-                if (str_starts_with($real, $backupRoot)) {
-                    continue;
-                }
-                $relative = 'storage/'.ltrim(str_replace('\\', '/', substr($absolute, strlen($storage))), '/');
-                if (str_starts_with($relative, 'storage/app/backups/')
-                    || str_starts_with($relative, 'storage/framework/testing/')
-                    || str_starts_with($relative, 'storage/framework/cache/')
-                    || str_starts_with($relative, 'storage/framework/sessions/')
-                    || str_starts_with($relative, 'storage/logs/')) {
-                    continue;
-                }
-                $contents = @file_get_contents($absolute);
-                if ($contents === false) {
-                    continue;
-                }
-                $zip->addFromString($relative, $contents);
+            } finally {
+                $zip->close();
             }
-        } finally {
-            $zip->close();
+        } else {
+            PurePhpZipWriter::write($zipPath, $files);
         }
 
         $meta = $this->readMeta($id);
@@ -259,32 +232,84 @@ class BackupService
     {
         $path = $this->assertReady($id);
         $target = $path.'.zip';
+        $files = [];
 
-        if (! class_exists(ZipArchive::class)) {
-            throw new BackupException('ZipArchive is required to download backups.');
-        }
-
-        $zip = new ZipArchive;
-        if ($zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            throw new BackupException('Could not create the download zip.');
-        }
-
-        try {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS)
-            );
-            foreach ($iterator as $file) {
-                if (! $file->isFile()) {
-                    continue;
-                }
-                $relative = substr($file->getPathname(), strlen($path) + 1);
-                $zip->addFile($file->getPathname(), str_replace('\\', '/', $relative));
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || ! $file->isReadable()) {
+                continue;
             }
-        } finally {
-            $zip->close();
+            $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($path) + 1));
+            $contents = @file_get_contents($file->getPathname());
+            if ($contents === false) {
+                continue;
+            }
+            $files[$relative] = $contents;
+        }
+
+        if (ZipArchiveSupport::isUsable()) {
+            $zip = new ZipArchive;
+            if ($zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+                throw new BackupException('Could not create the download zip.');
+            }
+
+            try {
+                foreach ($files as $name => $contents) {
+                    $zip->addFromString($name, $contents);
+                }
+            } finally {
+                $zip->close();
+            }
+        } else {
+            PurePhpZipWriter::write($target, $files);
         }
 
         return $target;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function collectArchiveFiles(): array
+    {
+        $files = [];
+        $env = base_path('.env');
+        if (is_file($env) && is_readable($env)) {
+            $files['.env'] = (string) file_get_contents($env);
+        }
+
+        $storage = storage_path();
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($storage, \FilesystemIterator::SKIP_DOTS)
+        );
+        $backupRoot = realpath($this->root) ?: $this->root;
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || ! $file->isReadable()) {
+                continue;
+            }
+            $absolute = $file->getPathname();
+            $real = realpath($absolute) ?: $absolute;
+            if (str_starts_with($real, $backupRoot)) {
+                continue;
+            }
+            $relative = 'storage/'.ltrim(str_replace('\\', '/', substr($absolute, strlen($storage))), '/');
+            if (str_starts_with($relative, 'storage/app/backups/')
+                || str_starts_with($relative, 'storage/framework/testing/')
+                || str_starts_with($relative, 'storage/framework/cache/')
+                || str_starts_with($relative, 'storage/framework/sessions/')
+                || str_starts_with($relative, 'storage/logs/')) {
+                continue;
+            }
+            $contents = @file_get_contents($absolute);
+            if ($contents === false) {
+                continue;
+            }
+            $files[$relative] = $contents;
+        }
+
+        return $files;
     }
 
     /**

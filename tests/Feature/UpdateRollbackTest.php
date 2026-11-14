@@ -201,7 +201,11 @@ class UpdateRollbackTest extends TestCase
             $zip->addFile($dir.'/easm-'.$version.'/composer.json', 'easm-'.$version.'/composer.json');
             $zip->close();
         } else {
-            $this->fail('ZipArchive required to build the fixture package.');
+            $this->writeMinimalStoredZip($zipPath, [
+                'easm-'.$version.'/VERSION' => $version."\n",
+                'easm-'.$version.'/UPDATE_MARKER' => "swapped-from-{$version}\n",
+                'easm-'.$version.'/composer.json' => "{\"name\":\"easm/test\"}\n",
+            ]);
         }
 
         $sha = hash_file('sha256', $zipPath);
@@ -229,5 +233,30 @@ class UpdateRollbackTest extends TestCase
         );
 
         return $sigPath;
+    }
+
+    /**
+     * @param  array<string, string>  $files
+     */
+    private function writeMinimalStoredZip(string $zipPath, array $files): void
+    {
+        $entries = '';
+        $central = '';
+        $offset = 0;
+        $count = 0;
+        foreach ($files as $name => $body) {
+            $nameBytes = $name;
+            $size = strlen($body);
+            $crc = crc32($body);
+            $local = pack('VvvvvvVVVvv', 0x04034B50, 20, 0, 0, 0, 0, $crc, $size, $size, strlen($nameBytes), 0)
+                .$nameBytes.$body;
+            $entries .= $local;
+            $central .= pack('VvvvvvvVVVvvvvvVV', 0x02014B50, 20, 20, 0, 0, 0, 0, $crc, $size, $size, strlen($nameBytes), 0, 0, 0, 0, 0, $offset)
+                .$nameBytes;
+            $offset += strlen($local);
+            $count++;
+        }
+        $end = pack('VvvvvVVv', 0x06054B50, 0, 0, $count, $count, strlen($central), strlen($entries), 0);
+        file_put_contents($zipPath, $entries.$central.$end);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Update;
 
 use App\Backup\BackupService;
+use Easm\Package\PurePhpZipReader;
+use Easm\Package\ZipArchiveSupport;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -144,10 +146,23 @@ class UpdateRollback
             return;
         }
 
-        if (! class_exists(ZipArchive::class)) {
-            throw new UpdateException('ZipArchive is required to restore backup files.');
+        if (ZipArchiveSupport::isUsable()) {
+            $this->restoreFilesWithZipArchive($zipPath);
+
+            return;
         }
 
+        $reader = new PurePhpZipReader($zipPath);
+        foreach ($reader->entries() as $entry) {
+            if ($entry['is_directory']) {
+                continue;
+            }
+            $this->writeRestoredFile($entry['name'], $reader->readContents($entry));
+        }
+    }
+
+    private function restoreFilesWithZipArchive(string $zipPath): void
+    {
         $zip = new ZipArchive;
         if ($zip->open($zipPath) !== true) {
             throw new UpdateException('Could not open the backup files archive.');
@@ -159,30 +174,34 @@ class UpdateRollback
                 if ($name === false || str_ends_with($name, '/')) {
                     continue;
                 }
-                $name = str_replace('\\', '/', $name);
-                if (str_contains($name, '..') || str_starts_with($name, '/')) {
-                    continue;
-                }
-
                 $contents = $zip->getFromIndex($i);
                 if ($contents === false) {
                     continue;
                 }
-
-                if ($name === '.env') {
-                    $target = $this->appRoot.DIRECTORY_SEPARATOR.'.env';
-                } elseif (str_starts_with($name, 'storage/')) {
-                    $target = $this->appRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $name);
-                } else {
-                    continue;
-                }
-
-                File::ensureDirectoryExists(dirname($target));
-                file_put_contents($target, $contents);
+                $this->writeRestoredFile($name, $contents);
             }
         } finally {
             $zip->close();
         }
+    }
+
+    private function writeRestoredFile(string $name, string $contents): void
+    {
+        $name = str_replace('\\', '/', $name);
+        if (str_contains($name, '..') || str_starts_with($name, '/')) {
+            return;
+        }
+
+        if ($name === '.env') {
+            $target = $this->appRoot.DIRECTORY_SEPARATOR.'.env';
+        } elseif (str_starts_with($name, 'storage/')) {
+            $target = $this->appRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $name);
+        } else {
+            return;
+        }
+
+        File::ensureDirectoryExists(dirname($target));
+        file_put_contents($target, $contents);
     }
 
     private function shouldSkip(string $relative): bool
