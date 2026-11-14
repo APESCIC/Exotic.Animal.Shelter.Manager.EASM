@@ -13,12 +13,14 @@ class LocalValetDriver extends LaravelValetDriver
 {
     public function frontControllerPath(string $sitePath, string $siteName, string $uri): ?string
     {
-        if ($uri === '/check.php' && is_file($sitePath.'/public/check.php')) {
-            $_SERVER['SCRIPT_FILENAME'] = $sitePath.'/public/check.php';
-            $_SERVER['SCRIPT_NAME'] = '/check.php';
-            $_SERVER['PHP_SELF'] = '/check.php';
+        foreach (['/check.php', '/recover.php'] as $script) {
+            if ($uri === $script && is_file($sitePath.'/public'.$script)) {
+                $_SERVER['SCRIPT_FILENAME'] = $sitePath.'/public'.$script;
+                $_SERVER['SCRIPT_NAME'] = $script;
+                $_SERVER['PHP_SELF'] = $script;
 
-            return $sitePath.'/public/check.php';
+                return $sitePath.'/public'.$script;
+            }
         }
 
         return parent::frontControllerPath($sitePath, $siteName, $uri);
