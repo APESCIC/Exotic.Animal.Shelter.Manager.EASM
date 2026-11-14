@@ -173,10 +173,14 @@ jobs:
         # --no-scripts avoids artisan during install; discover runs after .env is SQLite.
         run: composer install --prefer-dist --no-interaction --no-progress --no-scripts
 
+      - name: Discover packages without .env
+        # Same order as the PHP 8.3 job: package:discover runs before .env exists.
+        # Discover with a MySQL-oriented .env present has hung this job.
+        run: php artisan package:discover --ansi
+
       - name: Prepare SQLite environment
         run: |
-          # --no-scripts skipped ensure-env / package:discover; do them after SQLite .env.
-          if [ ! -f .env ]; then cp .env.example .env; fi
+          cp .env.example .env
           mkdir -p database
           touch database/database.sqlite
           sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
@@ -184,12 +188,9 @@ jobs:
           sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
           sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' .env
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
-          if grep -qE '^APP_KEY=\s*$' .env; then
-            KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
-            sed -i "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env
-          fi
+          KEY="base64:$(openssl rand -base64 32 | tr -d '\n')"
+          sed -i "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env
           grep -E '^(DB_CONNECTION|SESSION_DRIVER|CACHE_STORE|QUEUE_CONNECTION)=' .env
-          php artisan package:discover --ansi
 
       - name: Run constrained-host matrix
         env:
