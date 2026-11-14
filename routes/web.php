@@ -265,7 +265,7 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
         Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
         Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('backups.download');
         Route::get('/update', [UpdaterController::class, 'index'])->name('update.index');
-        Route::get('/update/status', [UpdaterController::class, 'status'])->name('update.status');
+        Route::get('/update/status.json', [UpdaterController::class, 'status'])->name('update.status.json');
         Route::post('/update/start', [UpdaterController::class, 'start'])->name('update.start');
         Route::post('/update/step', [UpdaterController::class, 'step'])->name('update.step');
     });

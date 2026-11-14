@@ -7,7 +7,7 @@
     <p class="hint">Resumable browser update. Each step is a short request so a 30-second PHP limit is fine. Keep this tab open until it finishes; if it stops, reload and continue.</p>
 
     <section class="card" data-updater
-             data-status-url="{{ route('admin.update.status') }}"
+             data-status-url="{{ route('admin.update.status.json') }}"
              data-start-url="{{ route('admin.update.start') }}"
              data-step-url="{{ route('admin.update.step') }}"
              data-csrf="{{ csrf_token() }}">
