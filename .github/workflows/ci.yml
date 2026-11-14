@@ -9,8 +9,10 @@ on:
 permissions:
   contents: read
 
+# Include github.sha so a stuck cancel on an older head cannot block the
+# current PR head (cancel-in-progress alone waits for the old run to die).
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
