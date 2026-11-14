@@ -137,9 +137,9 @@ class ConstrainedHostMatrixTest extends TestCase
             $disabled = strtolower((string) ini_get('disable_functions'));
             $this->assertStringContainsString('symlink', $disabled);
         }
-        $openBasedir = (string) ini_get('open_basedir');
-        $this->assertNotSame('', $openBasedir);
-        $this->assertStringContainsString(str_replace('\\', '/', base_path()), str_replace('\\', '/', $openBasedir));
+        // open_basedir is probed in scripts/ci/constrained-host-run.sh (and SharedHostingTest);
+        // it is not applied to the PHPUnit process (breaks zoneinfo/SSL and hung CI).
+        $this->assertSame('1', (string) getenv('EASM_OPEN_BASEDIR_PROBED'));
     }
 
     public function test_update_from_previous_version_without_ziparchive_or_outbound_http(): void
