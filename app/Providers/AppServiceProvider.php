@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Backup\BackupService;
 use App\Install\InstallationState;
 use App\Models\Setting;
 use App\Support\SharedHosting;
@@ -17,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(InstallationState::class);
+        $this->app->singleton(BackupService::class, function () {
+            return new BackupService(
+                root: (string) config('easm.backups.path', storage_path('app/backups')),
+            );
+        });
         SharedHosting::ensureAppTempDirectory();
     }
 
