@@ -131,7 +131,8 @@ class ConstrainedHostMatrixTest extends TestCase
             $this->assertStringContainsString('ziparchive', $disabledClasses);
         }
         if (getenv('EASM_EXPECT_NO_MYSQLDUMP') === '1') {
-            $this->assertFalse($this->mysqldumpOnPath());
+            // Stub may still be on PATH; it must fail so BackupService cannot use it.
+            $this->assertFalse($this->mysqldumpUsable());
         }
         if (getenv('EASM_EXPECT_NO_SYMLINK') === '1') {
             $disabled = strtolower((string) ini_get('disable_functions'));
@@ -189,11 +190,13 @@ class ConstrainedHostMatrixTest extends TestCase
         }
     }
 
-    private function mysqldumpOnPath(): bool
+    private function mysqldumpUsable(): bool
     {
-        $which = trim((string) shell_exec('command -v mysqldump 2>/dev/null || which mysqldump 2>/dev/null || echo'));
+        $output = [];
+        $code = 0;
+        exec('mysqldump --version 2>&1', $output, $code);
 
-        return $which !== '';
+        return $code === 0;
     }
 
     /**
