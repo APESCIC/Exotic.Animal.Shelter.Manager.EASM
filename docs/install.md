@@ -73,7 +73,7 @@ Run `php artisan config:clear` after changing it if the config is cached.
 
 ## Health and version
 
-`GET /health` returns the app's status, name and version as JSON (`"status":"ok"` and a `version` field). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. On MySQL/MariaDB the check uses a 2-second connect timeout so a silent packet drop returns 503 instead of holding a PHP worker for the driver default. It works before and after the installer. Laravel's own `GET /up` check is also available.
+`GET /health` returns the app's status, name and version as JSON (`"status":"ok"`, a `version` field from the `VERSION` file, and `schema` as the last applied migration name). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. On MySQL/MariaDB the check uses a 2-second connect timeout so a silent packet drop returns 503 instead of holding a PHP worker for the driver default. It works before and after the installer. Laravel's own `GET /up` check is also available.
 
 ## The APES Cloudron instance
 

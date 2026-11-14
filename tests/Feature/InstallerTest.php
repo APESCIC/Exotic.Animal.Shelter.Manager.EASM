@@ -70,6 +70,10 @@ class InstallerTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertFileExists($this->installedPath);
+        $marker = json_decode((string) file_get_contents($this->installedPath), true);
+        $this->assertIsArray($marker);
+        $this->assertSame(config('app.version'), $marker['installed_version']);
+        $this->assertSame(config('app.version'), $marker['updated_version']);
 
         $env = file_get_contents($this->envPath);
         $this->assertIsString($env);
