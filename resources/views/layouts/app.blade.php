@@ -66,6 +66,35 @@
                         <div class="warning" role="alert">{{ session('warning') }}</div>
                     @endif
 
+                    @isset($updateNotice)
+                        @if ($updateNotice->shouldShowBanner())
+                            <div class="warning" role="status" data-update-banner>
+                                @if ($updateNotice->updateAvailable)
+                                    <p>
+                                        Update <strong>{{ $updateNotice->latestVersion }}</strong> is available
+                                        (you are on {{ $updateNotice->currentVersion }}).
+                                        @if ($updateNotice->htmlUrl)
+                                            <a href="{{ $updateNotice->htmlUrl }}" rel="noopener noreferrer" target="_blank">View the release</a>
+                                        @endif
+                                    </p>
+                                    @if ($updateNotice->notes)
+                                        <details>
+                                            <summary>Changelog</summary>
+                                            <pre class="update-notes">{{ $updateNotice->notes }}</pre>
+                                        </details>
+                                    @endif
+                                @else
+                                    <p>
+                                        {{ $updateNotice->message ?: 'Could not check for updates. Check manually.' }}
+                                        @if ($updateNotice->htmlUrl)
+                                            <a href="{{ $updateNotice->htmlUrl }}" rel="noopener noreferrer" target="_blank">GitHub Releases</a>
+                                        @endif
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    @endisset
+
                     @if ($errors->any())
                         <div class="errors" role="alert">
                             <ul>

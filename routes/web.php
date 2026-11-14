@@ -43,6 +43,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SponsorshipController;
 use App\Http\Controllers\StockItemController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\UpdateCheckCronController;
 use App\Http\Controllers\WaitingListEntryController;
 use App\Http\Controllers\WebManifestController;
 use App\Http\Middleware\DeduplicateClientRequests;
@@ -69,6 +70,10 @@ Route::post('/logout', [LoginController::class, 'destroy'])
 Route::get('/dev/login-as/{role}', DevLoginController::class)->name('dev.login-as');
 
 Route::get('/manifest.webmanifest', WebManifestController::class)->name('webmanifest');
+
+Route::get('/cron/update-check', UpdateCheckCronController::class)
+    ->middleware('throttle:30,1')
+    ->name('cron.update-check');
 
 Route::get('/adopt', [AdoptableAnimalController::class, 'index'])->name('public.adopt.index');
 Route::get('/adopt/embed', [AdoptableAnimalController::class, 'embed'])->name('public.adopt.embed');
