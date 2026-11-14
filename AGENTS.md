@@ -76,6 +76,7 @@ Hotfixes only with Bambie's written approval on the issue. The full guide is [do
 - Security checks use only free GitHub features ([docs/workflows.md](docs/workflows.md)).
 - UK English. Commit messages: `fix: what changed (Refs #123)`.
 - Published Releases also get a shared-hosting zip from `release-package.yml` (`release: published` only): `easm-X.Y.Z.zip`, `SHA256SUMS` and a minisign signature. Public key: `resources/keys/easm-release.minisign.pub`. Private key: repository secret `MINISIGN_SECRET_KEY` (never in git).
+- Pre-install host check: open `/check.php` (plain PHP under `install/requirements/`, no Laravel). After install it locks. Herd serves it via `LocalValetDriver.php`.
 
 ## Where to find more
 
