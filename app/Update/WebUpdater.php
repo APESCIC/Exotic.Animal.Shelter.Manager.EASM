@@ -8,6 +8,7 @@ use App\Support\AppVersion;
 use Easm\Package\ChunkedDownloader;
 use Easm\Package\ReleaseVerifier;
 use Easm\Package\SafeZipExtractor;
+use Easm\Recovery\RecoveryToken;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -64,6 +65,9 @@ class WebUpdater
             'from_version' => AppVersion::current($this->appRoot),
         ], $options['context'] ?? []);
 
+        $recoveryToken = (new RecoveryToken($this->workRoot))->issue();
+        $context['recovery_token'] = $recoveryToken;
+
         return $this->machine->start($targetVersion, $context);
     }
 
@@ -97,6 +101,10 @@ class WebUpdater
                 $state = $this->machine->completeStep($step, $result['context']);
                 if ($this->machine->lock()->isHeld()) {
                     $this->machine->release();
+                }
+
+                if (($state['status'] ?? null) === UpdateStateMachine::STATUS_COMPLETED) {
+                    (new RecoveryToken($this->workRoot))->clear();
                 }
 
                 return [

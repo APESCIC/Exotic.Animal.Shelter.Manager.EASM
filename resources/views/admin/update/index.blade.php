@@ -49,6 +49,12 @@
     <section class="card">
         <h2>Progress</h2>
         <p data-updater-message class="hint">{{ ($state['status'] ?? 'idle') === 'idle' ? 'No update in progress.' : 'Status: '.$state['status'] }}</p>
+        @if (! empty($state['context']['recovery_token']))
+            <p class="hint">If Laravel will not boot after a failed update, open
+                <a href="{{ url('/recover.php?token='.$state['context']['recovery_token']) }}"><code>/recover.php</code></a>
+                with the recovery token (plain PHP; does not load <code>vendor/</code>).
+            </p>
+        @endif
         <pre data-updater-log class="update-notes" aria-live="polite">{{ json_encode($state, JSON_PRETTY_PRINT) }}</pre>
         <p><button type="button" class="button" data-updater-continue>Continue / run next step</button></p>
     </section>
