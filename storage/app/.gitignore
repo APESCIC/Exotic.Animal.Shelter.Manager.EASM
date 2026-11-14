@@ -3,4 +3,6 @@
 !public/
 !backups/
 !backups/.gitignore
+!update/
+!update/.gitignore
 !.gitignore
