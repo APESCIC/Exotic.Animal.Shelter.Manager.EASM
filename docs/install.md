@@ -1,13 +1,13 @@
 # Install EASM on a host
 
-How a shelter installs EASM on its own web hosting. Developing EASM locally is different: see [Start here in AGENTS.md](../AGENTS.md#start-here). Terms are in the [glossary](glossary.md).
+How a shelter installs EASM on its own web hosting. **Browser-only shared hosting (cPanel / Plesk File Manager):** start with [INSTALL.md](../INSTALL.md). **Upgrades:** [UPGRADING.md](../UPGRADING.md). **Cloudron LAMP:** [hosting/cloudron-lamp.md](hosting/cloudron-lamp.md). Developing EASM locally is different: see [Start here in AGENTS.md](../AGENTS.md#start-here). Terms are in the [glossary](glossary.md).
 
 ## Hosting
 
 | Host type | PHP | Database | Document root | Notes |
 |-----------|-----|----------|---------------|--------|
-| cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | One `composer install`. Don't point the site at the repository root. |
-| Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document root and Composer step. |
+| cPanel shared | 8.3+ (select in MultiPHP) | MySQL 8 or MariaDB 10.6+ | `public/` | Prefer the Release zip ([INSTALL.md](../INSTALL.md)). Don't point the site at the application root. |
+| Plesk | 8.3+ | MySQL or MariaDB | `public/` | Same document root; Release zip path in [INSTALL.md](../INSTALL.md). |
 | VPS (Apache or nginx) | 8.3+ | MySQL or MariaDB | `public/` | HTTPS recommended. |
 | Cloudron LAMP app | 8.3 (`/app/data/PHP_VERSION`) | Cloudron MySQL addon, or your own | `public/` | The wizard offers Cloudron's database; see [Choosing the database](#choosing-the-database). |
 Laravel 13 needs PHP 8.3 or newer. Composer runs at install time only, not on every request. One shelter per install; EASM is not multi-tenant software.
