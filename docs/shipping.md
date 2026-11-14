@@ -32,7 +32,7 @@ Work is grouped into versions, such as `v0.6.2`. Each issue in a version gets it
 
 ## Version fields
 
-`VERSION` is the single source of the version. `composer milestone:bump -- vX.Y.Z` sets it and copies it into `config/app.php` (the `APP_VERSION` default) and `.env.example`, as listed in `scripts/MilestoneVersion/fields.json`. Never edit those by hand. The local Herd `.env` has no `APP_VERSION`, so the local preview reports the version in `VERSION`; `scripts\preview.ps1` removes one if it finds it.
+`VERSION` is the single source of the version. `composer milestone:bump -- vX.Y.Z` sets it and copies it into `.env.example`, as listed in `scripts/MilestoneVersion/fields.json`. `config/app.php` reads the `VERSION` file (or `APP_VERSION` when set). Never edit those by hand. The local Herd `.env` has no `APP_VERSION`, so the local preview reports the version in `VERSION`; `scripts\preview.ps1` removes one if it finds it. `GET /health` also returns `schema` (the last applied migration name).
 
 ## The four steps
 

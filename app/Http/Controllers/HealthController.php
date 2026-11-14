@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\AppVersion;
 use App\Support\LocalRevision;
+use App\Support\SchemaVersion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -22,10 +24,14 @@ class HealthController extends Controller
     {
         $database = $this->databaseIsReachable();
 
+        $schema = $database ? (new SchemaVersion)->current() : null;
+
         $body = [
             'status' => $database ? 'ok' : 'degraded',
             'app' => config('app.name'),
-            'version' => config('app.version'),
+            // Always the VERSION file so /health matches the checkout/package, not a stale APP_VERSION.
+            'version' => AppVersion::fromFile(),
+            'schema' => $schema,
             'checks' => [
                 'app' => true,
                 'database' => $database,
