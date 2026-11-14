@@ -30,6 +30,16 @@ rsync -a \
   --exclude='/.playwright-mcp' \
   "$root/" "$stage/"
 
+# install/requirements/ must ship for public/check.php (plain PHP, no Laravel).
+if [[ ! -d "$stage/install/requirements" ]]; then
+  echo "error: install/requirements missing from the package" >&2
+  exit 1
+fi
+if [[ ! -f "$stage/public/check.php" ]]; then
+  echo "error: public/check.php missing from the package" >&2
+  exit 1
+fi
+
 # Drop any .env that composer scripts might have created.
 rm -f "$stage/.env"
 

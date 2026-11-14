@@ -16,6 +16,8 @@ PHP extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbs
 
 ## Install
 
+Before installing, open `/check.php` in the browser. It is plain PHP (no Laravel) and reports PHP version, extensions, writable folders, document root, and other host limits, with UK English fixes. After install it locks and will not run again on that shelter. On Laravel Herd locally, `LocalValetDriver.php` serves `/check.php` outside the front controller.
+
 Prefer a published GitHub Release zip (includes `vendor/` and static assets; no Composer or Node on the host):
 
 ```bash
