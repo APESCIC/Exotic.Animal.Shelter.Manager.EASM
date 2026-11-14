@@ -54,11 +54,11 @@ Each term in one plain sentence. Other docs link here instead of explaining term
 ## Local development
 
 - **Laravel Herd:** the Windows app that runs EASM locally with nginx, PHP, MySQL and a mail catcher.
-- **nginx:** the web server Herd uses to serve `http://easm.test`.
+- **nginx:** the web server Herd uses to serve `https://easm.test`.
 - **Isolate:** Herd's way of giving one site its own PHP version (`herd isolate 8.3`), so other local sites keep theirs.
 - **FastCGI:** the way the web server runs PHP; `/health` reports it as `cgi-fcgi`.
 - **Mail catcher:** Herd's local mail server (SMTP port 2525); it keeps every email the app sends, so nothing reaches a real inbox.
-- **Browsersync:** the tool that reloads the browser when you save a file (`http://localhost:5176`).
+- **Browsersync:** the tool that reloads the browser when you save a file (`https://easm.test:5176`).
 - **Live preview gate:** `scripts\preview.ps1` plus opening the local and live sites in Cursor's browser, done before any work.
 - **Demo data:** fake records for local testing only (`php artisan demo:seed`).
 - **`/health`:** a page that reports EASM's status and version, used to prove a deploy worked.

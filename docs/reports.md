@@ -15,7 +15,7 @@ One or two lines.
 
 ## How it was checked
 - `composer test`: passed (link to the CI run)
-- Checked in the preview at http://easm.test: what you looked at
+- Checked in the preview at https://easm.test: what you looked at
 
 ## What you need to do
 Nothing / what Bambie or the IT Administrator needs to do.

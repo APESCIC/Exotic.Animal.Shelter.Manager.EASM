@@ -5,7 +5,7 @@ EASM runs locally as its own Laravel Herd site. These are the values it needs. [
 | Setting | Value |
 | --- | --- |
 | Herd site | `easm`, linked from your clone (`herd link easm`) |
-| Hostname | `http://easm.test` |
+| Hostname | `https://easm.test`, secured with Herd's certificate (`herd secure easm`); `http://` redirects to it |
 | Document root | `public/` |
 | Web server | Herd's nginx |
 | PHP | 8.3, as on the live server, isolated to this site (`herd isolate 8.3`); Herd runs it through FastCGI (`cgi-fcgi`) |
@@ -13,7 +13,7 @@ EASM runs locally as its own Laravel Herd site. These are the values it needs. [
 | Database | Herd's MySQL 8.4, `easm_local` on `127.0.0.1:3306`, user `root`, no password, `utf8mb4_unicode_ci` |
 | Mail | Herd's mail catcher, SMTP on `127.0.0.1:2525`; read the mail in the Herd app or with `herd mail:wait` |
 | Node | 22, from Herd's nvm (`%USERPROFILE%\.config\herd\bin\nvm\v22.*`) |
-| Live reload | Browsersync on port 5176 (`npm run dev`), proxying `http://easm.test`; `scripts/preview.ps1` starts it in a hidden window and `-StopDevServer` stops it |
+| Live reload | Browsersync at `https://easm.test:5176` (`npm run dev`), proxying `https://easm.test`; [`bs-config.cjs`](../../bs-config.cjs) gives it Herd's `easm.test` certificate so browsers trust it. `scripts/preview.ps1` starts it in a hidden window and `-StopDevServer` stops it |
 | Live app | `https://easm.intranet.apes.org.uk` (Cloudron); the preview gate checks its `/health` version matches the preview's |
 | Env file | `.env.herd.example`, copied to `.env` by the setup script; no `APP_VERSION`, so the version comes from `VERSION` |
 

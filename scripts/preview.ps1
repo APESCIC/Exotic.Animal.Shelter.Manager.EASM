@@ -201,6 +201,8 @@ try {
         Write-Warn "Not running (-NoDevServer). Start it with npm run dev."
     } else {
         if (-not $nodeDir) { Stop-Preview 1 "Herd has no Node $($p.node). Ask the owner before running herd node:install $($p.node)." }
+        $certificate = Join-Path $env:USERPROFILE ".config\herd\config\valet\Certificates\$($p.hostname).crt"
+        if (-not (Test-Path $certificate)) { Stop-Preview 1 "Herd has no certificate for $($p.hostname), so live reload cannot serve $($p.previewUrl). Ask the owner before running herd secure $($p.site)." }
         $log = Join-Path $repo 'storage\logs\browsersync.log'
         Start-Process -FilePath $env:ComSpec -ArgumentList '/d', '/s', '/c', "`"npm run dev > `"$log`" 2>&1`"" -WorkingDirectory $repo -WindowStyle Hidden
         $deadline = (Get-Date).AddSeconds(60)
@@ -211,9 +213,14 @@ try {
         }
         Write-Ok "Started npm run dev in the background (log: storage\logs\browsersync.log; stop it with -StopDevServer)"
     }
+    if (-not $NoDevServer -or (Get-Listener $p.devServerPort)) {
+        $viaPreview = Get-Json "$($p.previewUrl)/health" 30
+        if ($null -eq $viaPreview -or $viaPreview.local.git_revision -ne $short) { Stop-Preview 1 "$($p.previewUrl) does not serve this checkout. Restart live reload with -StopDevServer, then run this again." }
+        Write-Ok "$($p.previewUrl) serves $short"
+    }
 
     Write-Step 'Ready'
-    Write-Ok "Open http://localhost:$($p.devServerPort) (live reload of $($p.appUrl)) and $($p.liveUrl) in Cursor's browser."
+    Write-Ok "Open $($p.previewUrl) (live reload of $($p.appUrl)) and $($p.liveUrl) in Cursor's browser."
     if ($before -ne $head) { Write-Ok "Code moved from $($before.Substring(0, 12)) to $short during the sync." }
 } finally {
     Pop-Location

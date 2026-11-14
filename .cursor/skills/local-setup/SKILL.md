@@ -17,7 +17,7 @@ Laravel Herd is the only local set-up. Settings: `docs/local/profile.md`. Demo d
    ```
 
    It checks Herd's PHP 8.3, Node 22 and MySQL 8.4, copies `.env.herd.example` to `.env`, installs dependencies, creates the `easm_local` database, migrates and loads the fake demo data.
-3. If it reports Herd does not serve `easm.test` yet, **stop and ask** before adding `-Link`: that changes Herd's sites (`herd link easm`, `herd isolate 8.3`).
+3. If it reports Herd does not serve `https://easm.test` yet, **stop and ask** before adding `-Link`: that changes Herd's sites (`herd link easm`, `herd isolate 8.3`, `herd secure easm`).
 
 ## Every time (the live preview gate)
 
@@ -28,13 +28,13 @@ Laravel Herd is the only local set-up. Settings: `docs/local/profile.md`. Demo d
    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1
    ```
 
-   It fetches, fast-forwards the branch, merges `origin/main` into it, installs changed dependencies, and reports pending migrations. It checks `http://easm.test/health` runs this revision on PHP 8.3 through FastCGI, compares the version with <https://easm.intranet.apes.org.uk/health>, and starts live reload on port 5176 in a hidden window.
+   It fetches, fast-forwards the branch, merges `origin/main` into it, installs changed dependencies, and reports pending migrations. It checks `https://easm.test/health` runs this revision on PHP 8.3 through FastCGI, compares the version with <https://easm.intranet.apes.org.uk/health>, and starts live reload at `https://easm.test:5176` in a hidden window.
 3. Read the exit code:
    - `0`: ready.
    - `1`: blocked. Report the message and **stop**.
    - `3`: needs a decision, usually a version mismatch. **Stop and ask** with AskQuestion. The only expected difference is a `chore: release vX.Y.Z` commit waiting to ship.
 4. If it lists pending migrations, **stop and ask** before running `php artisan migrate`.
-5. Open <http://localhost:5176> and <https://easm.intranet.apes.org.uk> in Cursor's browser. Check both loaded, take a screenshot of each, and report the URLs and the version. Then say "Preview ready, starting work". Call `SetActiveBranch` if the branch changed.
+5. Open <https://easm.test:5176> and <https://easm.intranet.apes.org.uk> in Cursor's browser. Check both loaded, take a screenshot of each, and report the URLs and the version. Then say "Preview ready, starting work". Call `SetActiveBranch` if the branch changed.
 6. If either site won't load after two attempts, **stop**, report what you saw, and ask how to go on.
 
 ## Good to know

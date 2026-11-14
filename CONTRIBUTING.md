@@ -49,7 +49,7 @@ Say issue #123, "[Bug] The animal filter resets on reload", is in milestone `v1.
    - Expected checks: composer test and composer lint pass; the filter survives a reload in the preview
    ```
 
-3. **Work.** Commit `fix: keep the animal filter on reload (Refs #123)`, then run `composer test` and `composer lint`, and check the change at <http://localhost:5176>.
+3. **Work.** Commit `fix: keep the animal filter on reload (Refs #123)`, then run `composer test` and `composer lint`, and check the change at <https://easm.test:5176>.
 4. **Pull request** into the version branch, titled with `composer milestone:pr-title -- 123` (`[v1.3.0] The animal filter resets on reload (#123)`). Its description follows the template and includes `Closes #123`. Then comment:
 
    ```markdown

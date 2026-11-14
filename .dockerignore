@@ -17,6 +17,7 @@ docs
 tests
 phpunit.xml
 package.json
+bs-config.cjs
 package-lock.json
 scripts/local
 scripts/herd-setup.ps1

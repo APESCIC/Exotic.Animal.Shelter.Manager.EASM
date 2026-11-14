@@ -7,8 +7,9 @@
       1. finds Herd's PHP 8.3, Composer, Node 22 and MySQL 8.4 and puts them
          first on PATH for this PowerShell session only, and checks the PHP
          extensions;
-      2. checks Herd serves this clone as http://easm.test on PHP 8.3; -Link
-         links and isolates it (herd link easm, herd isolate 8.3);
+      2. checks Herd serves this clone as https://easm.test on PHP 8.3; -Link
+         links, isolates and secures it (herd link easm, herd isolate 8.3,
+         herd secure easm);
       3. copies .env.herd.example to .env if .env is missing;
       4. installs Composer and npm dependencies, and generates APP_KEY if blank;
       5. creates this project's database if missing, and runs the migrations;
@@ -23,8 +24,9 @@
     Skip the demo data without asking.
 
 .PARAMETER Link
-    Link this clone as the Herd site and isolate it to the profile's PHP.
-    Changes Herd's sites, so run it only when the owner has agreed.
+    Link this clone as the Herd site, isolate it to the profile's PHP and
+    secure it with Herd's certificate. Changes Herd's sites, so run it only
+    when the owner has agreed.
 
 .EXAMPLE
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\herd-setup.ps1 -Link -SeedDemo
@@ -106,7 +108,8 @@ try {
     if ($Link) {
         Invoke-Checked 'herd link' { & $herd link $p.site }
         Invoke-Checked 'herd isolate' { & $herd isolate $p.php }
-        Write-Ok "Linked this clone as $($p.hostname) on PHP $($p.php)"
+        Invoke-Checked 'herd secure' { & $herd secure $p.site }
+        Write-Ok "Linked this clone as $($p.appUrl) on PHP $($p.php)"
     }
     $links = "$(& $herd links 2>&1 | Out-String)"
     $repoFull = (Resolve-Path $repo).Path.TrimEnd('\')
@@ -117,8 +120,10 @@ try {
         throw "Herd's $($p.site) site points at another folder: $($row.Trim()). Unlink it yourself (herd unlink $($p.site)), then run this again."
     } elseif ($row -notmatch "\|\s*$([regex]::Escape($p.php))\s*\|") {
         Write-Warn "Herd serves $($p.hostname) but not on PHP $($p.php). Run: herd isolate $($p.php)"
+    } elseif ($row -notmatch [regex]::Escape($p.appUrl)) {
+        Write-Warn "Herd serves $($p.hostname) without HTTPS. Run: herd secure $($p.site)"
     } else {
-        Write-Ok "Herd serves this clone on PHP $($p.php)"
+        Write-Ok "Herd serves this clone as $($p.appUrl) on PHP $($p.php)"
     }
 } finally {
     Pop-Location

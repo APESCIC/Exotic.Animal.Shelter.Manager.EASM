@@ -36,7 +36,7 @@ class LocalProfileTest extends TestCase
 
         $this->assertSame('local', $env['APP_ENV']);
         $this->assertSame($profile['appUrl'], $env['APP_URL']);
-        $this->assertSame('http://'.$profile['hostname'], $env['APP_URL']);
+        $this->assertSame('https://'.$profile['hostname'], $env['APP_URL']);
         $this->assertSame($profile['database']['host'], $env['DB_HOST']);
         $this->assertSame((string) $profile['database']['port'], $env['DB_PORT']);
         $this->assertSame($profile['database']['name'], $env['DB_DATABASE']);
@@ -65,7 +65,9 @@ class LocalProfileTest extends TestCase
         $this->assertSame('php'.str_replace('.', '', $profile['php']), $profile['herdPhp']);
         $this->assertSame('cgi-fcgi', $profile['phpSapi']);
         $this->assertStringStartsWith('https://', $profile['liveUrl']);
-        $this->assertStringContainsString('--proxy '.$profile['appUrl'].' --port '.$profile['devServerPort'], $package);
+        $this->assertSame($profile['appUrl'].':'.$profile['devServerPort'], $profile['previewUrl']);
+        $this->assertStringContainsString('--config bs-config.cjs --proxy '.$profile['appUrl'].' --port '.$profile['devServerPort'], $package);
+        $this->assertStringContainsString($profile['hostname'].'.crt', (string) file_get_contents(base_path('bs-config.cjs')));
     }
 
     public function test_public_htaccess_is_safe_under_fastcgi(): void
