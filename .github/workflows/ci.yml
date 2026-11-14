@@ -9,8 +9,10 @@ on:
 permissions:
   contents: read
 
+# Include github.sha so a stuck cancel on an older head cannot block the
+# current PR head (cancel-in-progress alone waits for the old run to die).
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -127,3 +129,49 @@ jobs:
           DB_USERNAME: easm
           DB_PASSWORD: secret
         run: php artisan migrate --force --no-interaction
+
+  # Shared-hosting matrix: 30s / 128M / 8M upload, no ZipArchive, no symlink,
+  # open_basedir, no mysqldump, outbound blocked, root docroot checks, previous→current update.
+  # Job name is part of the required-check set on main — never rename it.
+  constrained-host:
+    name: Constrained host
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          # zip stays available for Composer install; the constrained-host script
+          # disables ZipArchive via disable_classes so the pure-PHP extract path runs.
+          extensions: mbstring, xml, curl, pdo_sqlite, bcmath, intl, gd, sodium, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Find the Composer cache folder
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php8.3-constrained-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.3-constrained-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate --ansi
+
+      - name: Run constrained-host matrix
+        run: bash scripts/ci/constrained-host-run.sh
