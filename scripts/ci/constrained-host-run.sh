@@ -29,8 +29,9 @@ export EASM_EXPECT_NO_SYMLINK=1
 export EASM_REQUEST_MAX_EXECUTION_TIME=30
 
 # ZipArchive disabled for the matrix (Composer already ran with zip available).
-# open_basedir is NOT applied to the PHPUnit process (it breaks timezone/SSL reads
-# and hung the job); it is probed separately and covered by SharedHostingTest.
+# open_basedir is probed in a subprocess (not on PHPUnit — that hung CI).
+# Outbound block is application-level (Http::fake in ConstrainedHostMatrixTest);
+# iptables REJECT was tried and hung this job on GitHub-hosted runners.
 PHP_ARGS=(
   -d max_execution_time=120
   -d memory_limit=128M
@@ -47,7 +48,7 @@ command -v mysqldump >/dev/null 2>&1 && mysqldump --version 2>&1 | head -1 || ec
 
 echo "open_basedir probe (subprocess):"
 php -d "open_basedir=${ROOT}:/tmp" -r '
-  $base = getenv("PWD") ?: getcwd();
+  $base = getcwd();
   $file = $base."/storage/framework/tmp/open-basedir-ci-probe.txt";
   if (!is_dir(dirname($file))) { mkdir(dirname($file), 0755, true); }
   if (file_put_contents($file, "ok") === false) { fwrite(STDERR, "open_basedir write failed\n"); exit(2); }
@@ -58,18 +59,8 @@ php -d "open_basedir=${ROOT}:/tmp" -r '
 '
 export EASM_OPEN_BASEDIR_PROBED=1
 
-# Block outbound network after dependencies are installed (loopback stays open).
-# Use REJECT (not DROP) so accidental outbound calls fail fast instead of hanging.
-if command -v iptables >/dev/null 2>&1; then
-  sudo iptables -A OUTPUT -o lo -j ACCEPT || true
-  sudo iptables -A OUTPUT -d 127.0.0.0/8 -j ACCEPT || true
-  sudo iptables -A OUTPUT -j REJECT --reject-with icmp-host-unreachable || true
-fi
-if command -v ip6tables >/dev/null 2>&1; then
-  sudo ip6tables -A OUTPUT -o lo -j ACCEPT || true
-  sudo ip6tables -A OUTPUT -j REJECT --reject-with icmp6-addr-unreachable || true
-fi
-
-php "${PHP_ARGS[@]}" artisan test \
+echo "Running constrained PHPUnit matrix..."
+# Cap wall clock so a hang fails the job instead of waiting for job timeout.
+timeout 180 php "${PHP_ARGS[@]}" vendor/bin/phpunit \
   tests/Feature/ConstrainedHostMatrixTest.php \
   tests/Feature/SharedHostingTest.php
