@@ -1,4 +1,4 @@
-# Only what the image needs. Local Laragon, demo and agent files stay out.
+# Only what the image needs. Local Herd, demo and agent files stay out.
 .git
 .github
 .githooks
@@ -19,7 +19,7 @@ phpunit.xml
 package.json
 package-lock.json
 scripts/local
-scripts/laragon-setup.ps1
+scripts/herd-setup.ps1
 scripts/preview.ps1
 scripts/milestone-version
 scripts/MilestoneVersion

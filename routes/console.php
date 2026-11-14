@@ -27,10 +27,10 @@ Artisan::command('demo:seed', function () use ($demoGuard) {
     }
 
     $this->call('db:seed', ['--class' => DemoSeeder::class, '--force' => true]);
-    $this->info('Demo data loaded. Logins: docs/laragon/demo-data.md');
+    $this->info('Demo data loaded. Logins: docs/local/demo-data.md');
 
     return 0;
-})->purpose('Load the fake demo data (Laragon only, APP_ENV=local)');
+})->purpose('Load the fake demo data (local Herd preview only, APP_ENV=local)');
 
 Artisan::command('demo:reset', function () use ($demoGuard) {
     if ($problem = $demoGuard()) {
@@ -41,7 +41,7 @@ Artisan::command('demo:reset', function () use ($demoGuard) {
 
     $this->call('migrate:fresh', ['--force' => true]);
     $this->call('db:seed', ['--class' => DemoSeeder::class, '--force' => true]);
-    $this->info('Local database emptied and demo data reloaded. Logins: docs/laragon/demo-data.md');
+    $this->info('Local database emptied and demo data reloaded. Logins: docs/local/demo-data.md');
 
     return 0;
-})->purpose('Empty the local database and reload the fake demo data (Laragon only, APP_ENV=local)');
+})->purpose('Empty the local database and reload the fake demo data (local Herd preview only, APP_ENV=local)');

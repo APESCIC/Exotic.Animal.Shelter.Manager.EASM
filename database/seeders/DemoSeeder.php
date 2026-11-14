@@ -19,7 +19,7 @@ use Illuminate\Database\Seeder;
 use RuntimeException;
 
 /**
- * Clearly fake demo data for the Laragon preview: en_GB Faker with a fixed seed,
+ * Clearly fake demo data for the local Herd preview: en_GB Faker with a fixed seed,
  * example.test emails, Ofcom drama-range phone numbers (07700 900xxx) and the
  * non-existent ZZ99 postcode area. Refuses to run unless APP_ENV=local.
  */

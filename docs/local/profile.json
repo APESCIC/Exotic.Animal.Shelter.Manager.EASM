@@ -1,17 +1,13 @@
 {
     "project": "easm",
-    "folder": "C:\\laragon\\www\\easm",
+    "site": "easm",
     "hostname": "easm.test",
     "appUrl": "http://easm.test",
     "liveUrl": "https://easm.intranet.apes.org.uk",
     "documentRoot": "public",
-    "webServer": "apache",
-    "apache": "2.4",
     "php": "8.3",
-    "phpBuild": "php-8.3.33-Win32-vs16-x64",
-    "phpThreadSafe": true,
-    "apacheHandler": "fcgid",
-    "siteVhost": "docs/laragon/easm.test.conf",
+    "herdPhp": "php83",
+    "phpSapi": "cgi-fcgi",
     "phpExtensions": ["bcmath", "curl", "fileinfo", "gd", "intl", "mbstring", "openssl", "pdo_mysql", "pdo_sqlite", "zip"],
     "database": {
         "engine": "mysql",
@@ -22,6 +18,10 @@
         "username": "root",
         "charset": "utf8mb4",
         "collation": "utf8mb4_unicode_ci"
+    },
+    "mail": {
+        "host": "127.0.0.1",
+        "port": 2525
     },
     "node": "22",
     "devServerPort": 5176

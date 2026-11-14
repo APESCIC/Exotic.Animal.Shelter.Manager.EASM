@@ -4,23 +4,23 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 
-class LaragonProfileTest extends TestCase
+class LocalProfileTest extends TestCase
 {
     /**
      * @return array<string, mixed>
      */
     private function profile(): array
     {
-        return json_decode((string) file_get_contents(base_path('docs/laragon/profile.json')), true, flags: JSON_THROW_ON_ERROR);
+        return json_decode((string) file_get_contents(base_path('docs/local/profile.json')), true, flags: JSON_THROW_ON_ERROR);
     }
 
     /**
      * @return array<string, string>
      */
-    private function laragonEnv(): array
+    private function herdEnv(): array
     {
         $values = [];
-        foreach (file(base_path('.env.laragon.example'), FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+        foreach (file(base_path('.env.herd.example'), FILE_IGNORE_NEW_LINES) ?: [] as $line) {
             if (preg_match('/^([A-Z0-9_]+)=(.*)$/', $line, $match) === 1) {
                 $values[$match[1]] = trim($match[2], '"');
             }
@@ -29,19 +29,23 @@ class LaragonProfileTest extends TestCase
         return $values;
     }
 
-    public function test_the_laragon_env_example_matches_the_profile(): void
+    public function test_the_herd_env_example_matches_the_profile(): void
     {
         $profile = $this->profile();
-        $env = $this->laragonEnv();
+        $env = $this->herdEnv();
 
         $this->assertSame('local', $env['APP_ENV']);
         $this->assertSame($profile['appUrl'], $env['APP_URL']);
         $this->assertSame('http://'.$profile['hostname'], $env['APP_URL']);
         $this->assertSame($profile['database']['host'], $env['DB_HOST']);
+        $this->assertSame((string) $profile['database']['port'], $env['DB_PORT']);
         $this->assertSame($profile['database']['name'], $env['DB_DATABASE']);
         $this->assertSame($profile['database']['username'], $env['DB_USERNAME']);
         $this->assertSame('', $env['DB_PASSWORD']);
         $this->assertStringEndsWith('_local', $env['DB_DATABASE']);
+        $this->assertSame('smtp', $env['MAIL_MAILER']);
+        $this->assertSame($profile['mail']['host'], $env['MAIL_HOST']);
+        $this->assertSame((string) $profile['mail']['port'], $env['MAIL_PORT']);
     }
 
     public function test_the_shipped_env_example_stays_production_safe(): void
@@ -52,27 +56,16 @@ class LaragonProfileTest extends TestCase
         $this->assertStringContainsString("APP_DEBUG=false\n", str_replace("\r\n", "\n", $example));
     }
 
-    public function test_the_folder_and_live_reload_port_match_the_profile(): void
+    public function test_the_site_php_and_live_reload_port_match_the_profile(): void
     {
         $profile = $this->profile();
         $package = (string) file_get_contents(base_path('package.json'));
 
-        $this->assertSame($profile['project'].'.test', $profile['hostname']);
-        $this->assertSame('C:\\laragon\\www\\'.$profile['project'], $profile['folder']);
+        $this->assertSame($profile['site'].'.test', $profile['hostname']);
+        $this->assertSame('php'.str_replace('.', '', $profile['php']), $profile['herdPhp']);
+        $this->assertSame('cgi-fcgi', $profile['phpSapi']);
         $this->assertStringStartsWith('https://', $profile['liveUrl']);
         $this->assertStringContainsString('--proxy '.$profile['appUrl'].' --port '.$profile['devServerPort'], $package);
-    }
-
-    public function test_the_vhost_runs_the_profile_php_through_fastcgi(): void
-    {
-        $profile = $this->profile();
-        $vhost = (string) file_get_contents(base_path($profile['siteVhost']));
-
-        $this->assertSame('fcgid', $profile['apacheHandler']);
-        $this->assertStringContainsString('define EASM_PHP "C:/laragon/bin/php/'.$profile['phpBuild'].'"', $vhost);
-        $this->assertStringContainsString('FcgidWrapper "${EASM_PHP}/php-cgi.exe" .php', $vhost);
-        $this->assertStringContainsString('define ROOT "C:/laragon/www/'.$profile['project'].'/public"', $vhost);
-        $this->assertStringStartsWith('php-'.$profile['php'].'.', $profile['phpBuild']);
     }
 
     public function test_public_htaccess_is_safe_under_fastcgi(): void
@@ -101,6 +94,6 @@ class LaragonProfileTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $version);
         $this->assertSame($version, $manifest['version']);
         $this->assertStringContainsString("env('APP_VERSION', '{$version}')", (string) file_get_contents(base_path('config/app.php')));
-        $this->assertArrayNotHasKey('APP_VERSION', $this->laragonEnv());
+        $this->assertArrayNotHasKey('APP_VERSION', $this->herdEnv());
     }
 }
