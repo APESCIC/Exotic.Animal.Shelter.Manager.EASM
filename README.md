@@ -21,6 +21,29 @@ The full list is in [docs/features.md](docs/features.md).
 | Develop EASM on my PC | [Start here in AGENTS.md](AGENTS.md#start-here): Laravel Herd on Windows, five steps |
 | Contribute a change | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
+## Document root and nginx
+
+Point the site's document root at `public/`. Apache uses `public/.htaccess` for the front controller. nginx ignores `.htaccess`, so without `try_files` routes such as `/health` and `/install` return 404. See also [Laravel 13 nginx deployment](https://laravel.com/docs/13.x/deployment#nginx).
+
+```nginx
+root /var/www/easm/public;
+
+location / {
+    try_files $uri $uri/ /index.php?$query_string;
+}
+
+location ~ \.php$ {
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock; # or 127.0.0.1:9000
+    fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    include fastcgi_params;
+    try_files $uri =404;
+}
+```
+
+Adjust `root` and `fastcgi_pass` to the host. cPanel and Plesk Apache vhosts already honour `.htaccess`. Full install steps are in [docs/install.md](docs/install.md).
+
+`GET /health` returns JSON status and version. On MySQL/MariaDB it uses a 2-second connect timeout so a silent packet drop returns 503 instead of holding a PHP worker for the driver default (often about 60 seconds).
+
 ## Links
 
 - [How a version ships](docs/shipping.md)

@@ -37,7 +37,7 @@ composer install --no-dev --optimize-autoloader
 Then:
 
 1. Create an empty MySQL or MariaDB database in the host panel.
-2. Point the site's document root at `public/`.
+2. Point the site's document root at `public/`. Apache uses `public/.htaccess`. nginx needs `try_files` (see the [README nginx section](../README.md#document-root-and-nginx)).
 3. Make `storage/` and `bootstrap/cache/` writable by the web server.
 4. Run `php artisan storage:link`, so animal photos and media under `storage/app/public` can be reached.
 5. Open the site in a browser. You are sent to `/install`.
@@ -69,7 +69,7 @@ Run `php artisan config:clear` after changing it if the config is cached.
 
 ## Health and version
 
-`GET /health` returns the app's status, name and version as JSON (`"status":"ok"` and a `version` field). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. It works before and after the installer. Laravel's own `GET /up` check is also available.
+`GET /health` returns the app's status, name and version as JSON (`"status":"ok"` and a `version` field). It checks that PHP can open the configured database, and never includes secrets, `.env` values or credentials. On MySQL/MariaDB the check uses a 2-second connect timeout so a silent packet drop returns 503 instead of holding a PHP worker for the driver default. It works before and after the installer. Laravel's own `GET /up` check is also available.
 
 ## The APES Cloudron instance
 
