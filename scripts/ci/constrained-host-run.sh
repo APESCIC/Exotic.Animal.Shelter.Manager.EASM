@@ -45,14 +45,15 @@ php -d max_execution_time=30 -r 'echo "request_max_execution_time=".ini_get("max
 command -v mysqldump >/dev/null 2>&1 && mysqldump --version 2>&1 | head -1 || echo "mysqldump unavailable (expected)"
 
 # Block outbound network after dependencies are installed (loopback stays open).
+# Use REJECT (not DROP) so accidental outbound calls fail fast instead of hanging.
 if command -v iptables >/dev/null 2>&1; then
-  sudo iptables -P OUTPUT DROP || true
   sudo iptables -A OUTPUT -o lo -j ACCEPT || true
   sudo iptables -A OUTPUT -d 127.0.0.0/8 -j ACCEPT || true
+  sudo iptables -A OUTPUT -j REJECT --reject-with icmp-host-unreachable || true
 fi
 if command -v ip6tables >/dev/null 2>&1; then
-  sudo ip6tables -P OUTPUT DROP || true
   sudo ip6tables -A OUTPUT -o lo -j ACCEPT || true
+  sudo ip6tables -A OUTPUT -j REJECT --reject-with icmp6-addr-unreachable || true
 fi
 
 php "${PHP_ARGS[@]}" artisan test \
