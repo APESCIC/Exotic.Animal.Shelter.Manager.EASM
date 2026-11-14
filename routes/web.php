@@ -50,6 +50,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/install', [InstallerController::class, 'show'])->name('install.show');
 Route::post('/install', [InstallerController::class, 'store'])->name('install.store');
+Route::get('/install/requirements', [InstallerController::class, 'requirements'])->name('install.requirements');
+Route::post('/install/database', [InstallerController::class, 'database'])->name('install.database');
+Route::post('/install/details', [InstallerController::class, 'details'])->name('install.details');
+Route::post('/install/migrate', [InstallerController::class, 'migrate'])->name('install.migrate');
+Route::post('/install/finish', [InstallerController::class, 'finish'])->name('install.finish');
 
 Route::middleware(RedirectIfAuthenticated::class)->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
