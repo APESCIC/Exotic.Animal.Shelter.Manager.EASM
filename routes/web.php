@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\AnimalTab;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
@@ -254,5 +255,8 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
         Route::put('/publishing', [PublishingController::class, 'update'])->name('publishing.update');
         Route::post('/publishing/token', [PublishingController::class, 'regenerate'])->name('publishing.regenerate');
         Route::get('/publishing/adoptable.csv', [PublishingController::class, 'download'])->name('publishing.csv');
+        Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
+        Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
+        Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('backups.download');
     });
 });

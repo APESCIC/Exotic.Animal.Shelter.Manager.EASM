@@ -20,6 +20,8 @@ Before installing, open `/check.php` in the browser. It is plain PHP (no Laravel
 
 The updater uses `install/package/` to download a Release zip over HTTPS in chunks, verify its SHA-256 and minisign signature with libsodium (public key `resources/keys/easm-release.minisign.pub`), then extract it safely. Extraction prefers `ZipArchive` and falls back to a pure-PHP reader; both paths reject zip-slip, absolute paths, symbolic links and oversized entries.
 
+Before an update, the pure-PHP backup service dumps the database in short chunks (no `mysqldump`), zips `.env` and `storage`, and keeps the newest three under `storage/app/backups` (never under `public/`). Admins can download them from Administration → Backups.
+
 Prefer a published GitHub Release zip (includes `vendor/` and static assets; no Composer or Node on the host):
 
 ```bash

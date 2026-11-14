@@ -75,6 +75,21 @@ return [
 
     'dwa_reminder_days' => 60,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Updater backups
+    |--------------------------------------------------------------------------
+    |
+    | Pure-PHP dumps for the web updater live under storage/app/backups (never
+    | under public/). Only the newest few are kept.
+    |
+    */
+
+    'backups' => [
+        'path' => env('EASM_BACKUPS_PATH', storage_path('app/backups')),
+        'keep' => (int) env('EASM_BACKUPS_KEEP', 3),
+    ],
+
     'dev_login' => [
         'auto_login' => filter_var(env('DEV_AUTO_LOGIN', false), FILTER_VALIDATE_BOOLEAN),
         'role' => env('DEV_AUTO_LOGIN_ROLE', 'admin'),
