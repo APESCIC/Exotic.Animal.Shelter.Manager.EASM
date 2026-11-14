@@ -32,7 +32,7 @@ Work is grouped into versions, such as `v0.6.2`. Each issue in a version gets it
 
 ## Version fields
 
-`VERSION` is the single source of the version. `composer milestone:bump -- vX.Y.Z` sets it and copies it into `config/app.php` (the `APP_VERSION` default), `CloudronManifest.json` and `.env.example`, as listed in `scripts/MilestoneVersion/fields.json`. Never edit those by hand. The local Herd `.env` has no `APP_VERSION`, so the local preview reports the version in `VERSION`; `scripts\preview.ps1` removes one if it finds it.
+`VERSION` is the single source of the version. `composer milestone:bump -- vX.Y.Z` sets it and copies it into `config/app.php` (the `APP_VERSION` default) and `.env.example`, as listed in `scripts/MilestoneVersion/fields.json`. Never edit those by hand. The local Herd `.env` has no `APP_VERSION`, so the local preview reports the version in `VERSION`; `scripts\preview.ps1` removes one if it finds it.
 
 ## The four steps
 
@@ -69,7 +69,6 @@ When every issue in the version is closed, apart from the Epic and any "[Task] S
 Tag the merge commit and push the tag (the `release-version` skill). `release.yml` then:
 
 - checks that the tag matches `VERSION` and is on `main`;
-- builds and pushes the Cloudron image, until v0.6.3 removes it;
 - publishes the GitHub Release titled `v<version> <milestone name>`.
 
 ### 4. Deploy (once per version)

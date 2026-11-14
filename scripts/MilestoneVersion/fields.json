@@ -2,7 +2,6 @@
     "fields": [
         { "file": "VERSION", "type": "plain" },
         { "file": "config/app.php", "type": "regex", "pattern": "env\\('APP_VERSION', '([^']*)'\\)" },
-        { "file": "CloudronManifest.json", "type": "json", "key": "version" },
         { "file": ".env.example", "type": "regex", "pattern": "(?m)^APP_VERSION=([^\\r\\n]*)" }
     ],
     "notes": [

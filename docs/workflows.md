@@ -8,10 +8,9 @@ Every automatic check and job in this repository, what starts it, and what to do
 | --- | --- | --- | --- |
 | `ci.yml`: `PHP 8.3`, `PHP 8.4` | Every pull request, and `main` after the version merge | Validates `composer.json`, installs dependencies (cached), runs Pint and all PHPUnit tests | Open the failed step. Run `composer lint` or `composer test` locally, fix, push. `composer format` fixes style. |
 | `ci.yml`: `MySQL migrate` | Same | Runs every migration on an empty MySQL 8.0 database | A migration doesn't work on MySQL. Run `php artisan migrate:fresh` on your local Herd database to reproduce. |
-| `ci.yml`: `Docker image` | Same | Builds the Cloudron image without pushing it (removed in v0.6.3 with the package) | Read the build log. It is usually the `Dockerfile` or a Composer install step. |
 | `milestone-version-check.yml`: `milestone-version-check` | Every pull request (opened, edited or pushed) | Checks the PR title and branch name carry the right version and no milestone number | Use `composer milestone:pr-title -- <issue>` for the title, and `composer milestone:branch -- --issue <issue>` for the branch name. Edit the title; the check re-runs. |
 | `dependency-review.yml`: `dependency-review` | Every pull request | Fails if the PR adds a dependency with a known high or critical vulnerability | Pick a fixed version of that dependency, or ask Bambie. |
-| `release.yml`: `Build image and publish the release` | Only when a `vX.Y.Z` tag is pushed | Checks the tag matches `VERSION` and is on `main`, builds and pushes `ghcr.io/apescic/easm:<version>` (until v0.6.3), and publishes the GitHub Release | Stop and ask. Never move or re-push a tag. Usually `VERSION` wasn't bumped in the version PR. |
+| `release.yml`: `Build image and publish the release` (name kept from the image build, removed in v0.6.3) | Only when a `vX.Y.Z` tag is pushed | Checks the tag matches `VERSION` and is on `main`, and publishes the GitHub Release | Stop and ask. Never move or re-push a tag. Usually `VERSION` wasn't bumped in the version PR. |
 | `deploy-cloudron.yml`: `Update the Cloudron app to the release image` (name kept from the image deploy) | Only by hand, from the tag: `gh workflow run deploy-cloudron.yml --ref vX.Y.Z -f tag=vX.Y.Z`. Runs in the `production` environment (only `v*` tags) | Refuses a tag without a published Release, builds the release with Composer, backs up the APES Cloudron LAMP app, uploads and activates the release (`deploy/cloudron/`), restarts, checks `/health` and `REVISION`, and switches back to the previous release otherwise | It has already switched back. Read the log and stop and ask. Migrations are not undone; the pre-deploy backup is in Cloudron. |
 
 Nothing releases or deploys on an ordinary push or pull request. Every workflow starts with read-only permissions, widens them only for the job that needs them, pins each action to a commit, and doesn't keep the checkout's credentials.
@@ -21,7 +20,7 @@ Nothing releases or deploys on an ordinary push or pull request. Every workflow 
 | Feature | What it does | Notes |
 | --- | --- | --- |
 | CodeQL (check `CodeQL`, `Analyze (...)`) | Scans JavaScript and the workflows for security problems on every pull request | Runs as GitHub's default setup, enforced by the organisation. A CodeQL workflow file would fail alongside it, so the repo has none. CodeQL has no PHP support; PHP is covered by the tests and Pint. |
-| Dependabot (`.github/dependabot.yml`) | Weekly grouped update PRs for Composer, npm, GitHub Actions and the Docker base images | PRs go into the `dependencies` branch, never `main`. Each version branch merges `origin/dependencies` when work starts. |
+| Dependabot (`.github/dependabot.yml`) | Weekly grouped update PRs for Composer, npm and GitHub Actions | PRs go into the `dependencies` branch, never `main`. Each version branch merges `origin/dependencies` when work starts. |
 
 Extra checks from third-party apps installed across the APESCIC organisation are not set up in this repository; the APES IT Administrator manages them.
 
@@ -56,4 +55,4 @@ To replace the token: create a new one in Cloudron (profile → API Tokens), pas
 
 ## Required checks on `main`
 
-These are set in the repository settings by the APES IT Administrator, not in this repository. They match the job names above, so job names must never be renamed: `PHP 8.3`, `PHP 8.4`, `MySQL migrate`, `Docker image`, `milestone-version-check`, `dependency-review` and CodeQL.
+These are set in the repository settings by the APES IT Administrator, not in this repository. They match the job names above, so job names must never be renamed: `PHP 8.3`, `PHP 8.4`, `MySQL migrate`, `milestone-version-check`, `dependency-review` and CodeQL.

@@ -121,7 +121,6 @@ jobs:
             --exclude='/package.json' --exclude='/package-lock.json' --exclude='/bs-config.cjs' \
             --exclude='/scripts/local' --exclude='/scripts/*.ps1' \
             --exclude='/database/seeders/Demo*' \
-            --exclude='/Dockerfile' --exclude='/.dockerignore' --exclude='/cloudron' --exclude='/CloudronManifest.json' \
             ./ release/
           echo "$GITHUB_SHA" > release/REVISION
           tar -czf "$RELEASE_ID.tar.gz" -C release .

@@ -91,10 +91,9 @@ class LocalProfileTest extends TestCase
     public function test_version_fields_match_the_version_file(): void
     {
         $version = trim((string) file_get_contents(base_path('VERSION')));
-        $manifest = json_decode((string) file_get_contents(base_path('CloudronManifest.json')), true, flags: JSON_THROW_ON_ERROR);
 
         $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $version);
-        $this->assertSame($version, $manifest['version']);
+        $this->assertStringContainsString("APP_VERSION={$version}\n", str_replace("\r\n", "\n", (string) file_get_contents(base_path('.env.example'))));
         $this->assertStringContainsString("env('APP_VERSION', '{$version}')", (string) file_get_contents(base_path('config/app.php')));
         $this->assertArrayNotHasKey('APP_VERSION', $this->herdEnv());
     }

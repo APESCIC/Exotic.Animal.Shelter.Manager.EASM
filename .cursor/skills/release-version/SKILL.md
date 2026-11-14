@@ -22,7 +22,7 @@ Only after a ship-gate answer in this chat that includes release. Steps 3 and 4 
    git push origin vX.Y.Z
    ```
 
-4. **Watch `release.yml`.** It checks the tag matches `VERSION` and is on `main`, builds and pushes the image (until v0.6.3), and publishes the Release.
+4. **Watch `release.yml`.** It checks the tag matches `VERSION` and is on `main`, and publishes the Release.
 
    ```powershell
    gh run list --workflow release.yml --limit 1 --json databaseId,url
