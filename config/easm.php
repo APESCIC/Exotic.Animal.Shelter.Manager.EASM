@@ -107,6 +107,8 @@ return [
         'channel' => env('EASM_UPDATE_CHANNEL', 'stable'),
         'check_interval_hours' => (int) env('EASM_UPDATE_CHECK_HOURS', 24),
         'cron_token' => env('EASM_UPDATE_CRON_TOKEN'),
+        'state_path' => env('EASM_UPDATE_STATE_PATH', storage_path('app/update')),
+        'lock_stale_seconds' => (int) env('EASM_UPDATE_LOCK_STALE', 120),
     ],
 
     'dev_login' => [

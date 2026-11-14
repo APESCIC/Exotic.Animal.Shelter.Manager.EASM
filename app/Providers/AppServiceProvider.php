@@ -7,6 +7,7 @@ use App\Install\InstallationState;
 use App\Models\Setting;
 use App\Support\SharedHosting;
 use App\Update\UpdateChecker;
+use App\Update\UpdateStateMachine;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(BackupService::class, function () {
             return new BackupService(
                 root: (string) config('easm.backups.path', storage_path('app/backups')),
+            );
+        });
+        $this->app->singleton(UpdateStateMachine::class, function () {
+            return new UpdateStateMachine(
+                root: (string) config('easm.updates.state_path', storage_path('app/update')),
+                lockStaleSeconds: (int) config('easm.updates.lock_stale_seconds', 120),
             );
         });
         SharedHosting::ensureAppTempDirectory();
