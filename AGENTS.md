@@ -2,18 +2,37 @@
 
 For people and Cursor agents alike. Any word you don't know is in the [glossary](docs/glossary.md).
 
+Cursor's user rules and skills set how work is done here (branches, issues, pull requests, merge, release, deploy, ship gate, decisions and safety). This file describes this repository and fills the named slots below. If anything here disagrees with them, Cursor's rules win and this file is corrected in the same milestone.
+
 ## What this repo is
 
 EASM (Exotic Animal Shelter Manager) is web software for one exotic-animal shelter per install: animals, care, CITES and DWA paperwork, people, adoption, finance and reports ([features](docs/features.md)). It is a Laravel app (PHP 8.3) with a MySQL database. APES runs one copy at <https://easm.intranet.apes.org.uk>.
 
 ## Start here
 
-Laragon on Windows is the only local set-up.
-1. Install and start [Laragon](https://laragon.org/) (Full), then clone this repository.
-2. Once, in PowerShell from the repository folder: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\laragon-setup.ps1 -SeedDemo`
-3. Before any work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` (the live preview gate). In each new PowerShell window, first run `$env:PATH = "C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64;$env:PATH"` so `php` and `composer` use PHP 8.3.
-4. Open <http://localhost:5176>, your local copy, which reloads as you save. Sign in as `admin@easm.test` with password `password` ([fake demo data](docs/laragon/demo-data.md)).
-5. In Cursor, `/local-setup` does steps 3 and 4 for you. Settings: [docs/laragon/profile.md](docs/laragon/profile.md).
+[Laravel Herd](https://herd.laravel.com/windows) on Windows is the only local set-up.
+1. Install and start Laravel Herd (with its MySQL service), then clone this repository.
+2. Once, in PowerShell from the repository folder: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\herd-setup.ps1 -Link -SeedDemo`
+3. Before any work: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\preview.ps1` (the live preview gate). In each new PowerShell window, first run `$env:PATH = "$env:USERPROFILE\.config\herd\bin\php83;$env:USERPROFILE\.config\herd\bin;$env:PATH"` so `php` and `composer` use PHP 8.3 (Herd's plain `php` is its global 8.5), or use `herd php` and `herd composer`.
+4. Open <http://localhost:5176>, your local copy, which reloads as you save. Sign in as `admin@easm.test` with password `password` ([fake demo data](docs/local/demo-data.md)).
+5. In Cursor, `/local-setup` does steps 3 and 4 for you. Settings: [docs/local/profile.md](docs/local/profile.md).
+
+## Local development and preview
+
+| Item | Value |
+| --- | --- |
+| Clone | `C:\Users\BambieMurphy\Documents\GitHub\Exotic.Animal.Shelter.Manager.EASM` |
+| Herd site | `easm` (linked; PHP 8.3 isolated, through FastCGI) |
+| Preview URL | `http://easm.test`, with live reload at <http://localhost:5176> |
+| Preview command | `scripts\preview.ps1` (starts Browsersync, `npm run dev`, on Herd's Node 22) |
+| Live reload port | 5176 (Browsersync; EASM has no Vite) |
+| Env file | `.env.herd.example`, copied to `.env` by `scripts\herd-setup.ps1` |
+| Database | MySQL, `easm_local` by default (Herd MySQL 8.4 on 127.0.0.1:3306, `root`, no password) |
+| Mail | Herd mail catcher (`MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT=2525`) |
+
+- The tests use SQLite in memory (`phpunit.xml`), so they need no local database.
+- Herd's status table can show MySQL as `error` while it is listening on 3306 and working; `scripts\preview.ps1` checks the port instead.
+- Debug with Herd: `herd site:info`, `herd site:error`, `herd logs:read`, `herd mail:wait`, `herd insights:analyze`.
 
 ## How we work
 

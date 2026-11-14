@@ -1,6 +1,6 @@
 # Contributing to EASM
 
-Thank you for helping. Please write in UK English. Set up Laragon first ([Start here in AGENTS.md](AGENTS.md#start-here)). Words you don't know are in the [glossary](docs/glossary.md); the full rules are in [docs/shipping.md](docs/shipping.md).
+Thank you for helping. Please write in UK English. Set up Laravel Herd first ([Start here in AGENTS.md](AGENTS.md#start-here)). Words you don't know are in the [glossary](docs/glossary.md); the full rules are in [docs/shipping.md](docs/shipping.md).
 
 ## The flow
 
