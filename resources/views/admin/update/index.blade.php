@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Update EASM</h1>
-    <p class="hint">Resumable browser update. Each step is a short request so a 30-second PHP limit is fine. Keep this tab open until it finishes; if it stops, reload and continue.</p>
+    <p class="hint">Resumable browser update. Each step is a short request so a 30-second PHP limit is fine. Keep this tab open until it finishes; if it stops, reload and continue. If a step fails, EASM restores the previous version from the pre-update backup and turns maintenance mode off.</p>
 
     <section class="card" data-updater
              data-status-url="{{ route('admin.update.status.json') }}"

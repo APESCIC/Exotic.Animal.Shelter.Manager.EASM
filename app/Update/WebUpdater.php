@@ -26,6 +26,7 @@ class WebUpdater
         private BackupService $backups,
         private ChunkedMigrator $migrator,
         private ReleaseSwapper $swapper = new ReleaseSwapper,
+        private ?UpdateRollback $rollback = null,
         private ?ChunkedDownloader $downloader = null,
         private ?SafeZipExtractor $extractor = null,
         private ?ReleaseVerifier $verifier = null,
@@ -39,6 +40,12 @@ class WebUpdater
         $this->downloader ??= new ChunkedDownloader(chunkBytes: 512_000, maxBytes: 104_857_600, timeoutSeconds: 20);
         $this->extractor ??= new SafeZipExtractor(backend: SafeZipExtractor::BACKEND_AUTO);
         $this->verifier ??= new ReleaseVerifier($this->publicKeyPath);
+        $this->rollback ??= new UpdateRollback(
+            backups: $this->backups,
+            swapper: $this->swapper,
+            appRoot: $this->appRoot,
+            workRoot: $this->workRoot,
+        );
     }
 
     /**
@@ -83,6 +90,7 @@ class WebUpdater
         try {
             $this->machine->beginStep($step);
             $context = is_array($resume['state']['context'] ?? null) ? $resume['state']['context'] : [];
+            $this->maybeSimulateFailure($step, $context);
             $result = $this->execute($step, $context, $started);
 
             if ($result['step_done']) {
@@ -112,9 +120,22 @@ class WebUpdater
                 'message' => $result['message'],
             ];
         } catch (Throwable $e) {
+            $context = is_array($resume['state']['context'] ?? null) ? $resume['state']['context'] : [];
+            // Prefer context from a partial step write when present.
+            $latest = $this->machine->state();
+            if (is_array($latest['context'] ?? null)) {
+                $context = array_merge($context, $latest['context']);
+            }
+
+            $rollback = $this->rollback->run($context, $e->getMessage());
+            $aftermath = [
+                'rolled_back' => (bool) ($rollback['ok'] ?? false),
+                'rollback' => $rollback,
+            ];
+
             if ($this->machine->lock()->isHeld()) {
                 try {
-                    $this->machine->failStep($step, $e->getMessage());
+                    $this->machine->failStep($step, $e->getMessage(), $aftermath);
                 } catch (Throwable) {
                     $this->machine->release();
                 }
@@ -125,6 +146,8 @@ class WebUpdater
                 'step' => $step->value,
                 'step_done' => false,
                 'error' => $e->getMessage(),
+                'rolled_back' => (bool) ($rollback['ok'] ?? false),
+                'rollback' => $rollback,
                 'state' => $this->machine->state(),
                 'message' => $e->getMessage(),
             ];
@@ -353,10 +376,26 @@ class WebUpdater
 
         // Packages may nest as easm-X.Y.Z/… — swap from the directory that holds VERSION/composer.json.
         $source = $this->resolvePackageRoot($staging);
+        $context['previous_path'] = $this->rollback->snapshotLiveCode();
         $this->swapper->swap($source, $this->appRoot);
         $context['swapped'] = true;
 
         return ['step_done' => true, 'context' => $context, 'message' => 'Release swapped into place.'];
+    }
+
+    /**
+     * @param  array<string, mixed>  $context
+     */
+    private function maybeSimulateFailure(UpdateStep $step, array $context): void
+    {
+        $target = $context['fail_at_step'] ?? null;
+        if (! is_string($target) || $target === '') {
+            return;
+        }
+
+        if ($target === $step->value) {
+            throw new UpdateException('Simulated failure at '.$step->value.'.');
+        }
     }
 
     /**
