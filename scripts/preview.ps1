@@ -74,7 +74,20 @@ function Get-Json([string]$Url, [int]$TimeoutSec = 60) {
 }
 
 function Get-Listener([int]$Port) {
-    Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1
+    # Herd's nginx/MySQL often run elevated (HerdHelper); Get-NetTCPConnection then
+    # returns nothing even while the port answers. Prefer the PID when visible;
+    # otherwise fall back to a TCP connect so the gate still works.
+    $existing = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($existing) { return $existing }
+    try {
+        $client = [Net.Sockets.TcpClient]::new()
+        $async = $client.BeginConnect('127.0.0.1', $Port, $null, $null)
+        $ok = $async.AsyncWaitHandle.WaitOne(1000, $false) -and $client.Connected
+        if ($ok) { $client.EndConnect($async) }
+        $client.Close()
+        if ($ok) { return [pscustomobject]@{ LocalPort = $Port; OwningProcess = $null } }
+    } catch { }
+    return $null
 }
 
 $repo = Split-Path $PSScriptRoot -Parent
