@@ -1,20 +1,32 @@
-# Demo data
+# Demo data and Developer QA login
 
-The demo data is clearly fake and only for the local Herd preview. `database/seeders/DemoSeeder.php` uses Faker in `en_GB` with a fixed seed (`20261109`), so every run gives the same records.
+The demo data is clearly fake and only for the local Herd preview. `database/seeders/DemoSeeder.php` uses Faker in `en_GB` with a fixed seed (`20261109`), so every run gives the same records. Never enable this on Cloudron, staging or production, and never point it at real APES data.
+
+## Commands
 
 | Command | What it does |
 | --- | --- |
-| `php artisan demo:seed` | Loads the demo data into the local database |
-| `php artisan demo:reset` | Empties the local database (`migrate:fresh`), then loads the demo data |
+| `php artisan demo:seed` / `composer demo:seed` | Loads or refreshes the demo data (idempotent) |
+| `php artisan demo:seed --fresh` | Empties the local database (`migrate:fresh`), then loads the demo data |
+| `php artisan demo:reset` / `composer demo:reset` | Alias of `demo:seed --fresh` |
 
-Both refuse unless `APP_ENV=local` and the database is on `127.0.0.1` or `localhost`. Nothing here is real: never copy real animal, person or medical records into a local database.
+Both refuse unless:
+
+- `APP_ENV=local`
+- the database host is on this computer (`127.0.0.1` / `localhost`), or SQLite for tests
+- no Cloudron MySQL variables are set
+- the database name is `easm` (this machine’s Herd site) or ends in `_local` (as in `.env.herd.example`)
+
+Nothing here is real: never copy real animal, person or medical records into a local database. The installer never runs the seeder or turns on QA login.
 
 ## What it creates
 
 - An organisation, "Demo Exotic Rescue (fake data)", if none exists.
-- 10 enclosures (`Demo ENC-01` to `Demo ENC-10`).
+- 10 enclosures (`Demo ENC-01` to `Demo ENC-10`), including a quarantine enclosure.
 - 30 people with `demo-person-NN@example.test` emails, Ofcom drama-range phone numbers (`07700 900001` to `07700 900030`), "Demo Street" addresses and `ZZ99` postcodes (a postcode area that does not exist).
-- 40 animals (`DEMO-0001` to `DEMO-0040`) across the enclosures, each with an intake movement and a medical record; some adopted, some adoptable, some with diary tasks for the staff login.
+- 40 animals (`DEMO-0001` to `DEMO-0040`) across reptiles, primates and birds, with intake movements, medical records, diets, and some quarantine / adoption movements.
+- At least one CITES Article 10 certificate, one DWA licence (with an inspection), enclosure logs/equipment and demo stock.
+- Diary tasks linked to the QA admin, staff and volunteer accounts so switching role shows work for that role.
 
 ## Test logins
 
@@ -27,21 +39,22 @@ One per role, all with the password `password` (from `DevUserSeeder`, which refu
 | Volunteer | `volunteer@easm.test` |
 | Read only | `readonly@easm.test` |
 
-`php artisan db:seed` creates them when `APP_ENV=local`, or run `php artisan db:seed --class=DevUserSeeder`.
+`php artisan db:seed` creates them when `APP_ENV=local`, or run `php artisan db:seed --class=DevUserSeeder`. `demo:seed` also creates them.
 
-## Skip the login screen
+## Developer QA login (local Herd only)
 
-Add to your local `.env`:
+Add to your local `.env` (already set in `.env.herd.example`):
 
 ```env
-DEV_AUTO_LOGIN=true
+QA_LOGIN_ENABLED=true
+DEV_AUTO_LOGIN=false
 DEV_AUTO_LOGIN_ROLE=admin
 ```
 
-- Guests are then signed in as the test login for `DEV_AUTO_LOGIN_ROLE`; missing accounts are created on first use.
-- The sidebar gains a **Development: sign in as** list to switch roles, also reachable at `/dev/login-as/{role}`.
-- Signing out pauses auto-login for that browser session, so the login page stays usable; pick a role on the login page to resume.
-- The installer, `/login`, `/adopt`, `/apply` and `/feeds` are never auto-logged-in.
-- To turn it off, set `DEV_AUTO_LOGIN=false` (then `php artisan config:clear` if config is cached).
+- **`QA_LOGIN_ENABLED=true`** with **`APP_ENV=local`** turns on the amber **Developer sign-in** panel on `/login` (tagged Local only), the `/qa` fallback page, the in-app **Local QA — signed in as {role}** banner, and the sidebar role switcher. Sign-in and switch use CSRF-safe `POST` forms (`/qa/login`, `/qa/logout`).
+- When the gate is off, or `APP_ENV` is not `local` (including production, staging and testing), the panel and banner are absent and QA routes return **404**.
+- The installer never sets `QA_LOGIN_ENABLED` or `DEV_AUTO_LOGIN` to true; it writes `APP_ENV=production`.
+- Optional **`DEV_AUTO_LOGIN=true`**: guests are signed in as `DEV_AUTO_LOGIN_ROLE`. It is ignored unless the QA gate is on and `APP_ENV=local`. Signing out pauses auto-login for that browser session; pick a role on the login page to resume. `/login`, `/adopt`, `/apply` and `/feeds` are never auto-logged-in.
+- Legacy `GET /dev/login-as/{role}` still works behind the gate; prefer the POST panel and switcher.
 
-Auto-login and `/dev/login-as` only work when `APP_ENV=local`. In any other environment the flag is ignored and the route returns 404.
+After changing flags, run `php artisan config:clear` if config is cached.
