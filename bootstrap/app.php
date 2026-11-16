@@ -59,7 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
-        $exceptions->respond(function (Response $response, \Throwable $exception, Request $request): Response {
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
             $fallback = app(DevLogin::class)->fallbackAfterSwitch($request, $response->getStatusCode());
 
             return $fallback ?? $response;
