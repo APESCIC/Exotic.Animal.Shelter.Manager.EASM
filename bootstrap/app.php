@@ -6,12 +6,14 @@ use App\Http\Middleware\AutoLoginDevUser;
 use App\Http\Middleware\CheckForUpdates;
 use App\Http\Middleware\EnsureInstallerAccess;
 use App\Http\Middleware\EnsureUserHasRole;
+use App\Support\DevLogin;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -56,4 +58,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->respond(function (Response $response, \Throwable $exception, Request $request): Response {
+            $fallback = app(DevLogin::class)->fallbackAfterSwitch($request, $response->getStatusCode());
+
+            return $fallback ?? $response;
+        });
     })->create();

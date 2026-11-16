@@ -1512,3 +1512,174 @@ button.m-button {
         transition: none;
     }
 }
+
+/* Developer QA panel and banner (local Herd only) */
+
+.qa-panel {
+    margin-top: 2rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #d97706;
+    background: #fffbeb;
+    color: #78350f;
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+.qa-panel__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+}
+
+.qa-panel__title {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.qa-panel__tag {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border: 1px solid #b45309;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.qa-panel__intro {
+    margin: 0 0 0.75rem;
+    color: #92400e;
+    font-size: 0.95rem;
+}
+
+.qa-panel__roles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.qa-panel__form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.qa-panel__button {
+    margin: 0;
+    padding: 0.4rem 0.75rem;
+    font: inherit;
+    cursor: pointer;
+    background: #b45309;
+    color: #fffbeb;
+    border: 1px solid #92400e;
+    border-radius: 0.35rem;
+}
+
+.qa-panel__button:hover,
+.qa-panel__button:focus-visible {
+    background: #92400e;
+}
+
+.qa-panel__email {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    color: #78350f;
+}
+
+.qa-banner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 var(--space-4, 1rem);
+    padding: 0.65rem 0.85rem;
+    background: #fffbeb;
+    color: #78350f;
+    border: 1px solid #d97706;
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+.qa-banner__email {
+    opacity: 0.85;
+    font-size: 0.9em;
+}
+
+.qa-banner__switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.qa-banner__switcher-label {
+    font-size: 0.85rem;
+    margin-right: 0.25rem;
+}
+
+.qa-banner__form {
+    display: inline;
+    margin: 0;
+}
+
+.qa-banner__role,
+.qa-banner__signout {
+    margin: 0;
+    padding: 0.25rem 0.55rem;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+    border-radius: 0.3rem;
+}
+
+.qa-banner__role.is-current,
+.qa-banner__role[aria-current="true"] {
+    background: #b45309;
+    color: #fffbeb;
+    border-color: #92400e;
+}
+
+.qa-banner__signout {
+    border-style: dashed;
+}
+
+.qa-sidebar-form {
+    margin: 0;
+}
+
+.qa-sidebar-button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+[data-theme="dark"] .qa-panel,
+[data-theme="dark"] .qa-banner {
+    background: #3b2a14;
+    color: #fde68a;
+    border-color: #b45309;
+}
+
+[data-theme="dark"] .qa-panel__intro,
+[data-theme="dark"] .qa-panel__email {
+    color: #fbbf24;
+}
+
+[data-theme="dark"] .qa-banner__role,
+[data-theme="dark"] .qa-banner__signout {
+    background: #451a03;
+    color: #fde68a;
+    border-color: #b45309;
+}

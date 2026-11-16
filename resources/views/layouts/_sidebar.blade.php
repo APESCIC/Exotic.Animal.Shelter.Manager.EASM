@@ -93,12 +93,17 @@
         </div>
 
         @if ($devLogin->enabled())
-            <div class="nav-group" data-dev-login>
-                <p class="nav-group-title">Development: sign in as</p>
+            <div class="nav-group" data-dev-login data-qa-switcher>
+                <p class="nav-group-title">Developer QA</p>
                 <ul>
                     @foreach (\App\Enums\UserRole::cases() as $devRole)
                         <li>
-                            <a class="nav-link" href="{{ route('dev.login-as', $devRole) }}"@if ($role === $devRole) aria-current="page"@endif>{{ $devRole->label() }}</a>
+                            <form method="post" action="{{ route('qa.login') }}" class="qa-sidebar-form">
+                                @csrf
+                                <input type="hidden" name="role" value="{{ $devRole->value }}">
+                                <input type="hidden" name="return_to" value="{{ request()->getRequestUri() }}">
+                                <button type="submit" class="nav-link qa-sidebar-button"@if ($role === $devRole) aria-current="page"@endif>{{ $devRole->label() }}</button>
+                            </form>
                         </li>
                     @endforeach
                 </ul>
