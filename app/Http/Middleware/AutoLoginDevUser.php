@@ -13,7 +13,7 @@ class AutoLoginDevUser
     public function __construct(private DevLogin $devLogin) {}
 
     /**
-     * Sign guests in as the default QA account while local auto-login is on.
+     * Sign guests in as the default QA account while the QA gate and auto-login are on.
      *
      * A deliberate sign-out pauses auto-login for the session so the login
      * page stays reachable; the role switcher resumes it.
@@ -22,7 +22,7 @@ class AutoLoginDevUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $this->devLogin->enabled()) {
+        if (! $this->devLogin->autoLoginEnabled()) {
             return $next($request);
         }
 
@@ -35,7 +35,7 @@ class AutoLoginDevUser
 
         if (Auth::guest()
             && ! $request->session()->get(DevLogin::PAUSED_SESSION_KEY, false)
-            && ! $request->routeIs('install.*', 'login', 'login.store', 'public.*', 'feeds.*', 'dev.*')) {
+            && ! $request->routeIs('install.*', 'login', 'login.store', 'public.*', 'feeds.*', 'dev.*', 'qa.*')) {
             Auth::login($this->devLogin->userFor($this->devLogin->defaultRole()));
         }
 

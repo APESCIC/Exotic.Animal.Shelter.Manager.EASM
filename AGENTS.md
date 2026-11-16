@@ -55,7 +55,8 @@ Laravel Herd on Windows is the only local set-up. Use fake demo data only ([docs
 | Tests | `composer test` |
 | Lint / format | `composer lint` / `composer format` (Pint) |
 | Milestone helpers | `composer milestone:next`, `milestone:branch`, `milestone:pr-title`, `milestone:status`, `milestone:bump` |
-| Demo data | `composer demo:seed` / `composer demo:reset` (local only; refuse unless `APP_ENV=local`) |
+| Demo data | `composer demo:seed` / `composer demo:reset` (alias of `demo:seed --fresh`); local Herd only — see [docs/local/demo-data.md](docs/local/demo-data.md) |
+| Developer QA login | `QA_LOGIN_ENABLED=true` with `APP_ENV=local` (Herd); amber panel on `/login`, `/qa`, in-app banner; off in production; never set by the installer |
 | CI workflows | `.github/workflows/` (`ci`, `milestone-version-check`, `dependency-review`, `release`, `release-package`, `deploy-cloudron`) |
 
 ## How we work

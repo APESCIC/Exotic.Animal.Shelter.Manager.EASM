@@ -58,6 +58,8 @@
                 <main id="main" class="content" tabindex="-1">
                     <div class="offline-status" role="status" aria-live="polite" data-offline-status hidden></div>
 
+                    @include('layouts._qa-banner')
+
                     @if (session('status'))
                         <div class="status" role="status">{{ session('status') }}</div>
                     @endif

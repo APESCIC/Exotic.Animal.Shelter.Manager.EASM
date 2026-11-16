@@ -69,6 +69,9 @@ Route::post('/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
+Route::get('/qa', [DevLoginController::class, 'show'])->name('qa.index');
+Route::post('/qa/login', [DevLoginController::class, 'login'])->name('qa.login');
+Route::post('/qa/logout', [DevLoginController::class, 'logout'])->name('qa.logout');
 Route::get('/dev/login-as/{role}', DevLoginController::class)->name('dev.login-as');
 
 Route::get('/manifest.webmanifest', WebManifestController::class)->name('webmanifest');
