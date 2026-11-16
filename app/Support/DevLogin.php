@@ -12,11 +12,22 @@ class DevLogin
     public const PAUSED_SESSION_KEY = 'dev_login.paused';
 
     /**
-     * Whether development auto-login and the role switcher are active.
+     * Whether the Developer QA login panel and role switcher are available.
+     * Local Herd only, behind QA_LOGIN_ENABLED.
      */
     public function enabled(): bool
     {
         return app()->environment('local')
+            && filter_var(config('easm.dev_login.enabled'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Whether guests are signed in automatically as the default QA role.
+     * Requires the QA gate; DEV_AUTO_LOGIN alone is never enough.
+     */
+    public function autoLoginEnabled(): bool
+    {
+        return $this->enabled()
             && filter_var(config('easm.dev_login.auto_login'), FILTER_VALIDATE_BOOLEAN);
     }
 

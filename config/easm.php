@@ -113,6 +113,9 @@ return [
     ],
 
     'dev_login' => [
+        // Local Herd QA panel / role switcher. Must stay false or unset on Cloudron.
+        'enabled' => filter_var(env('QA_LOGIN_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+        // Optional guest auto-login; only honoured when the QA gate above is on and APP_ENV=local.
         'auto_login' => filter_var(env('DEV_AUTO_LOGIN', false), FILTER_VALIDATE_BOOLEAN),
         'role' => env('DEV_AUTO_LOGIN_ROLE', 'admin'),
     ],

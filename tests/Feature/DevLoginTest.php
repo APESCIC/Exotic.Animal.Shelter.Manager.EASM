@@ -17,15 +17,19 @@ class DevLoginTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function enableDevLogin(string $environment = 'local'): void
+    private function enableQaGate(string $environment = 'local', bool $autoLogin = true): void
     {
         $this->app['env'] = $environment;
-        config(['easm.dev_login.auto_login' => true, 'easm.dev_login.role' => 'admin']);
+        config([
+            'easm.dev_login.enabled' => true,
+            'easm.dev_login.auto_login' => $autoLogin,
+            'easm.dev_login.role' => 'admin',
+        ]);
     }
 
     public function test_guest_is_auto_logged_in_as_default_role_in_local(): void
     {
-        $this->enableDevLogin();
+        $this->enableQaGate();
         config(['easm.dev_login.role' => 'staff']);
 
         $this->get('/')
@@ -40,7 +44,7 @@ class DevLoginTest extends TestCase
 
     public function test_unknown_default_role_falls_back_to_admin(): void
     {
-        $this->enableDevLogin();
+        $this->enableQaGate();
         config(['easm.dev_login.role' => 'superuser']);
 
         $this->get('/')->assertOk();
@@ -48,21 +52,13 @@ class DevLoginTest extends TestCase
         $this->assertSame('admin@easm.test', auth()->user()?->email);
     }
 
-    public function test_nothing_happens_when_flag_is_off(): void
+    public function test_qa_gate_off_hides_panel_and_routes(): void
     {
         $this->app['env'] = 'local';
-        config(['easm.dev_login.auto_login' => false]);
-
-        $this->get('/')->assertRedirect(route('login'));
-        $this->get(route('dev.login-as', 'admin'))->assertNotFound();
-
-        $this->assertGuest();
-        $this->assertSame(0, User::query()->count());
-    }
-
-    public function test_production_ignores_the_flag(): void
-    {
-        $this->enableDevLogin('production');
+        config([
+            'easm.dev_login.enabled' => false,
+            'easm.dev_login.auto_login' => true,
+        ]);
 
         $this->get('/')->assertRedirect(route('login'));
         $this->get(route('dev.login-as', 'admin'))->assertNotFound();
@@ -72,17 +68,72 @@ class DevLoginTest extends TestCase
         $this->assertSame(0, User::query()->count());
     }
 
-    public function test_testing_environment_ignores_the_flag(): void
+    public function test_qa_gate_on_without_auto_login_shows_panel_and_switcher(): void
     {
-        config(['easm.dev_login.auto_login' => true]);
+        $this->enableQaGate(autoLogin: false);
+
+        $this->get('/')->assertRedirect(route('login'));
+        $this->assertGuest();
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('Development: sign in as', false)
+            ->assertSee('admin@easm.test', false);
+
+        $this->get(route('dev.login-as', 'admin'))
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('status', 'Signed in as '.DevLogin::name(UserRole::Admin).'.');
+
+        $this->assertSame('admin@easm.test', auth()->user()?->email);
+    }
+
+    public function test_production_ignores_the_flags(): void
+    {
+        $this->enableQaGate('production');
+
+        $this->get('/')->assertRedirect(route('login'));
+        $this->get(route('dev.login-as', 'admin'))->assertNotFound();
+        $this->get(route('login'))->assertOk()->assertDontSee('Development: sign in as', false);
+
+        $this->assertGuest();
+        $this->assertSame(0, User::query()->count());
+    }
+
+    public function test_staging_ignores_the_flags(): void
+    {
+        $this->enableQaGate('staging');
 
         $this->get('/')->assertRedirect(route('login'));
         $this->get(route('dev.login-as', 'admin'))->assertNotFound();
     }
 
+    public function test_testing_environment_ignores_the_flags(): void
+    {
+        config([
+            'easm.dev_login.enabled' => true,
+            'easm.dev_login.auto_login' => true,
+        ]);
+
+        $this->get('/')->assertRedirect(route('login'));
+        $this->get(route('dev.login-as', 'admin'))->assertNotFound();
+    }
+
+    public function test_dev_auto_login_alone_is_not_enough(): void
+    {
+        $this->app['env'] = 'local';
+        config([
+            'easm.dev_login.enabled' => false,
+            'easm.dev_login.auto_login' => true,
+        ]);
+
+        $this->get('/')->assertRedirect(route('login'));
+        $this->assertGuest();
+        $this->get(route('dev.login-as', 'admin'))->assertNotFound();
+    }
+
     public function test_role_switcher_logs_in_with_each_role(): void
     {
-        $this->enableDevLogin();
+        $this->enableQaGate(autoLogin: false);
 
         foreach (UserRole::cases() as $role) {
             $this->get(route('dev.login-as', $role))
@@ -100,14 +151,14 @@ class DevLoginTest extends TestCase
 
     public function test_role_switcher_rejects_unknown_roles(): void
     {
-        $this->enableDevLogin();
+        $this->enableQaGate(autoLogin: false);
 
         $this->get('/dev/login-as/superuser')->assertNotFound();
     }
 
     public function test_sign_out_pauses_auto_login_until_a_role_is_picked(): void
     {
-        $this->enableDevLogin();
+        $this->enableQaGate();
         $this->withoutMiddleware(PreventRequestForgery::class);
 
         $this->get('/')->assertOk();
@@ -129,7 +180,7 @@ class DevLoginTest extends TestCase
 
     public function test_public_and_login_routes_stay_guest(): void
     {
-        $this->enableDevLogin();
+        $this->enableQaGate();
 
         $this->get(route('login'))->assertOk();
         $this->get(route('public.apply.index'))->assertOk();
