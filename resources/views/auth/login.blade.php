@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Sign in · {{ config('app.name') }}</title>
         <link rel="icon" href="{{ asset('images/pwa/easm.svg') }}" type="image/svg+xml">
+        <link rel="stylesheet" href="{{ asset('css/easm.css') }}?v={{ @filemtime(public_path('css/easm.css')) }}">
         <style>
             :root { color-scheme: light dark; }
             body {
@@ -14,6 +15,7 @@
                 max-width: 40rem;
                 line-height: 1.5;
                 color: #1b1b18;
+                padding: 0 1rem;
             }
             h1 { margin-bottom: 0.5rem; }
             label { display: block; margin: 0.75rem 0 0.25rem; font-weight: 500; }
@@ -31,7 +33,7 @@
                 font-weight: 400;
             }
             .remember input { width: auto; }
-            button {
+            button[type="submit"]:not(.qa-panel__button) {
                 margin-top: 0.75rem;
                 padding: 0.55rem 1rem;
                 font: inherit;
@@ -44,13 +46,6 @@
                 margin: 1rem 0;
             }
             .hint { margin: 0 0 1rem; color: #444; }
-            .dev-login {
-                margin-top: 2rem;
-                padding: 0.75rem 1rem;
-                border: 1px dashed #b45309;
-                background: #fffbeb;
-            }
-            .dev-login h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
             .logo { display: block; width: 10rem; height: auto; margin: 0 0 1rem; }
         </style>
     </head>
@@ -58,6 +53,10 @@
         <img class="logo" src="{{ asset('images/easm-logo.svg') }}" alt="EASM" width="160" height="183">
         <h1>Sign in</h1>
         <p class="hint">Email and password for this shelter. No external SSO.</p>
+
+        @if (session('status'))
+            <div class="status" role="status">{{ session('status') }}</div>
+        @endif
 
         @if ($errors->any())
             <div class="errors" role="alert">
@@ -87,15 +86,7 @@
         </form>
 
         @if ($devLogin->enabled())
-            <section class="dev-login" aria-labelledby="dev-login-title" data-dev-login>
-                <h2 id="dev-login-title">Development: sign in as</h2>
-                <p class="hint">Local QA accounts (password <code>{{ \App\Support\DevLogin::PASSWORD }}</code>). Auto-login stays paused after signing out until you pick a role.</p>
-                <ul>
-                    @foreach (\App\Enums\UserRole::cases() as $devRole)
-                        <li><a href="{{ route('dev.login-as', $devRole) }}">{{ $devRole->label() }}</a> · {{ \App\Support\DevLogin::email($devRole) }}</li>
-                    @endforeach
-                </ul>
-            </section>
+            @include('qa._panel')
         @endif
     </body>
 </html>

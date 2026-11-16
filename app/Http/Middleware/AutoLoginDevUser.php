@@ -35,7 +35,7 @@ class AutoLoginDevUser
 
         if (Auth::guest()
             && ! $request->session()->get(DevLogin::PAUSED_SESSION_KEY, false)
-            && ! $request->routeIs('install.*', 'login', 'login.store', 'public.*', 'feeds.*', 'dev.*')) {
+            && ! $request->routeIs('install.*', 'login', 'login.store', 'public.*', 'feeds.*', 'dev.*', 'qa.*')) {
             Auth::login($this->devLogin->userFor($this->devLogin->defaultRole()));
         }
 
