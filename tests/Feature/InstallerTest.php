@@ -89,6 +89,8 @@ class InstallerTest extends TestCase
         $this->assertStringContainsString('APP_DEBUG=false', $env);
         $this->assertStringContainsString('APP_TIMEZONE=Europe/London', $env);
         $this->assertStringContainsString('APP_INSTALLED=true', $env);
+        $this->assertDoesNotMatchRegularExpression('/^QA_LOGIN_ENABLED=true$/m', $env);
+        $this->assertDoesNotMatchRegularExpression('/^DEV_AUTO_LOGIN=true$/m', $env);
 
         $admin = User::query()->where('email', 'admin@example.org')->first();
         $this->assertNotNull($admin);
