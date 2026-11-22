@@ -7,7 +7,7 @@ EASM is free, self-hosted web software for running one exotic-animal shelter. It
 - **Animals and care:** records with free-text species, movements, medical care, diary tasks, stock and reminders.
 - **Compliance:** a CITES register with Article 10 tracking, and Dangerous Wild Animals Act licences and inspections.
 - **People and adoption:** contacts, a waiting list, public adoption pages, online applications and a partner feed.
-- **Documents and finance:** signed PDF documents, donations, fees, sponsorship and a draft Gift Aid schedule.
+- **Documents and finance:** signed PDF documents, donations, fees and sponsorship.
 - **Reports, mobile and rota:** CSV reports, a phone-friendly task screen that works offline, and a staff rota.
 
 The full list is in [docs/features.md](docs/features.md).
@@ -53,4 +53,5 @@ Adjust `root` and `fastcgi_pass` to the host. cPanel and Plesk Apache vhosts alr
 - [Roadmap and product constraints](docs/roadmap.md), with the plan in [issue #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) and the [milestones](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all)
 - [Publishing adoptable animals to partner sites](docs/publishing.md)
 - [Glossary of terms](docs/glossary.md)
+- [Licence (MIT)](LICENSE) · [Security policy](SECURITY.md)
 - [Releases](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/releases)
