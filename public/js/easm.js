@@ -448,10 +448,26 @@
         });
     }
 
+    function isSafeEnclosureJumpUrl(raw) {
+        if (!raw) {
+            return false;
+        }
+        try {
+            var url = new URL(raw, window.location.origin);
+            if (url.origin !== window.location.origin) {
+                return false;
+            }
+            // Mobile enclosure pages only (matches data-allowed-prefix on the scan page).
+            return url.pathname.indexOf('/m/') === 0;
+        } catch (e) {
+            return false;
+        }
+    }
+
     function initEnclosureJump() {
         document.querySelectorAll('[data-enclosure-select]').forEach(function (select) {
             select.addEventListener('change', function () {
-                if (select.value) {
+                if (isSafeEnclosureJumpUrl(select.value)) {
                     window.location.assign(select.value);
                 }
             });
