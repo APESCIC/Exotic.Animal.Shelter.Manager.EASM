@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MedicalRecordType;
+use App\Models\Concerns\RecordsAudit;
 use Database\Factories\MedicalRecordFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,7 @@ class MedicalRecord extends Model
 {
     /** @use HasFactory<MedicalRecordFactory> */
     use HasFactory;
+    use RecordsAudit;
 
     /**
      * @var list<string>

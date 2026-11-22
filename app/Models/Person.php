@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PersonCategory;
+use App\Models\Concerns\RecordsAudit;
 use Database\Factories\PersonFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,7 @@ class Person extends Model
 {
     /** @use HasFactory<PersonFactory> */
     use HasFactory;
+    use RecordsAudit;
 
     /**
      * @var list<string>
