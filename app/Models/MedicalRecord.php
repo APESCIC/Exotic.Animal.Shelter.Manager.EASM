@@ -14,6 +14,7 @@ class MedicalRecord extends Model
 {
     /** @use HasFactory<MedicalRecordFactory> */
     use HasFactory;
+
     use RecordsAudit;
 
     /**

@@ -14,6 +14,7 @@ class Person extends Model
 {
     /** @use HasFactory<PersonFactory> */
     use HasFactory;
+
     use RecordsAudit;
 
     /**
