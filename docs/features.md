@@ -25,7 +25,7 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
   - Staff set each animal's CITES Annex (A, B, C, D or not listed) on the animal record.
   - Staff add certificates (Article 10, import or export permits), with an optional scan or PDF, on the animal's Legal tab. Certificate files are stored privately under `storage/app/private/cites`, and only signed-in admin, staff and read-only users can download them.
   - The register lists animals in care (or, optionally, everyone who has left too) and downloads as CSV.
-  - Annex A animals in care with no Article 10 certificate are flagged **No Article 10: needed before any sale or fee-paid rehoming (to be confirmed)** and raise a **No Article 10 (Annex A)** alert on the dashboard. Whether fee-paid rehoming counts is waiting on APHA (#134).
+  - Annex A animals in care with no Article 10 certificate are flagged **No Article 10: needed before any sale or fee-paid rehoming** and raise a **No Article 10 (Annex A)** alert on the dashboard. APES treats fee-paid rehoming as needing Article 10 (shelter decision on published guidance; not APHA-signed advice).
   - Staff can tick **Captive-bred and exempt under Annex X** on an Annex A animal to clear the flag. An export or re-export permit issued in the last 6 months also counts as cover, and the register shows the date it runs out.
   - EASM does not look up Annex listings or decide when a certificate is needed. It is a record-keeping aid, not legal advice, so check current APHA guidance.
 - **Dangerous Wild Animals Act licences:** these live at `/compliance/dwa`.

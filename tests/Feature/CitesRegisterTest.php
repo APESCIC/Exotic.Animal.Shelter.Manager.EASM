@@ -199,7 +199,7 @@ class CitesRegisterTest extends TestCase
     {
         $animal = Animal::factory()->create(['name' => 'Hermann', 'cites_annex' => CitesAnnex::A]);
         $staff = User::factory()->staff()->create();
-        $wording = 'No Article 10: needed before any sale or fee-paid rehoming (to be confirmed)';
+        $wording = 'No Article 10: needed before any sale or fee-paid rehoming';
 
         $this->assertSame($wording, CitesRegister::NO_ARTICLE_TEN);
         $this->actingAs($staff)->get(route('compliance.cites.index'))
@@ -209,7 +209,7 @@ class CitesRegisterTest extends TestCase
         $this->actingAs($staff)->get(AnimalTab::Legal->url($animal))->assertSee($wording);
         $this->actingAs($staff)->get(route('home'))
             ->assertSee('No Article 10 (Annex A)')
-            ->assertSee('fee-paid rehoming (to be confirmed)');
+            ->assertSee('fee-paid rehoming');
         $this->assertSame(1, app(DashboardAlerts::class)->missingArticleTen()->count);
     }
 
