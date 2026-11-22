@@ -63,6 +63,7 @@ Each term in one plain sentence. Other docs link here instead of explaining term
 - **Demo data:** fake records for local testing only (`php artisan demo:seed`).
 - **`/health`:** a page that reports EASM's status and version, used to prove a deploy worked.
 - **Cloudron:** the APES server platform that hosts the live EASM app.
+- **Animal control case:** a staff record of a municipal-style callout (log, assign dispatch, close), separate from lost-and-found matching.
 
 ## Cursor
 

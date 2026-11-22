@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PublishingController;
 use App\Http\Controllers\Admin\ReleaseUploadController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UpdaterController;
+use App\Http\Controllers\AnimalControlCaseController;
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
@@ -239,6 +240,15 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
     Route::get('/lost-found/{lostFoundReport}', [LostFoundReportController::class, 'show'])->name('lost-found.show');
     Route::get('/lost-found/{lostFoundReport}/edit', [LostFoundReportController::class, 'edit'])->name('lost-found.edit');
     Route::put('/lost-found/{lostFoundReport}', [LostFoundReportController::class, 'update'])->name('lost-found.update');
+
+    Route::get('/animal-control', [AnimalControlCaseController::class, 'index'])->name('animal-control.index');
+    Route::get('/animal-control/create', [AnimalControlCaseController::class, 'create'])->name('animal-control.create');
+    Route::post('/animal-control', [AnimalControlCaseController::class, 'store'])->name('animal-control.store');
+    Route::get('/animal-control/{animalControlCase}', [AnimalControlCaseController::class, 'show'])->name('animal-control.show');
+    Route::get('/animal-control/{animalControlCase}/edit', [AnimalControlCaseController::class, 'edit'])->name('animal-control.edit');
+    Route::put('/animal-control/{animalControlCase}', [AnimalControlCaseController::class, 'update'])->name('animal-control.update');
+    Route::post('/animal-control/{animalControlCase}/dispatch', [AnimalControlCaseController::class, 'assignDispatch'])->name('animal-control.dispatch');
+    Route::post('/animal-control/{animalControlCase}/close', [AnimalControlCaseController::class, 'close'])->name('animal-control.close');
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/', DashboardController::class)->name('dashboard');

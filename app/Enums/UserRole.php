@@ -56,6 +56,14 @@ enum UserRole: string
         };
     }
 
+    public function canManageAnimalControl(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
+
     public function canManageMedical(): bool
     {
         return match ($this) {

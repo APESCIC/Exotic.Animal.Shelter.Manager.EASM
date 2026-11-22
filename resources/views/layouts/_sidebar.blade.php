@@ -10,6 +10,7 @@
             ['label' => 'Shelter view', 'route' => 'animals.shelter', 'active' => ['animals.shelter']],
             ['label' => 'Enclosures', 'route' => 'enclosures.index', 'active' => ['enclosures.*']],
             ['label' => 'Lost and found', 'route' => 'lost-found.index', 'active' => ['lost-found.*']],
+            ['label' => 'Animal control', 'route' => 'animal-control.index', 'active' => ['animal-control.*']],
         ],
         'People' => [
             ['label' => 'People', 'route' => 'people.index', 'active' => ['people.*']],
