@@ -26,7 +26,6 @@ class Payment extends Model
         'amount_pence',
         'received_on',
         'reference',
-        'gift_aid_eligible',
         'notes',
         'created_by',
     ];
@@ -41,7 +40,6 @@ class Payment extends Model
             'method' => PaymentMethod::class,
             'amount_pence' => 'integer',
             'received_on' => 'date',
-            'gift_aid_eligible' => 'boolean',
         ];
     }
 

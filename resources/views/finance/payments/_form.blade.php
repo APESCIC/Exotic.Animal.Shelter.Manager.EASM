@@ -38,12 +38,5 @@
 <input id="reference" type="text" name="reference" value="{{ old('reference', $payment->reference) }}" maxlength="255">
 <p class="hint">Receipt number, bank reference or platform transaction ID.</p>
 
-<label class="check" for="gift_aid_eligible">
-    <input type="hidden" name="gift_aid_eligible" value="0">
-    <input id="gift_aid_eligible" name="gift_aid_eligible" type="checkbox" value="1" @checked(old('gift_aid_eligible', $payment->gift_aid_eligible))>
-    Gift Aid eligible
-</label>
-<p class="hint">Only donations and sponsorships can be claimed, and only when the donor has a Gift Aid declaration covering the date. Fees are never eligible.</p>
-
 <label for="notes">Notes</label>
 <textarea id="notes" name="notes" maxlength="5000">{{ old('notes', $payment->notes) }}</textarea>

@@ -25,7 +25,7 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
   - Staff set each animal's CITES Annex (A, B, C, D or not listed) on the animal record.
   - Staff add certificates (Article 10, import or export permits), with an optional scan or PDF, on the animal's Legal tab. Certificate files are stored privately under `storage/app/private/cites`, and only signed-in admin, staff and read-only users can download them.
   - The register lists animals in care (or, optionally, everyone who has left too) and downloads as CSV.
-  - Annex A animals in care with no Article 10 certificate are flagged **No Article 10: needed before any sale or fee-paid rehoming (to be confirmed)** and raise a **No Article 10 (Annex A)** alert on the dashboard. Whether fee-paid rehoming counts is waiting on APHA (#134).
+  - Annex A animals in care with no Article 10 certificate are flagged **No Article 10: needed before any sale or fee-paid rehoming** and raise a **No Article 10 (Annex A)** alert on the dashboard. APES treats fee-paid rehoming as needing Article 10 (shelter decision on published guidance; not APHA-signed advice).
   - Staff can tick **Captive-bred and exempt under Annex X** on an Annex A animal to clear the flag. An export or re-export permit issued in the last 6 months also counts as cover, and the register shows the date it runs out.
   - EASM does not look up Annex listings or decide when a certificate is needed. It is a record-keeping aid, not legal advice, so check current APHA guidance.
 - **Dangerous Wild Animals Act licences:** these live at `/compliance/dwa`.
@@ -50,8 +50,7 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 
 - **Documents:** admin and staff generate documents (adoption contract, invoice, enclosure card) from an animal's Documents tab or a person's record, collect a mouse or touch signature, and download them as PDF. Signed documents are archived as PDF under `storage/app/private/documents` and cannot be changed. Admins edit the templates under `/admin/document-templates`; the default contract wording is a starting point to check with your own legal adviser.
 - **Finance:** admin and staff record donations, adoption fees and sponsorship payments in the ledger at `/finance`, against a person or animal or both, with totals by type and date.
-  - People can carry Gift Aid declarations, and animals show their current sponsors.
-  - `/finance/gift-aid` lists eligible donations for a date range (by default the current UK tax year), flags any that cannot be claimed, and downloads a **draft** schedule laid out like the HMRC Charities Online spreadsheet. Check the draft against current HMRC guidance before claiming.
+  - Animals show their current sponsors on the animal record; people show payments and sponsorships on their profile.
   - Read-only users can view the ledger; volunteers cannot see finance. There is no card or online payment processing.
 
 ## Reports, mobile and rota

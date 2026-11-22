@@ -54,7 +54,7 @@ Status (11/11/2026): v0.1.0 to v0.6.0 are done. Next are the patch versions v0.6
 
 1. #21 document templates/e-sign
 2. #22 publish to partner sites (generic CSV/JSON/RSS partner feed; see [publishing.md](publishing.md))
-3. #23 donations/fees/Gift Aid/sponsorship (Gift Aid export is a draft until #110 checks it against the HMRC spec)
+3. #23 donations/fees/sponsorship (Gift Aid removed in #110)
 4. #65 stock control for food and medical
 5. #66 waiting list with urgency
 
@@ -105,7 +105,7 @@ Optional CLI layers (not blocking): #87 `easm:install`, #88 `easm:update` / `eas
 1. #27 backup/security/first production install pack
 2. #34 bounded /health DB timeout and nginx front-controller docs
 3. #68 per-record audit log
-4. #134 apply APHA's answer on adoption-fee rehoming and Article 10
+4. #134 apply shelter decision on adoption-fee rehoming and Article 10
 
 ### v1.1.0 Optional: animal control ([issues](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues?q=milestone%3A%22v1.1.0+Optional%3A+animal+control%22))
 

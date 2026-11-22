@@ -15,6 +15,7 @@ enum AnimalTab: string
     case Documents = 'documents';
     case Diary = 'diary';
     case Log = 'log';
+    case Audit = 'audit';
 
     public function label(): string
     {
@@ -28,6 +29,7 @@ enum AnimalTab: string
             self::Documents => 'Documents',
             self::Diary => 'Diary',
             self::Log => 'Log',
+            self::Audit => 'Audit',
         };
     }
 
@@ -48,6 +50,7 @@ enum AnimalTab: string
             self::Documents => ['documents.person'],
             self::Diary => ['diaryTasks.assignee'],
             self::Log => ['observations.user'],
+            self::Audit => [],
         };
     }
 
@@ -57,7 +60,7 @@ enum AnimalTab: string
     public function countedRelation(): ?string
     {
         return match ($this) {
-            self::Overview, self::Legal => null,
+            self::Overview, self::Legal, self::Audit => null,
             self::Health => 'medicalRecords',
             self::Husbandry => 'diets',
             self::Movements => 'movements',

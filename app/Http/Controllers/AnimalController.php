@@ -9,6 +9,7 @@ use App\Enums\CustomFieldType;
 use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
+use App\Models\AuditLog;
 use App\Models\CustomFieldDefinition;
 use App\Models\Enclosure;
 use Illuminate\Database\Eloquent\Collection;
@@ -137,6 +138,9 @@ class AnimalController extends Controller
             'tabs' => AnimalTab::cases(),
             'customFieldDefinitions' => $activeTab === AnimalTab::Overview
                 ? CustomFieldDefinition::query()->active()->forAnimal()->ordered()->get()
+                : collect(),
+            'auditEntries' => $activeTab === AnimalTab::Audit
+                ? AuditLog::forAnimalRecord($animal)->with('user')->limit(200)->get()
                 : collect(),
         ]);
     }

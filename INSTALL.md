@@ -62,12 +62,16 @@ If the panel can only use the application root (the folder that contains `public
 
 The wizard writes `.env` (including `APP_KEY` when missing), runs migrations in short steps (fine on a 30-second PHP limit), creates the admin and writes `storage/app/installed`.
 
-## 4. After install
+## 4. After install (go-live checklist)
 
 - Confirm `GET /health` returns JSON with `"status":"ok"` and the version.
 - Store `APP_KEY` from `.env` in your password manager. Without it, encrypted data cannot be recovered from a backup.
+- Sign in as the first admin; create staff accounts and turn off unused roles only after you have a backup.
+- Create a first backup under Administration → Backups and download it off the server.
+- Confirm HTTPS is terminating at the host (or reverse proxy) and the site loads without mixed-content warnings.
+- Read [SECURITY.md](SECURITY.md) for how to report vulnerabilities and basic hardening.
 - Updates: see [UPGRADING.md](UPGRADING.md).
-- Backups: Administration → Backups (or follow [UPGRADING.md](UPGRADING.md#backup-and-restore)).
+- Backups and restore: [UPGRADING.md](UPGRADING.md#backup-and-restore).
 
 ## Cloudron LAMP
 

@@ -45,9 +45,25 @@ Some shared hosts block outbound HTTPS. On **Administration → Update**, use **
 | Create | Administration → Backups → Create backup now (pure-PHP dump + `.env`/`storage` zip; keeps the newest three) |
 | Download | Administration → Backups (admins only; others get 403) |
 | Automatic before update | The updater’s backup step |
-| Restore after failure | Automatic on updater rollback, or via `/recover.php` rollback |
+| Restore after updater failure | Automatic on updater rollback, or via `/recover.php` rollback |
+| Manual restore (shared hosting) | See below |
 
 Migrations are not undone by themselves; restoring the pre-update database backup is what reverts schema and data.
+
+### Manual restore from an Administration backup
+
+Use this when you are not mid-update and need to put a downloaded backup back onto the host (for example after a bad change outside the updater).
+
+1. Put the site in maintenance mode if you can (`php artisan down` when CLI is available, or your host’s equivalent).
+2. Download the backup zip from Administration → Backups (or use a copy you already stored offline).
+3. Extract it somewhere safe. It contains a SQL dump plus copies of `.env` and `storage` as packed by EASM.
+4. Restore the database with your host tools (phpMyAdmin import, `mysql` client, or the panel’s “restore database”). Prefer a fresh empty database, or drop existing tables first, so you do not mix schemas.
+5. Replace the live `.env` only if the backup’s `.env` is the one you intend (keep a copy of the current file first). Ensure `APP_KEY` matches the data you restored.
+6. Merge or replace `storage/` from the backup carefully (private files, logs, caches). Do not leave the site writable by the world.
+7. Clear caches if you have CLI (`php artisan config:clear`, `cache:clear`, `view:clear`). On Cloudron, prefer the documented activate/rollback path instead of hand-editing.
+8. Hit `/health` and sign in. Turn maintenance mode off.
+
+Cloudron LAMP operators should prefer Cloudron’s own backup plus EASM Administration backups; see [docs/hosting/cloudron-lamp.md](docs/hosting/cloudron-lamp.md).
 
 ## Per-version notes
 

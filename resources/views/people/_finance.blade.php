@@ -4,46 +4,8 @@
 
     $canManageFinance = (bool) auth()->user()?->role?->canManageFinance();
     $payments = $person->payments()->with('animal')->limit(20)->get();
-    $declarations = $person->giftAidDeclarations;
     $sponsorships = $person->sponsorships()->with('animal')->get();
-    $activeDeclaration = $declarations->first(fn ($declaration) => $declaration->isActive());
 @endphp
-
-<h2>Gift Aid</h2>
-@if ($activeDeclaration)
-    <p><x-badge tone="adoptable">Declaration in place</x-badge> covers donations from {{ UkDate::format($activeDeclaration->effective_from) }} ({{ $activeDeclaration->method->label() }}, declared {{ UkDate::format($activeDeclaration->declared_on) }}).</p>
-@else
-    <p class="hint">No active Gift Aid declaration.</p>
-@endif
-@if ($declarations->isNotEmpty())
-    <table>
-        <thead>
-            <tr><th>Declared</th><th>Covers from</th><th>Cancelled</th><th>How</th><th><span class="visually-hidden">Actions</span></th></tr>
-        </thead>
-        <tbody>
-            @foreach ($declarations as $declaration)
-                <tr>
-                    <td>{{ UkDate::format($declaration->declared_on) }}</td>
-                    <td>{{ UkDate::format($declaration->effective_from) }}</td>
-                    <td>{{ $declaration->cancelled_on ? UkDate::format($declaration->cancelled_on) : '—' }}</td>
-                    <td>{{ $declaration->method->label() }}</td>
-                    <td>
-                        @if ($canManageFinance && $declaration->isActive())
-                            <form class="inline-form" method="post" action="{{ route('gift-aid-declarations.cancel', $declaration) }}"
-                                  onsubmit="return window.confirm('Cancel this declaration from today?')">
-                                @csrf
-                                <button type="submit">Cancel</button>
-                            </form>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-@endif
-@if ($canManageFinance)
-    <p><a class="button" href="{{ route('gift-aid-declarations.create', $person) }}">Record Gift Aid declaration</a></p>
-@endif
 
 <h2>Payments</h2>
 @if ($payments->isEmpty())
@@ -51,7 +13,7 @@
 @else
     <table>
         <thead>
-            <tr><th>Date</th><th>Type</th><th>Amount</th><th>Animal</th><th>Gift Aid</th><th><span class="visually-hidden">Actions</span></th></tr>
+            <tr><th>Date</th><th>Type</th><th>Amount</th><th>Animal</th><th><span class="visually-hidden">Actions</span></th></tr>
         </thead>
         <tbody>
             @foreach ($payments as $payment)
@@ -60,7 +22,6 @@
                     <td>{{ $payment->type->label() }}</td>
                     <td>{{ Money::format($payment->amount_pence) }}</td>
                     <td>{{ $payment->animal?->name ?? '—' }}</td>
-                    <td>{{ $payment->gift_aid_eligible ? 'Yes' : 'No' }}</td>
                     <td>@if ($canManageFinance)<a href="{{ route('payments.edit', $payment) }}">Edit</a>@endif</td>
                 </tr>
             @endforeach

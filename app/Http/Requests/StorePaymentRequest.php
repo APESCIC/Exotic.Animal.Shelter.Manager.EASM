@@ -28,7 +28,6 @@ class StorePaymentRequest extends FormRequest
             'person_id' => ['nullable', 'integer', 'exists:people,id'],
             'animal_id' => ['nullable', 'integer', 'exists:animals,id'],
             'reference' => ['nullable', 'string', 'max:255'],
-            'gift_aid_eligible' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
@@ -49,17 +48,14 @@ class StorePaymentRequest extends FormRequest
      */
     public function paymentData(): array
     {
-        $type = PaymentType::from($this->string('type')->toString());
-
         return [
-            'type' => $type,
+            'type' => PaymentType::from($this->string('type')->toString()),
             'method' => $this->string('method')->toString(),
             'amount_pence' => Money::toPence($this->string('amount')->toString()),
             'received_on' => $this->date('received_on'),
             'person_id' => $this->integer('person_id') ?: null,
             'animal_id' => $this->integer('animal_id') ?: null,
             'reference' => $this->input('reference'),
-            'gift_aid_eligible' => $type->canClaimGiftAid() && $this->boolean('gift_aid_eligible'),
             'notes' => $this->input('notes'),
         ];
     }

@@ -40,12 +40,8 @@
 
     if ($role?->canViewFinance()) {
         $groups['Finance'] = [
-            ['label' => 'Ledger', 'route' => 'finance.index', 'active' => ['finance.*', 'payments.*', 'sponsorships.*', 'gift-aid-declarations.*']],
+            ['label' => 'Ledger', 'route' => 'finance.index', 'active' => ['finance.*', 'payments.*', 'sponsorships.*']],
         ];
-
-        if ($role->canManageFinance()) {
-            $groups['Finance'][] = ['label' => 'Gift Aid', 'route' => 'gift-aid.index', 'active' => ['gift-aid.*']];
-        }
     }
 
     if ($role?->isAdmin()) {

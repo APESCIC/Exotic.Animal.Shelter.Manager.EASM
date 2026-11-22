@@ -6,6 +6,7 @@ use App\Enums\AnimalSex;
 use App\Enums\CitesAnnex;
 use App\Enums\CitesCertificateType;
 use App\Enums\MovementType;
+use App\Models\Concerns\RecordsAudit;
 use Carbon\CarbonInterface;
 use Database\Factories\AnimalFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +22,8 @@ class Animal extends Model
 {
     /** @use HasFactory<AnimalFactory> */
     use HasFactory;
+
+    use RecordsAudit;
 
     /**
      * @var list<string>

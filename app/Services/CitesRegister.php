@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Collection;
 class CitesRegister
 {
     /**
-     * Article 10 is needed for commercial use; whether fee-paid rehoming counts is waiting on APHA (#134).
+     * Article 10 is needed for commercial use, including sale and fee-paid rehoming (shelter decision #134).
      */
-    public const NO_ARTICLE_TEN = 'No Article 10: needed before any sale or fee-paid rehoming (to be confirmed)';
+    public const NO_ARTICLE_TEN = 'No Article 10: needed before any sale or fee-paid rehoming';
 
     /**
      * @var list<string>
