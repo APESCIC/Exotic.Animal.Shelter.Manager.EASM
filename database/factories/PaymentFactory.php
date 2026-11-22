@@ -26,7 +26,6 @@ class PaymentFactory extends Factory
             'amount_pence' => fake()->numberBetween(500, 10000),
             'received_on' => '2026-10-01',
             'reference' => null,
-            'gift_aid_eligible' => false,
             'notes' => null,
         ];
     }

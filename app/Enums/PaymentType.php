@@ -18,15 +18,4 @@ enum PaymentType: string
             self::Other => 'Other',
         };
     }
-
-    /**
-     * Fees buy a service, so HMRC does not treat them as gifts.
-     */
-    public function canClaimGiftAid(): bool
-    {
-        return match ($this) {
-            self::Donation, self::Sponsorship => true,
-            self::AdoptionFee, self::Other => false,
-        };
-    }
 }

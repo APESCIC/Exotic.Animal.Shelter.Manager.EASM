@@ -71,14 +71,6 @@ class Person extends Model
     }
 
     /**
-     * @return HasMany<GiftAidDeclaration, $this>
-     */
-    public function giftAidDeclarations(): HasMany
-    {
-        return $this->hasMany(GiftAidDeclaration::class)->orderByDesc('effective_from')->orderByDesc('id');
-    }
-
-    /**
      * @return HasMany<Sponsorship, $this>
      */
     public function sponsorships(): HasMany

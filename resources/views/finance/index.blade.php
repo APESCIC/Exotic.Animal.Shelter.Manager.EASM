@@ -14,7 +14,6 @@
         </div>
         @if (auth()->user()?->role?->canManageFinance())
             <div class="page-actions">
-                <a class="button" href="{{ route('gift-aid.index') }}">Gift Aid</a>
                 <a class="button button-primary" href="{{ route('payments.create') }}">Record payment</a>
             </div>
         @endif
@@ -67,7 +66,6 @@
                 <th>From</th>
                 <th>Animal</th>
                 <th>Method</th>
-                <th>Gift Aid</th>
                 <th><span class="visually-hidden">Actions</span></th>
             </tr>
         </thead>
@@ -92,7 +90,6 @@
                         @endif
                     </td>
                     <td>{{ $payment->method->label() }}</td>
-                    <td>{{ $payment->gift_aid_eligible ? 'Yes' : 'No' }}</td>
                     <td>
                         @if (auth()->user()?->role?->canManageFinance())
                             <a href="{{ route('payments.edit', $payment) }}">Edit</a>
@@ -100,7 +97,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="8">No payments match.</td></tr>
+                <tr><td colspan="7">No payments match.</td></tr>
             @endforelse
         </tbody>
     </table>
