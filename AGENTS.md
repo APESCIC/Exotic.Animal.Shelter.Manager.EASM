@@ -61,14 +61,14 @@ Laravel Herd on Windows is the only local set-up. Use fake demo data only ([docs
 
 ## How we work
 
-Work ships in versions such as `v0.6.2`. Always use the version number, never GitHub's milestone number. Detail: [docs/shipping.md](docs/shipping.md); skills under `.cursor/skills/`.
+Work ships in versions such as `v0.6.2`. Always use the version number, never GitHub's milestone number. Shipping follows Cursor's `github-milestone-completion` and `ship-gate` skills; named slots below fill the repo-specific values. Detail for version names and release packaging: [docs/shipping.md](docs/shipping.md).
 
-1. **Work:** one issue at a time. Each gets its own branch and a PR into the version branch `milestone/vX-Y-Z-<slug>`, with Work started, Progress update and Work complete comments. Close the issue when its PR merges.
-2. **Merge:** when every issue is done, bring `main` into the version branch and open one PR into `main`. After Bambie's ship-gate answer it merges once as a merge commit.
+1. **Work:** one milestone branch (`milestone/vX-Y-Z-<slug>` from `composer milestone:next`) and one draft PR into `main`. Commit every issue on that branch (Started / Committed comments via `github-closeout`); issues stay open until the milestone PR merges.
+2. **Merge:** when every leaf is done, mark the PR ready. After Bambie's ship-gate answer it merges once as a merge commit (`gh pr merge --merge`).
 3. **Release:** one tag `vX.Y.Z` and one GitHub Release.
-4. **Deploy:** one deploy of that release tag, with evidence.
+4. **Deploy:** one deploy of that release tag via GitHub Actions, with evidence.
 
-Hotfixes only with Bambie's written approval on the issue. Worked example: [CONTRIBUTING.md](CONTRIBUTING.md).
+Hotfixes only with Bambie's written approval on the issue (AskQuestion). Worked example: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Everyday Cursor skills
 
