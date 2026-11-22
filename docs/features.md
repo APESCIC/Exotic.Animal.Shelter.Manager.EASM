@@ -11,10 +11,13 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 ## Animals and care
 
 - **Animals:** admin and staff manage animal records at `/animals` (free-text species, primary photo, enclosure, CITES and DWA details, find and filter, a shelter view by location). Public photos use `public/storage` when a symlink is available, or the `/storage/{path}` route on hosts that block `symlink()`.
+  - Colour, breed/type, entry reason, death reason and flags use **lookup lists** (select / multi-select). Species and location stay free text.
+  - When lookups first ship, existing free-text values are copied into the lists so records keep their colour, breed, reasons and flags.
 - **Movements:** admin and staff record movements on an animal (intake, hold, quarantine, foster, trial adoption, adoption, reclaim, transfer, deceased), with history on the animal record. A deceased movement updates the animal's deceased date and death reason. Optional contact links use people from `/people`.
 - **Medical care:** admin and staff record vaccinations, tests, treatments, diets and daily observations from the animal record.
 - **Media:** admin and staff upload extra photos and PDFs to an animal (Media section), separate from the primary photo.
-- **Custom husbandry fields:** admins define them under `/admin/custom-fields` (text, number, date, yes/no). Staff fill them in when creating or editing an animal, and animal search also matches them.
+- **Lookups:** admins manage reusable lists at `/admin/lookups` (colour, breed/type, entry reason, death reason, flags, and any lists used by custom fields). Values are retired, not deleted. Creating, updating and retiring a value is audited. Only admins can open or change lookups; staff, volunteers and read-only users get 403.
+- **Custom fields:** admins define them under `/admin/custom-fields` for **animals** or **people** (text, number, date, yes/no, lookup, multi-lookup). Options include mandatory, tooltip, display order, show-on-new-record, species filter (animals only), and retire-instead-of-delete. Staff fill values on create/edit; animal search also matches animal field values. This enhances the original custom-fields work rather than replacing it.
 - **Diary:** admin and staff create and complete diary tasks from an animal record or the shared inbox at `/diary`.
 - **Stock:** staff track food, medical and other supplies at `/stock`. Each item has a unit, quantity, reorder level and location. Every change (delivery, use, waste, stocktake count) is kept as history. Adding a medical record can take the stock used off at the same time. Items at or below their reorder level raise a **Low stock** alert on the dashboard. Volunteers can record deliveries and usage; staff manage the item list.
 - **Reminders:** equipment replacements and DWA renewals need no cron job; they are raised when anyone opens the dashboard or diary. `php artisan easm:reminders` does the same from the command line if you prefer a scheduled task.
@@ -42,7 +45,7 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 
 ## People, adoption and applications
 
-- **People:** admin and staff manage people and contacts at `/people` (categories, banned and homechecked flags, find and filter).
+- **People:** admin and staff manage people and contacts at `/people` (categories, banned and homechecked flags, find and filter). People custom fields defined for the person entity appear on create/edit and on the person record (species filter does not apply).
 - **Waiting list:** admin and staff keep a waiting list at `/waiting-list` of people who want to surrender an animal or adopt one.
   - Each entry has an urgency (urgent, high, normal, low), a species (free text), and a linked contact or free-text contact details.
   - The list shows the most urgent first, then the longest waiting.
@@ -66,6 +69,19 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
   - On HTTPS the app installs to the home screen and keeps visited mobile pages available offline.
   - Changes made without signal are saved on the phone and sent once it is back online, and each is applied only once.
 - **Rota:** the staff and volunteer rota is at `/rota`. Admins and staff plan shifts; everyone sees the week and **My shifts**.
+
+## Admin: lookups and custom fields (Herd checks)
+
+Local only (`https://easm.test` / live reload on `:5176`). Sign in as `admin@easm.test` with the fake demo password in [local/demo-data.md](local/demo-data.md). Do not use Laragon.
+
+1. **Manage a list:** Administration → Lookups → open Colour → Add value → save. Confirm it appears Active.
+2. **Retire a value:** Edit that value, untick Active, save. Confirm it shows as Retired and no longer appears on a **new** animal form's colour list.
+3. **Migrated animal value:** Open an existing demo animal that still has a colour or flags from before lookups. Confirm the value still shows on the record and on edit (including retired values already on the record).
+4. **Mandatory custom field:** Administration → Custom fields → add an animal text field with Mandatory on → edit an animal and leave it empty → save should show an error next to that field.
+5. **Species filter:** Add an animal field with species filter `Bearded dragon` → it appears on a bearded dragon edit form and not on a corn snake.
+6. **People custom field:** Add a person-entity field → it appears on People create/edit and show, and not on animal forms.
+
+Permissions: only **admin** manages lookups and custom-field definitions. **Admin and staff** fill values on animals and people. Volunteers and read-only users cannot manage definitions.
 
 ## What EASM does not include
 
