@@ -73,7 +73,22 @@ class Animal extends Model
             'non_shelter' => 'boolean',
             'is_adoptable' => 'boolean',
             'age_years' => 'integer',
+            'flags' => 'array',
         ];
+    }
+
+    /**
+     * Flags for display, search helpers and documents (comma-separated names).
+     */
+    public function flagsLabel(): string
+    {
+        $flags = $this->flags;
+
+        if (! is_array($flags) || $flags === []) {
+            return '';
+        }
+
+        return implode(', ', $flags);
     }
 
     /**

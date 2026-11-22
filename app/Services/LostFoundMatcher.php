@@ -90,7 +90,7 @@ class LostFoundMatcher
             $reasons[] = 'Location';
         }
 
-        if ($this->tokensOverlap($report->markings, $animal->flags)
+        if ($this->tokensOverlap($report->markings, $animal->flagsLabel())
             || $this->tokensOverlap($report->markings, $animal->breed_type)) {
             $score += 10;
             $reasons[] = 'Markings / description';

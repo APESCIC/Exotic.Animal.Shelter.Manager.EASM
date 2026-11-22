@@ -12,6 +12,8 @@ use App\Models\Animal;
 use App\Models\AuditLog;
 use App\Models\CustomFieldDefinition;
 use App\Models\Enclosure;
+use App\Models\LookupValue;
+use App\Support\LookupField;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -95,9 +97,12 @@ class AnimalController extends Controller
     {
         $this->authorizeManage();
 
+        $animal = new Animal(['sex' => AnimalSex::Unknown]);
+
         return view('animals.create', [
-            'animal' => new Animal(['sex' => AnimalSex::Unknown]),
+            'animal' => $animal,
             'enclosures' => $this->enclosureOptions(),
+            'lookupOptions' => $this->lookupOptionsFor($animal),
             'customFieldDefinitions' => CustomFieldDefinition::query()
                 ->active()
                 ->forAnimal()
@@ -154,6 +159,7 @@ class AnimalController extends Controller
         return view('animals.edit', [
             'animal' => $animal,
             'enclosures' => $this->enclosureOptions($animal->enclosure_id),
+            'lookupOptions' => $this->lookupOptionsFor($animal),
             'customFieldDefinitions' => CustomFieldDefinition::query()
                 ->active()
                 ->forAnimal()
@@ -220,8 +226,23 @@ class AnimalController extends Controller
         $data['non_shelter'] = $request->boolean('non_shelter');
         $data['is_adoptable'] = $request->boolean('is_adoptable');
         $data['cites_exempt_annex_x'] = $request->boolean('cites_exempt_annex_x');
+        $data['flags'] = array_values($request->input('flags', []) ?: []);
 
         return $data;
+    }
+
+    /**
+     * @return array<string, \Illuminate\Support\Collection<int, LookupValue>>
+     */
+    private function lookupOptionsFor(Animal $animal): array
+    {
+        return [
+            'colour' => LookupField::options('colour', $animal->colour),
+            'breed_type' => LookupField::options('breed_type', $animal->breed_type),
+            'entry_reason' => LookupField::options('entry_reason', $animal->entry_reason),
+            'death_reason' => LookupField::options('death_reason', $animal->death_reason),
+            'flags' => LookupField::options('flags', $animal->flags),
+        ];
     }
 
     private function syncCustomFieldValues(StoreAnimalRequest $request, Animal $animal): void

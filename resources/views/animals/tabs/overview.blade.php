@@ -15,7 +15,7 @@
         <tr><th>Identifying code</th><td>{{ $animal->identifying_code ?: '—' }}</td></tr>
         <tr><th>Current status</th><td>{{ $animal->currentMovementType()?->label() ?? '—' }}</td></tr>
         <tr><th>Entry reason</th><td>{{ $animal->entry_reason ?: '—' }}</td></tr>
-        <tr><th>Flags</th><td>{{ $animal->flags ?: '—' }}</td></tr>
+        <tr><th>Flags</th><td>{{ $animal->flagsLabel() !== '' ? $animal->flagsLabel() : '—' }}</td></tr>
         <tr><th>Non-shelter</th><td>{{ $animal->non_shelter ? 'Yes' : 'No' }}</td></tr>
         <tr><th>Listed for public adoption</th><td>{{ $animal->is_adoptable ? 'Yes' : 'No' }}</td></tr>
         <tr><th>Deceased</th><td>{{ $animal->deceased_at ? UkDate::format($animal->deceased_at) : '—' }}</td></tr>

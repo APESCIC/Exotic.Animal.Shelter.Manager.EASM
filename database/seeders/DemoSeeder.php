@@ -205,7 +205,7 @@ class DemoSeeder extends Seeder
                     'cites' => $i % 7 === 0 ? 'Yes' : null,
                     'cites_annex' => $i % 7 === 0 ? CitesAnnex::B : CitesAnnex::NotListed,
                     'dwa' => $i % 11 === 0 ? 'Yes' : null,
-                    'flags' => 'Demo record: fake animal for local QA.',
+                    'flags' => ['Special diet'],
                 ],
             );
 

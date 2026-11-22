@@ -35,7 +35,7 @@ class LookupTest extends TestCase
     public function test_admin_can_add_edit_reorder_and_retire_a_value(): void
     {
         $admin = User::factory()->admin()->create();
-        $list = LookupList::factory()->create(['key' => 'colour', 'name' => 'Colour']);
+        $list = LookupList::factory()->create(['key' => 'test_colour', 'name' => 'Test colour']);
 
         $this->actingAs($admin)
             ->post(route('admin.lookups.values.store', $list), [
