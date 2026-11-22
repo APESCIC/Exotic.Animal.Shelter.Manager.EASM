@@ -21,7 +21,7 @@ Nothing releases or deploys on an ordinary push or pull request. Every workflow 
 
 | Feature | What it does | Notes |
 | --- | --- | --- |
-| CodeQL (check `CodeQL`, `Analyze (...)`) | Scans JavaScript and the workflows for security problems on every pull request | Runs as GitHub's default setup, enforced by the organisation. A CodeQL workflow file would fail alongside it, so the repo has none. CodeQL has no PHP support; PHP is covered by the tests and Pint. |
+| CodeQL (check `CodeQL`, `Analyze (...)`) | Scans JavaScript and the workflows for security problems on every pull request and on `main` | Free default setup for this public repo, via the organisation's **GitHub recommended** code security configuration (not the paid private GHAS path). A CodeQL workflow file would fight default setup, so the repo has none. CodeQL has no PHP support; PHP is covered by the tests and Pint. |
 | Dependabot (`.github/dependabot.yml`) | Weekly grouped update PRs for Composer, npm and GitHub Actions | PRs go into the `dependencies` branch, never `main`. Each version branch merges `origin/dependencies` when work starts. |
 
 Extra checks from third-party apps installed across the APESCIC organisation are not set up in this repository; the APES IT Administrator manages them.
