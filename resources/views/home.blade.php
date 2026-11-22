@@ -39,6 +39,7 @@
                 <li><a href="{{ route('animals.index') }}">All animals</a></li>
                 <li><a href="{{ route('animals.shelter') }}">Shelter view</a></li>
                 <li><a href="{{ route('lost-found.index') }}">Lost and found</a></li>
+                <li><a href="{{ route('animal-control.index') }}">Animal control</a></li>
             </ul>
         </section>
         <section class="card">

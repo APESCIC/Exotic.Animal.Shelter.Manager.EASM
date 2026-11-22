@@ -4,7 +4,7 @@ This is the one detailed description of how work ships in EASM. `AGENTS.md`, `CO
 
 ## In one paragraph
 
-Work is grouped into versions, such as `v0.6.2`. Each issue in a version gets its own branch and pull request into the version branch. When every issue is done, the version branch goes into `main` in one merge commit, after Bambie's review. That merge commit is tagged `vX.Y.Z`, which publishes one GitHub Release, and that release is deployed once.
+Work is grouped into versions, such as `v0.6.2`. Every issue in a version is committed on one version branch behind one draft PR into `main` (Cursor's `github-milestone-completion` skill). When every leaf is done, that PR merges into `main` once as a merge commit after Bambie's ship-gate answer. That merge commit is tagged `vX.Y.Z`, which publishes one GitHub Release, and that release is deployed once.
 
 ## The version
 
@@ -41,22 +41,19 @@ Work is grouped into versions, such as `v0.6.2`. Each issue in a version gets it
 1. Run the live preview gate (the `local-setup` skill).
 2. `composer milestone:next`. Create the version branch from `origin/main` if it is missing and push it (`git push -u origin HEAD`). Otherwise switch to it and merge `origin/main` into it. Merge `origin/dependencies` into it as well. Both are merge commits. Stop on any conflict.
 3. Open one draft PR from the version branch into `main`, titled `v<version>: <milestone name>`, listing `Closes #<n>` for every issue including the Epic.
-4. Work one issue at a time, in the planned order (the `work-on-issue` skill):
-   - Create the issue branch from the version branch.
-   - Post the **Work started** comment before the first commit.
-   - Make small commits with `Refs #<n>` and push when useful.
-   - Open a PR into the version branch with `Closes #<n>` in its description, and post **Progress update** comments at each meaningful point.
-   - When CI is green, merge it into the version branch with a merge commit (`gh pr merge <pr> --merge --delete-branch`).
-   - Post **Work complete**, then close the issue with `gh issue close <n> --reason completed`. GitHub only closes issues by itself on merges into `main`.
-   - Check the issue shows as closed before starting the next one.
-   - If that was the last open sub-issue of a parent (other than the Epic), post Work complete on the parent and close it too.
+4. Work one issue at a time, in the planned order (the `work-on-issue` skill and Cursor's `github-closeout` comments):
+   - Stay on the version branch (no per-issue branch or per-issue PR into `main`).
+   - Post the **Started** comment before the first commit.
+   - Make small commits with `Refs #<n>` and push when useful so the draft milestone PR's CI runs.
+   - Post **Note** / **Decision** when the approach changes; then **Committed** with SHAs when the leaf is done.
+   - Leave the issue open until the milestone PR merges into `main` (`Closes #<n>`).
 5. An issue moves to a later version only with Bambie's approval. Comment why, then move it.
 
-The comment templates are in [reports.md](reports.md).
+Progress comments use `github-closeout` scripts; plain-language templates also live in [reports.md](reports.md).
 
 ### 2. Merge (once per version)
 
-When every issue in the version is closed, apart from the Epic and any "[Task] Ship the milestone" issue, which close at close-out (the `finish-version` skill). `composer milestone:status -- vX.Y.Z` still exits 1 at this point because the Epic is open; only other open issues should stop the merge.
+When every leaf has a **Committed** comment and only the Epic (and any ship task) remain as parents, run the `finish-version` skill. `composer milestone:status -- vX.Y.Z` may still exit 1 while the Epic is open; only other open leaves should stop the merge.
 
 1. Merge `origin/main` into the version branch.
 2. Run `composer milestone:bump -- vX.Y.Z` as the last commit, `chore: release vX.Y.Z`, and push.

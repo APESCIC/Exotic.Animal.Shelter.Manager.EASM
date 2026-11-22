@@ -19,6 +19,11 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 - **Stock:** staff track food, medical and other supplies at `/stock`. Each item has a unit, quantity, reorder level and location. Every change (delivery, use, waste, stocktake count) is kept as history. Adding a medical record can take the stock used off at the same time. Items at or below their reorder level raise a **Low stock** alert on the dashboard. Volunteers can record deliveries and usage; staff manage the item list.
 - **Reminders:** equipment replacements and DWA renewals need no cron job; they are raised when anyone opens the dashboard or diary. `php artisan easm:reminders` does the same from the command line if you prefer a scheduled task.
 
+## Animal control
+
+- **Cases:** admin and staff log municipal-style callouts at `/animal-control` (reference such as `AC-2026-0001`, reported time, location, free-text species, summary, optional reporter and linked animal). Signed-in users can view the list and case pages; volunteers and read-only users cannot create or change cases.
+- **Dispatch and close:** staff assign a dispatcher (admin or staff user) so the case becomes **Dispatched**, then close it with optional notes. Bite records, citations, trap loan and pet licensing are not in this MVP.
+
 ## Compliance
 
 - **CITES register:** admin, staff and read-only users keep a CITES register at `/compliance/cites`.

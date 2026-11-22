@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\MovementType;
 use App\Models\Animal;
+use App\Models\AnimalControlCase;
 use App\Models\Application;
 use App\Models\CustomFieldDefinition;
 use App\Models\Diet;
@@ -42,6 +43,7 @@ class LayoutTest extends TestCase
             'person' => Person::factory()->create(),
             'application' => Application::factory()->create(),
             'lostFoundReport' => LostFoundReport::factory()->create(),
+            'animalControlCase' => AnimalControlCase::factory()->create(),
             'customField' => CustomFieldDefinition::factory()->create(),
             'documentTemplate' => DocumentTemplate::factory()->create(),
             'document' => Document::factory()->for($animal)->create(),
