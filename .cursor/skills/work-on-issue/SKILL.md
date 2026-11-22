@@ -16,7 +16,7 @@ One issue at a time, in the planned order. Shipping follows Cursor's `github-mil
 ## 2. Start
 
 1. If nobody is assigned: `gh issue edit <n> --add-assignee apescic-director`.
-2. Stay on the version branch (`composer milestone:next` prints it). Run `repo-sync`. Do **not** open a per-issue branch or a per-issue PR into `main`.
+2. Stay on the version branch (`composer milestone:next` prints it). Run `repo-sync`. Commit on that branch only; the single milestone PR into `main` already covers every leaf.
 3. Post the **Started** comment *before* writing any code (`Add-IssueUpdate.ps1 -Kind Started`): branch, PR number, and a short step list.
 
 ## 3. Do the work
