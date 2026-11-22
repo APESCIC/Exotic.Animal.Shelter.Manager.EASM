@@ -128,6 +128,7 @@ Operator Cloudron LAMP guide: [docs/hosting/cloudron-lamp.md](docs/hosting/cloud
 - Herd MySQL can show as `error` in the status table while port 3306 answers; trust the preview script's port check.
 - Do not run `php artisan config:cache` on Cloudron (MySQL credentials can rotate).
 - Minisign public key id `0263FE993EE2A87C`.
+- CodeQL uses free default setup on this public repo via the organisation's **GitHub recommended** code security configuration (not a `codeql.yml` workflow). Attaching **APESCIC Security Off** disables scanning and causes `startup_failure`.
 
 ## Where to find things
 
