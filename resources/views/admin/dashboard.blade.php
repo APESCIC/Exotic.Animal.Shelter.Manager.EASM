@@ -13,8 +13,9 @@
             <a class="button" href="{{ route('admin.settings.edit') }}">Organisation settings</a>
         </section>
         <section class="card">
-            <h2>Custom fields</h2>
-            <p class="hint">Extra husbandry fields for animal records.</p>
+            <h2>Lookups and fields</h2>
+            <p class="hint">Reusable lists and extra fields for animal and people records.</p>
+            <a class="button" href="{{ route('admin.lookups.index') }}">Lookups</a>
             <a class="button" href="{{ route('admin.custom-fields.index') }}">Custom fields</a>
             <a class="button" href="{{ route('admin.document-templates.index') }}">Document templates</a>
             <a class="button" href="{{ route('admin.publishing.edit') }}">Partner feed</a>

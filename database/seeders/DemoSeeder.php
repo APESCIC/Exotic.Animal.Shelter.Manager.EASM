@@ -67,6 +67,7 @@ class DemoSeeder extends Seeder
         $faker->seed(self::SEED);
 
         $this->call(DevUserSeeder::class);
+        $this->call(LookupSeeder::class);
 
         $settings = [
             'organisation_name' => 'Demo Exotic Rescue (fake data)',
