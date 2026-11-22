@@ -6,6 +6,7 @@ use App\Enums\CustomFieldEntity;
 use App\Enums\CustomFieldType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreCustomFieldDefinitionRequest extends FormRequest
 {
@@ -24,14 +25,33 @@ class StoreCustomFieldDefinitionRequest extends FormRequest
             'type' => ['required', Rule::enum(CustomFieldType::class)],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'active' => ['sometimes', 'boolean'],
+            'is_mandatory' => ['sometimes', 'boolean'],
+            'tooltip' => ['nullable', 'string', 'max:255'],
+            'show_on_new_record' => ['sometimes', 'boolean'],
+            'species_filter' => ['nullable', 'string', 'max:255'],
+            'lookup_list_id' => ['nullable', 'integer', Rule::exists('lookup_lists', 'id')],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $type = CustomFieldType::tryFrom((string) $this->input('type'));
+            if ($type?->usesLookupList() && ! $this->filled('lookup_list_id')) {
+                $validator->errors()->add('lookup_list_id', 'Choose a lookup list for this field type.');
+            }
+        });
     }
 
     protected function prepareForValidation(): void
     {
         $this->merge([
             'active' => $this->boolean('active', true),
+            'is_mandatory' => $this->boolean('is_mandatory'),
+            'show_on_new_record' => $this->boolean('show_on_new_record', true),
             'entity' => CustomFieldEntity::Animal->value,
+            'species_filter' => $this->filled('species_filter') ? trim((string) $this->input('species_filter')) : null,
+            'lookup_list_id' => $this->filled('lookup_list_id') ? (int) $this->input('lookup_list_id') : null,
         ]);
     }
 }

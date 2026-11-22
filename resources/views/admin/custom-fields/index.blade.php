@@ -16,6 +16,7 @@
                     <th>Slug</th>
                     <th>Type</th>
                     <th>Order</th>
+                    <th>Mandatory</th>
                     <th>Active</th>
                     <th></th>
                 </tr>
@@ -25,9 +26,15 @@
                     <tr>
                         <td>{{ $definition->label }}</td>
                         <td><code>{{ $definition->slug }}</code></td>
-                        <td>{{ $definition->type->label() }}</td>
+                        <td>
+                            {{ $definition->type->label() }}
+                            @if ($definition->lookupList)
+                                <span class="hint">({{ $definition->lookupList->name }})</span>
+                            @endif
+                        </td>
                         <td>{{ $definition->sort_order }}</td>
-                        <td>{{ $definition->active ? 'Yes' : 'No' }}</td>
+                        <td>{{ $definition->is_mandatory ? 'Yes' : 'No' }}</td>
+                        <td>{{ $definition->active ? 'Yes' : 'Retired' }}</td>
                         <td><a href="{{ route('admin.custom-fields.edit', $definition) }}">Edit</a></td>
                     </tr>
                 @endforeach

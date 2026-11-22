@@ -4,11 +4,14 @@ namespace App\Http\Requests;
 
 use App\Enums\AnimalSex;
 use App\Enums\CitesAnnex;
+use App\Enums\CustomFieldType;
 use App\Enums\UserRole;
 use App\Models\Animal;
+use App\Models\CustomFieldDefinition;
 use App\Support\LookupField;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreAnimalRequest extends FormRequest
 {
@@ -53,6 +56,47 @@ class StoreAnimalRequest extends FormRequest
             'dwa' => ['nullable', 'string', 'max:255'],
             'primary_photo' => ['nullable', 'image', 'max:5120'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $species = (string) $this->input('species', '');
+            $isCreate = ! $this->route('animal') instanceof Animal;
+
+            $definitions = CustomFieldDefinition::query()
+                ->active()
+                ->forAnimal()
+                ->get()
+                ->filter(function (CustomFieldDefinition $definition) use ($species, $isCreate): bool {
+                    if (! $definition->appliesToSpecies($species)) {
+                        return false;
+                    }
+
+                    return ! $isCreate || $definition->show_on_new_record;
+                });
+
+            foreach ($definitions as $definition) {
+                if (! $definition->is_mandatory) {
+                    continue;
+                }
+
+                $raw = $this->input('custom_fields.'.$definition->id);
+                $normalized = $definition->normalizeStoredValue(
+                    $definition->type === CustomFieldType::Boolean ? ($raw ?? '0') : $raw,
+                );
+
+                $empty = $normalized === null || $normalized === ''
+                    || ($definition->type === CustomFieldType::Boolean && $normalized === '0');
+
+                if ($empty) {
+                    $validator->errors()->add(
+                        'custom_fields.'.$definition->id,
+                        $definition->label.' is required.',
+                    );
+                }
+            }
+        });
     }
 
     protected function prepareForValidation(): void

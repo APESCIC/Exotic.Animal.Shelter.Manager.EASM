@@ -103,11 +103,7 @@ class AnimalController extends Controller
             'animal' => $animal,
             'enclosures' => $this->enclosureOptions(),
             'lookupOptions' => $this->lookupOptionsFor($animal),
-            'customFieldDefinitions' => CustomFieldDefinition::query()
-                ->active()
-                ->forAnimal()
-                ->ordered()
-                ->get(),
+            'customFieldDefinitions' => $this->formCustomFieldDefinitions(newRecord: true),
         ]);
     }
 
@@ -120,7 +116,7 @@ class AnimalController extends Controller
         }
 
         $animal = Animal::query()->create($data);
-        $this->syncCustomFieldValues($request, $animal);
+        $this->syncCustomFieldValues($request, $animal, $data['species'] ?? null);
 
         return $this->withCapacityWarning(
             redirect()->route('animals.show', $animal)->with('status', 'Animal record created.'),
@@ -142,7 +138,7 @@ class AnimalController extends Controller
             'activeTab' => $activeTab,
             'tabs' => AnimalTab::cases(),
             'customFieldDefinitions' => $activeTab === AnimalTab::Overview
-                ? CustomFieldDefinition::query()->active()->forAnimal()->ordered()->get()
+                ? $this->overviewCustomFieldDefinitions($animal)
                 : collect(),
             'auditEntries' => $activeTab === AnimalTab::Audit
                 ? AuditLog::forAnimalRecord($animal)->with('user')->limit(200)->get()
@@ -160,11 +156,9 @@ class AnimalController extends Controller
             'animal' => $animal,
             'enclosures' => $this->enclosureOptions($animal->enclosure_id),
             'lookupOptions' => $this->lookupOptionsFor($animal),
-            'customFieldDefinitions' => CustomFieldDefinition::query()
-                ->active()
-                ->forAnimal()
-                ->ordered()
-                ->get(),
+            'customFieldDefinitions' => $this->formCustomFieldDefinitions(newRecord: false)
+                ->filter(fn (CustomFieldDefinition $definition): bool => $definition->appliesToSpecies($animal->species))
+                ->values(),
         ]);
     }
 
@@ -180,7 +174,7 @@ class AnimalController extends Controller
         }
 
         $animal->update($data);
-        $this->syncCustomFieldValues($request, $animal);
+        $this->syncCustomFieldValues($request, $animal, $data['species'] ?? $animal->species);
 
         return $this->withCapacityWarning(
             redirect()->route('animals.show', $animal)->with('status', 'Animal record updated.'),
@@ -245,7 +239,7 @@ class AnimalController extends Controller
         ];
     }
 
-    private function syncCustomFieldValues(StoreAnimalRequest $request, Animal $animal): void
+    private function syncCustomFieldValues(StoreAnimalRequest $request, Animal $animal, ?string $species): void
     {
         $submitted = $request->input('custom_fields', []);
 
@@ -256,7 +250,8 @@ class AnimalController extends Controller
         $definitions = CustomFieldDefinition::query()
             ->active()
             ->forAnimal()
-            ->get();
+            ->get()
+            ->filter(fn (CustomFieldDefinition $definition): bool => $definition->appliesToSpecies($species));
 
         foreach ($definitions as $definition) {
             $rawValue = $submitted[$definition->id] ?? ($definition->type === CustomFieldType::Boolean ? '0' : null);
@@ -281,6 +276,40 @@ class AnimalController extends Controller
                 ]);
             }
         }
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, CustomFieldDefinition>
+     */
+    private function formCustomFieldDefinitions(bool $newRecord)
+    {
+        return CustomFieldDefinition::query()
+            ->active()
+            ->forAnimal()
+            ->with('lookupList.values')
+            ->ordered()
+            ->get()
+            ->when($newRecord, fn ($defs) => $defs->filter(fn (CustomFieldDefinition $d): bool => $d->show_on_new_record))
+            ->values();
+    }
+
+    /**
+     * Active definitions, plus retired ones that still have a saved value on this animal.
+     *
+     * @return \Illuminate\Support\Collection<int, CustomFieldDefinition>
+     */
+    private function overviewCustomFieldDefinitions(Animal $animal)
+    {
+        $valueIds = $animal->customFieldValues->pluck('definition_id');
+
+        return CustomFieldDefinition::query()
+            ->forAnimal()
+            ->where(function ($query) use ($valueIds): void {
+                $query->where('active', true)
+                    ->orWhereIn('id', $valueIds);
+            })
+            ->ordered()
+            ->get();
     }
 
     private function authorizeManage(): void
