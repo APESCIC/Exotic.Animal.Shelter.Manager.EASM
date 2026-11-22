@@ -89,6 +89,15 @@ class CustomFieldDefinition extends Model
      * @param  Builder<CustomFieldDefinition>  $query
      * @return Builder<CustomFieldDefinition>
      */
+    public function scopeForPerson(Builder $query): Builder
+    {
+        return $query->where('entity', CustomFieldEntity::Person->value);
+    }
+
+    /**
+     * @param  Builder<CustomFieldDefinition>  $query
+     * @return Builder<CustomFieldDefinition>
+     */
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('label');

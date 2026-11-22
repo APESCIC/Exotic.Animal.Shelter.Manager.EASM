@@ -74,6 +74,14 @@ class Person extends Model
     }
 
     /**
+     * @return HasMany<CustomFieldValue, $this>
+     */
+    public function customFieldValues(): HasMany
+    {
+        return $this->hasMany(CustomFieldValue::class);
+    }
+
+    /**
      * @return HasMany<Sponsorship, $this>
      */
     public function sponsorships(): HasMany

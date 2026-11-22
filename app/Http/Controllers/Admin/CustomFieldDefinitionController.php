@@ -17,7 +17,6 @@ class CustomFieldDefinitionController extends Controller
     public function index(): View
     {
         $definitions = CustomFieldDefinition::query()
-            ->forAnimal()
             ->with('lookupList')
             ->ordered()
             ->get();
@@ -39,6 +38,7 @@ class CustomFieldDefinitionController extends Controller
                 'show_on_new_record' => true,
             ]),
             'types' => CustomFieldType::cases(),
+            'entities' => CustomFieldEntity::cases(),
             'lookupLists' => LookupList::query()->orderBy('name')->get(),
         ]);
     }
@@ -46,8 +46,7 @@ class CustomFieldDefinitionController extends Controller
     public function store(StoreCustomFieldDefinitionRequest $request): RedirectResponse
     {
         $data = $this->validatedData($request);
-        $data['entity'] = CustomFieldEntity::Animal;
-        $data['slug'] = $this->uniqueSlug($data['label']);
+        $data['slug'] = $this->uniqueSlug($data['label'], $data['entity']);
 
         CustomFieldDefinition::query()->create($data);
 
@@ -61,6 +60,7 @@ class CustomFieldDefinitionController extends Controller
         return view('admin.custom-fields.edit', [
             'definition' => $customField,
             'types' => CustomFieldType::cases(),
+            'entities' => CustomFieldEntity::cases(),
             'lookupLists' => LookupList::query()->orderBy('name')->get(),
         ]);
     }
@@ -69,8 +69,8 @@ class CustomFieldDefinitionController extends Controller
     {
         $data = $this->validatedData($request);
 
-        if ($customField->label !== $data['label']) {
-            $data['slug'] = $this->uniqueSlug($data['label'], $customField->id);
+        if ($customField->label !== $data['label'] || $customField->entity !== $data['entity']) {
+            $data['slug'] = $this->uniqueSlug($data['label'], $data['entity'], $customField->id);
         }
 
         $customField->update($data);
@@ -86,6 +86,7 @@ class CustomFieldDefinitionController extends Controller
     private function validatedData(StoreCustomFieldDefinitionRequest|UpdateCustomFieldDefinitionRequest $request): array
     {
         $data = $request->safe()->only([
+            'entity',
             'label',
             'type',
             'sort_order',
@@ -96,10 +97,15 @@ class CustomFieldDefinitionController extends Controller
             'species_filter',
             'lookup_list_id',
         ]);
+        $data['entity'] = CustomFieldEntity::from((string) $data['entity']);
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
         $data['active'] = $request->boolean('active');
         $data['is_mandatory'] = $request->boolean('is_mandatory');
         $data['show_on_new_record'] = $request->boolean('show_on_new_record', true);
+
+        if ($data['entity'] === CustomFieldEntity::Person) {
+            $data['species_filter'] = null;
+        }
 
         $type = CustomFieldType::tryFrom((string) ($data['type'] ?? ''));
         if (! $type?->usesLookupList()) {
@@ -109,7 +115,7 @@ class CustomFieldDefinitionController extends Controller
         return $data;
     }
 
-    private function uniqueSlug(string $label, ?int $ignoreId = null): string
+    private function uniqueSlug(string $label, CustomFieldEntity $entity, ?int $ignoreId = null): string
     {
         $base = CustomFieldDefinition::makeSlug($label);
         $slug = $base;
@@ -117,7 +123,7 @@ class CustomFieldDefinitionController extends Controller
 
         while (
             CustomFieldDefinition::query()
-                ->where('entity', CustomFieldEntity::Animal->value)
+                ->where('entity', $entity->value)
                 ->where('slug', $slug)
                 ->when($ignoreId !== null, fn ($q) => $q->where('id', '!=', $ignoreId))
                 ->exists()

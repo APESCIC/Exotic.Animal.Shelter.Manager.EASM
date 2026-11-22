@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CustomFieldEntity;
 use App\Enums\CustomFieldType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,6 +21,7 @@ class UpdateCustomFieldDefinitionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'entity' => ['required', Rule::enum(CustomFieldEntity::class)],
             'label' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(CustomFieldType::class)],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],

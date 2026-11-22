@@ -21,6 +21,7 @@ class StoreCustomFieldDefinitionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'entity' => ['required', Rule::enum(CustomFieldEntity::class)],
             'label' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(CustomFieldType::class)],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
@@ -49,7 +50,7 @@ class StoreCustomFieldDefinitionRequest extends FormRequest
             'active' => $this->boolean('active', true),
             'is_mandatory' => $this->boolean('is_mandatory'),
             'show_on_new_record' => $this->boolean('show_on_new_record', true),
-            'entity' => CustomFieldEntity::Animal->value,
+            'entity' => $this->input('entity', CustomFieldEntity::Animal->value),
             'species_filter' => $this->filled('species_filter') ? trim((string) $this->input('species_filter')) : null,
             'lookup_list_id' => $this->filled('lookup_list_id') ? (int) $this->input('lookup_list_id') : null,
         ]);

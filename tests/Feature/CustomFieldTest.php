@@ -24,6 +24,7 @@ class CustomFieldTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('admin.custom-fields.store'), [
+                'entity' => 'animal',
                 'label' => 'UVB hours',
                 'type' => CustomFieldType::Text->value,
                 'sort_order' => 1,
@@ -126,6 +127,7 @@ class CustomFieldTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('admin.custom-fields.store'), [
+                'entity' => 'animal',
                 'label' => 'Preferred colour',
                 'type' => CustomFieldType::Lookup->value,
                 'lookup_list_id' => $colour->id,
@@ -136,6 +138,7 @@ class CustomFieldTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('admin.custom-fields.store'), [
+                'entity' => 'animal',
                 'label' => 'Care tags',
                 'type' => CustomFieldType::MultiLookup->value,
                 'lookup_list_id' => $flags->id,

@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Add custom field</h1>
-    <p class="hint">Animal entity only for now. Staff fill values on the animal create/edit form.</p>
+    <p class="hint">Choose animal or person. Staff fill values on the matching create/edit form.</p>
 
     <form method="post" action="{{ route('admin.custom-fields.store') }}" data-dirty-guard>
         @csrf

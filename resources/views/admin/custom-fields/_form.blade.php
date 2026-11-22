@@ -2,6 +2,15 @@
     use App\Enums\CustomFieldType;
 @endphp
 
+<label for="entity">Applies to</label>
+<select id="entity" name="entity" required>
+    @foreach ($entities as $entity)
+        <option value="{{ $entity->value }}" @selected(old('entity', $definition->entity?->value) === $entity->value)>
+            {{ $entity->label() }}
+        </option>
+    @endforeach
+</select>
+
 <label for="label">Label</label>
 <input id="label" type="text" name="label" value="{{ old('label', $definition->label) }}" required maxlength="255">
 
@@ -41,7 +50,7 @@
 
 <label class="check" for="show_on_new_record">
     <input id="show_on_new_record" name="show_on_new_record" type="checkbox" value="1" @checked(old('show_on_new_record', $definition->show_on_new_record ?? true))>
-    Show on new animal form
+    Show on new record form
 </label>
 
 <label class="check" for="active">

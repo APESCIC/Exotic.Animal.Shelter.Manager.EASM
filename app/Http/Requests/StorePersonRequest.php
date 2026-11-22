@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CustomFieldType;
 use App\Enums\PersonCategory;
 use App\Enums\UserRole;
+use App\Models\CustomFieldDefinition;
+use App\Models\Person;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StorePersonRequest extends FormRequest
 {
@@ -37,6 +41,40 @@ class StorePersonRequest extends FormRequest
             'flags' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $isCreate = ! $this->route('person') instanceof Person;
+
+            $definitions = CustomFieldDefinition::query()
+                ->active()
+                ->forPerson()
+                ->get()
+                ->filter(fn (CustomFieldDefinition $definition): bool => ! $isCreate || $definition->show_on_new_record);
+
+            foreach ($definitions as $definition) {
+                if (! $definition->is_mandatory) {
+                    continue;
+                }
+
+                $raw = $this->input('custom_fields.'.$definition->id);
+                $normalized = $definition->normalizeStoredValue(
+                    $definition->type === CustomFieldType::Boolean ? ($raw ?? '0') : $raw,
+                );
+
+                $empty = $normalized === null || $normalized === ''
+                    || ($definition->type === CustomFieldType::Boolean && $normalized === '0');
+
+                if ($empty) {
+                    $validator->errors()->add(
+                        'custom_fields.'.$definition->id,
+                        $definition->label.' is required.',
+                    );
+                }
+            }
+        });
     }
 
     protected function prepareForValidation(): void
