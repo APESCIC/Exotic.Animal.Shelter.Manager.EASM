@@ -5,6 +5,13 @@
         'Overview' => [
             ['label' => 'Dashboard', 'route' => 'home', 'active' => ['home']],
         ],
+    ];
+
+    if ($role?->canViewActivity()) {
+        $groups['Overview'][] = ['label' => 'Recent changes', 'route' => 'activity', 'active' => ['activity']];
+    }
+
+    $groups += [
         'Animals' => [
             ['label' => 'Animals', 'route' => 'animals.index', 'active' => ['animals.index', 'animals.show', 'animals.create', 'animals.edit', 'animals.movements.*', 'animals.medical.*', 'animals.diets.*', 'animals.observations.*', 'animals.media.*', 'animals.diary.*', 'medical.*', 'diets.*', 'documents.*']],
             ['label' => 'Shelter view', 'route' => 'animals.shelter', 'active' => ['animals.shelter']],

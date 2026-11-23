@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AnimalTab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -158,5 +159,62 @@ class AuditLog extends Model
         }
 
         return $label.')';
+    }
+
+    /**
+     * Link to the auditable record, or its parent animal tab when the child was deleted.
+     */
+    public function recordUrl(): ?string
+    {
+        $model = $this->auditable;
+
+        if ($model instanceof Animal) {
+            return route('animals.show', $model);
+        }
+
+        if ($model instanceof Person) {
+            return route('people.show', $model);
+        }
+
+        if ($model instanceof MedicalRecord) {
+            return AnimalTab::Health->url($model->animal_id);
+        }
+
+        if ($model instanceof AnimalObservation) {
+            return AnimalTab::Log->url($model->animal_id);
+        }
+
+        if ($model instanceof Movement) {
+            return AnimalTab::Movements->url($model->animal_id);
+        }
+
+        $animalId = $this->old_values['animal_id'] ?? $this->new_values['animal_id'] ?? null;
+        if ($animalId === null) {
+            return null;
+        }
+
+        $animalId = (int) $animalId;
+
+        return match ($this->auditable_type) {
+            MedicalRecord::class, (new MedicalRecord)->getMorphClass() => AnimalTab::Health->url($animalId),
+            AnimalObservation::class, (new AnimalObservation)->getMorphClass() => AnimalTab::Log->url($animalId),
+            Movement::class, (new Movement)->getMorphClass() => AnimalTab::Movements->url($animalId),
+            Animal::class, (new Animal)->getMorphClass() => route('animals.show', $animalId),
+            default => null,
+        };
+    }
+
+    /**
+     * @return array<string, string> morph class => label
+     */
+    public static function subjectTypeOptions(): array
+    {
+        return [
+            (new Animal)->getMorphClass() => 'Animal',
+            (new Person)->getMorphClass() => 'Person',
+            (new MedicalRecord)->getMorphClass() => 'Medical record',
+            (new AnimalObservation)->getMorphClass() => 'Observation',
+            (new Movement)->getMorphClass() => 'Movement',
+        ];
     }
 }

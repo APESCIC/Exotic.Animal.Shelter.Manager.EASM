@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\AnimalTab;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -104,6 +105,7 @@ Route::post('/apply/{type}', [PublicApplicationController::class, 'store'])
 
 Route::middleware(['auth', DeduplicateClientRequests::class])->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
+    Route::get('/activity', ActivityController::class)->name('activity');
 
     Route::get('/search', [SearchController::class, 'index'])->name('search');
     Route::get('/search.json', [SearchController::class, 'json'])->name('search.json');

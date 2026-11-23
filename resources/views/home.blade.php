@@ -62,6 +62,36 @@
         </ul>
     </section>
 
+    @if ($canViewActivity)
+        <section class="card" aria-labelledby="recent-activity-heading" data-activity-widget>
+            <div class="card-header-row">
+                <h2 id="recent-activity-heading">Recent changes</h2>
+                <a href="{{ route('activity') }}">All changes</a>
+            </div>
+            @if ($recentActivity->isEmpty())
+                <p class="hint">No changes logged yet.</p>
+            @else
+                <ul class="activity-list">
+                    @foreach ($recentActivity as $entry)
+                        <li class="activity-item">
+                            <time datetime="{{ $entry->created_at?->toIso8601String() }}">
+                                {{ $entry->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') }}
+                            </time>
+                            <div>
+                                @if ($entry->recordUrl())
+                                    <a href="{{ $entry->recordUrl() }}">{{ $entry->summary() }}</a>
+                                @else
+                                    {{ $entry->summary() }}
+                                @endif
+                                <span class="hint">{{ $entry->user?->name ?: 'System' }}</span>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+    @endif
+
     <div class="dashboard-columns">
         <section class="card" aria-labelledby="compact-shelter-heading">
             <div class="card-header-row">
