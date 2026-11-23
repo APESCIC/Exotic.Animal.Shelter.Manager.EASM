@@ -87,8 +87,8 @@ Hotfixes only with Bambie's written approval on the issue (AskQuestion). Worked 
 
 | Slot | Value |
 | --- | --- |
-| Milestone branch pattern | `milestone/vX-Y-Z-<slug>` (from `composer milestone:next`) |
-| Issue branch pattern | from `composer milestone:branch -- --issue <n>` (for example `chore/151-shipping-docs`) |
+| Milestone branch pattern | `milestone/vX-Y-Z-<slug>` (from `composer milestone:next`); every issue commits on this one branch |
+| Issue branch pattern | not used for delivery (legacy helper: `composer milestone:branch -- --issue <n>`) |
 | Version files | set by `composer milestone:bump -- vX.Y.Z` |
 | Release tooling | push `vX.Y.Z` tag; `release.yml` publishes the Release; `release-package.yml` builds the shared-hosting zip |
 | Area labels | `area:ui`, `area:animals`, `area:husbandry`, `area:compliance`, `area:people`, `area:adoption`, `area:finance`, `area:mobile`, `area:security`, `area:docs`, `area:install` |
