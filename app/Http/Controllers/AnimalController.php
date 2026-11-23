@@ -6,6 +6,8 @@ use App\Enums\AnimalListFilter;
 use App\Enums\AnimalSex;
 use App\Enums\AnimalTab;
 use App\Enums\CustomFieldEntity;
+use App\Enums\ShelterGroup;
+use App\Enums\ShelterViewMode;
 use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
@@ -14,6 +16,7 @@ use App\Models\CustomFieldDefinition;
 use App\Models\Enclosure;
 use App\Models\ObservationType;
 use App\Services\CustomFieldSync;
+use App\Services\ShelterView;
 use App\Support\LookupField;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -23,7 +26,10 @@ use Illuminate\View\View;
 
 class AnimalController extends Controller
 {
-    public function __construct(private CustomFieldSync $customFields) {}
+    public function __construct(
+        private CustomFieldSync $customFields,
+        private ShelterView $shelterView,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -63,37 +69,10 @@ class AnimalController extends Controller
 
     public function shelter(Request $request): View
     {
-        $byEnclosure = $request->string('group')->toString() === 'enclosure';
+        $group = ShelterGroup::fromRequest($request->string('group')->toString());
+        $viewMode = ShelterViewMode::fromRequest($request->string('view')->toString());
 
-        if ($byEnclosure) {
-            return view('animals.shelter', [
-                'byEnclosure' => true,
-                'enclosures' => Enclosure::query()
-                    ->with(['occupants.latestMovement'])
-                    ->withCount('occupants')
-                    ->where(fn ($query) => $query->active()->orHas('occupants'))
-                    ->ordered()
-                    ->get(),
-                'unassigned' => Animal::query()
-                    ->inCare()
-                    ->whereNull('enclosure_id')
-                    ->with('latestMovement')
-                    ->orderBy('name')
-                    ->get(),
-            ]);
-        }
-
-        $groups = Animal::query()
-            ->with(['latestMovement', 'enclosure'])
-            ->orderBy('location')
-            ->orderBy('name')
-            ->get()
-            ->groupBy(fn (Animal $animal) => $animal->location ?: 'Unassigned');
-
-        return view('animals.shelter', [
-            'byEnclosure' => false,
-            'groups' => $groups,
-        ]);
+        return view('animals.shelter', $this->shelterView->build($group, $viewMode));
     }
 
     public function create(): View
