@@ -56,5 +56,6 @@ DEV_AUTO_LOGIN_ROLE=admin
 - The installer never sets `QA_LOGIN_ENABLED` or `DEV_AUTO_LOGIN` to true; it writes `APP_ENV=production`.
 - Optional **`DEV_AUTO_LOGIN=true`**: guests are signed in as `DEV_AUTO_LOGIN_ROLE`. It is ignored unless the QA gate is on and `APP_ENV=local`. Signing out pauses auto-login for that browser session; pick a role on the login page to resume. `/login`, `/adopt`, `/apply` and `/feeds` are never auto-logged-in.
 - Legacy `GET /dev/login-as/{role}` still works behind the gate; prefer the POST panel and switcher.
+- An older local `.env` that predates these keys is fixed by re-running `scripts\herd-setup.ps1`: it appends any missing `QA_LOGIN_ENABLED` / `DEV_AUTO_LOGIN` / `DEV_AUTO_LOGIN_ROLE` values from `.env.herd.example` and never overwrites keys that are already set. It warns when `APP_ENV=local` but `QA_LOGIN_ENABLED` is explicitly false.
 
 After changing flags, run `php artisan config:clear` if config is cached.

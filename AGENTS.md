@@ -29,7 +29,7 @@ Laravel Herd on Windows is the only local set-up. Use fake demo data only ([docs
 | Preview URL | `https://easm.test`, with live reload at <https://easm.test:5176> |
 | Preview command | `scripts\preview.ps1` (starts Browsersync, `npm run dev`, on Herd's Node 22) |
 | Live reload port | 5176 (Browsersync with Herd's certificate from `bs-config.cjs`; EASM has no Vite) |
-| Env file | `.env.herd.example`, copied to `.env` by `scripts\herd-setup.ps1` (key names only in git) |
+| Env file | `.env.herd.example`, copied to `.env` by `scripts\herd-setup.ps1`; existing `.env` gets missing `QA_LOGIN_*` / `DEV_AUTO_*` keys merged in (never overwritten; key names only in git) |
 | Database | MySQL, `easm_local` by default (Herd MySQL 8.4 on 127.0.0.1:3306, `root`, empty password) |
 | Mail | Herd mail catcher (`MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT=2525`) |
 | Set up | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\herd-setup.ps1 -Link -SeedDemo` |
@@ -56,7 +56,7 @@ Laravel Herd on Windows is the only local set-up. Use fake demo data only ([docs
 | Lint / format | `composer lint` / `composer format` (Pint) |
 | Milestone helpers | `composer milestone:next`, `milestone:branch`, `milestone:pr-title`, `milestone:status`, `milestone:bump` |
 | Demo data | `composer demo:seed` / `composer demo:reset` (alias of `demo:seed --fresh`); local Herd only — see [docs/local/demo-data.md](docs/local/demo-data.md) |
-| Developer QA login | `QA_LOGIN_ENABLED=true` with `APP_ENV=local` (Herd); amber panel on `/login`, `/qa`, in-app banner; off in production; never set by the installer |
+| Developer QA login | `QA_LOGIN_ENABLED=true` with `APP_ENV=local` (Herd); amber panel on `/login`, `/qa`, in-app banner and role switcher; off in production; never set by the installer; `herd-setup.ps1` merges missing QA keys into an existing `.env` |
 | CI workflows | `.github/workflows/` (`ci`, `milestone-version-check`, `dependency-review`, `release`, `release-package`, `deploy-cloudron`) |
 
 ## How we work
