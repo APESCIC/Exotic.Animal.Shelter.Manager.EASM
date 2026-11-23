@@ -49,6 +49,8 @@ Adjust `root` and `fastcgi_pass` to the host. cPanel and Plesk Apache vhosts alr
 
 ## Links
 
+- [Changelog](CHANGELOG.md)
+- [Release checklist](docs/release-checklist.md) (when PATCH / MINOR / MAJOR moves, and what must be true before a tag)
 - [How a version ships](docs/shipping.md)
 - [Roadmap and product constraints](docs/roadmap.md), with the plan in [issue #1](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/issues/1) and the [milestones](https://github.com/APESCIC/Exotic.Animal.Shelter.Manager.EASM/milestones?state=all)
 - [Publishing adoptable animals to partner sites](docs/publishing.md)

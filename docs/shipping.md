@@ -10,7 +10,7 @@ Work is grouped into versions, such as `v0.6.2`. Every issue in a version is com
 
 - A milestone's version is the `vMAJOR.MINOR.PATCH` at the start of its title, for example `v1.3.0 Beta: Public UX & compliance`. Always read it from the title, never from GitHub's milestone number.
 - **The next version** is the open milestone with the lowest version above the latest tag, compared as numbers (`v0.9.0` comes before `v0.10.0`). `composer milestone:next` prints it.
-- [Semantic versioning](https://semver.org/): MAJOR for breaking changes, MINOR for new features, PATCH for fixes. The milestone title sets the version; issues never change it.
+- [Semantic versioning](https://semver.org/): MAJOR for breaking changes, MINOR for new features, PATCH for fixes. The milestone title sets the version; issues never change it. Operator-facing bump rules and the pre-tag checklist: [release-checklist.md](release-checklist.md). Notable changes: [CHANGELOG.md](../CHANGELOG.md).
 - Stop and ask Bambie, without guessing, if a milestone title doesn't start with a valid version, its version isn't above the latest tag, or the version is already used on `main`. Never create, rename or delete milestones yourself.
 
 ## Names
@@ -30,7 +30,7 @@ Work is grouped into versions, such as `v0.6.2`. Every issue in a version is com
 
 ## Version fields
 
-`VERSION` is the single source of the version. `composer milestone:bump -- vX.Y.Z` sets it and copies it into `.env.example`, as listed in `scripts/MilestoneVersion/fields.json`. `config/app.php` reads the `VERSION` file (or `APP_VERSION` when set). Never edit those by hand. The local Herd `.env` has no `APP_VERSION`, so the local preview reports the version in `VERSION`; `scripts\preview.ps1` removes one if it finds it. `GET /health` also returns `schema` (the last applied migration name).
+`VERSION` is the single source of the version. `composer milestone:bump -- vX.Y.Z` sets it and copies it into `.env.example`, as listed in `scripts/MilestoneVersion/fields.json`. `config/app.php` reads the `VERSION` file (or `APP_VERSION` when set). Never edit those by hand. On release the git tag must be `v` plus the contents of `VERSION`. The local Herd `.env` has no `APP_VERSION`, so the local preview reports the version in `VERSION`; `scripts\preview.ps1` removes one if it finds it. `GET /health` also returns `schema` (the last applied migration name).
 
 ## The four steps
 
