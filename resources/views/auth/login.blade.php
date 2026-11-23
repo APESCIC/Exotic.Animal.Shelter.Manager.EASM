@@ -15,6 +15,7 @@
                 max-width: 40rem;
                 line-height: 1.5;
                 color: #1b1b18;
+                background: #fff;
                 padding: 0 1rem;
             }
             h1 { margin-bottom: 0.5rem; }
@@ -24,6 +25,9 @@
                 box-sizing: border-box;
                 padding: 0.45rem 0.5rem;
                 font: inherit;
+                color: #1b1b18;
+                background: #fff;
+                border: 1px solid #888;
             }
             .remember {
                 display: flex;
@@ -38,6 +42,9 @@
                 padding: 0.55rem 1rem;
                 font: inherit;
                 cursor: pointer;
+                color: #1b1b18;
+                background: #f0f0ee;
+                border: 1px solid #888;
             }
             .errors {
                 background: #fde8e8;
@@ -47,6 +54,21 @@
             }
             .hint { margin: 0 0 1rem; color: #444; }
             .logo { display: block; width: 10rem; height: auto; margin: 0 0 1rem; }
+            @media (prefers-color-scheme: dark) {
+                body { color: #ededec; background: #121212; }
+                input[type="email"], input[type="password"] {
+                    color: #ededec;
+                    background: #1e1e1e;
+                    border-color: #777;
+                }
+                button[type="submit"]:not(.qa-panel__button) {
+                    color: #ededec;
+                    background: #2a2a2a;
+                    border-color: #777;
+                }
+                .errors { background: #3b1515; color: #fecaca; }
+                .hint { color: #b0b0a8; }
+            }
         </style>
     </head>
     <body>

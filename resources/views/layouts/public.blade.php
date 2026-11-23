@@ -13,6 +13,7 @@
                 max-width: 48rem;
                 line-height: 1.5;
                 color: #1b1b18;
+                background: #fff;
             }
             a { color: #1b4332; }
             label { display: block; margin: 0.75rem 0 0.25rem; font-weight: 500; }
@@ -21,6 +22,9 @@
                 box-sizing: border-box;
                 padding: 0.45rem 0.5rem;
                 font: inherit;
+                color: #1b1b18;
+                background: #fff;
+                border: 1px solid #888;
             }
             textarea { min-height: 5rem; }
             button, .button {
@@ -66,6 +70,25 @@
             header nav a { margin-right: 0.75rem; }
             .brand { display: flex; align-items: center; gap: 0.75rem; }
             .brand .logo { width: 5rem; height: auto; }
+            @media (prefers-color-scheme: dark) {
+                body { color: #ededec; background: #121212; }
+                a { color: #8fbc9a; }
+                input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select, textarea {
+                    color: #ededec;
+                    background: #1e1e1e;
+                    border-color: #777;
+                }
+                button, .button {
+                    color: #ededec;
+                    border-color: #777;
+                    background: #2a2a2a;
+                }
+                .errors { background: #3b1515; color: #fecaca; }
+                .status { background: #14301a; color: #bbf7d0; }
+                .hint { color: #b0b0a8; }
+                th, td, .card { border-bottom-color: #555; }
+                fieldset { border-color: #555; }
+            }
         </style>
         @stack('head')
     </head>
