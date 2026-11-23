@@ -10,7 +10,9 @@
       2. checks Herd serves this clone as https://easm.test on PHP 8.3; -Link
          links, isolates and secures it (herd link easm, herd isolate 8.3,
          herd secure easm);
-      3. copies .env.herd.example to .env if .env is missing;
+      3. copies .env.herd.example to .env if .env is missing, or merges
+         missing Developer QA keys (QA_LOGIN_ENABLED, DEV_AUTO_LOGIN,
+         DEV_AUTO_LOGIN_ROLE) into an existing .env without overwriting;
       4. installs Composer and npm dependencies, and generates APP_KEY if blank;
       5. creates this project's database if missing, and runs the migrations;
       6. offers to load the fake demo data (php artisan demo:seed).
@@ -65,6 +67,24 @@ function Get-EnvValue([string]$Path, [string]$Key) {
     $line = Get-Content $Path | Where-Object { $_ -match "^$Key=" } | Select-Object -First 1
     if ($null -eq $line) { return $null }
     return ($line -replace "^$Key=", '').Trim('"')
+}
+
+# Append KEY=value only when the key is absent. Never overwrites an existing value.
+function Add-MissingEnvValue([string]$Path, [string]$Key, [string]$Value) {
+    if ($null -ne (Get-EnvValue $Path $Key)) { return $false }
+    Add-Content -Path $Path -Value "$Key=$Value" -Encoding utf8
+    return $true
+}
+
+# Copy selected keys from .env.herd.example into an existing .env when missing.
+function Merge-MissingEnvKeysFromExample([string]$EnvFile, [string]$ExampleFile, [string[]]$Keys) {
+    $added = @()
+    foreach ($key in $Keys) {
+        $fromExample = Get-EnvValue $ExampleFile $key
+        if ($null -eq $fromExample) { continue }
+        if (Add-MissingEnvValue $EnvFile $key $fromExample) { $added += $key }
+    }
+    return $added
 }
 
 if ($SeedDemo -and $NoDemo) { throw 'Use -SeedDemo or -NoDemo, not both.' }
@@ -134,11 +154,28 @@ try {
     # 3. .env -------------------------------------------------------------------
     Write-Step '.env'
     $envFile = Join-Path $repo '.env'
-    if (Test-Path $envFile) { Write-Ok '.env already exists, left as it is' }
-    else { Copy-Item (Join-Path $repo '.env.herd.example') $envFile; Write-Ok 'Copied .env.herd.example to .env' }
-    foreach ($check in @(@('APP_ENV', 'local'), @('APP_URL', $p.appUrl), @('DB_DATABASE', $p.database.name), @('DB_HOST', $p.database.host), @('MAIL_PORT', "$($p.mail.port)"))) {
+    $envExample = Join-Path $repo '.env.herd.example'
+    if (Test-Path $envFile) {
+        Write-Ok '.env already exists'
+        $qaKeys = @('QA_LOGIN_ENABLED', 'DEV_AUTO_LOGIN', 'DEV_AUTO_LOGIN_ROLE')
+        $merged = @(Merge-MissingEnvKeysFromExample $envFile $envExample $qaKeys)
+        if ($merged.Count -gt 0) {
+            Write-Ok ("Added missing Developer QA keys from .env.herd.example: " + ($merged -join ', '))
+        } else {
+            Write-Ok 'Developer QA keys already present (existing values left unchanged)'
+        }
+    } else {
+        Copy-Item $envExample $envFile
+        Write-Ok 'Copied .env.herd.example to .env'
+    }
+    foreach ($check in @(@('APP_ENV', 'local'), @('APP_URL', $p.appUrl), @('DB_DATABASE', $p.database.name), @('DB_HOST', $p.database.host), @('MAIL_PORT', "$($p.mail.port)"), @('QA_LOGIN_ENABLED', 'true'))) {
         $value = Get-EnvValue $envFile $check[0]
         if ($value -ne $check[1]) { Write-Warn "$($check[0]) in .env is '$value'. The local profile expects '$($check[1])'." }
+    }
+    $appEnv = Get-EnvValue $envFile 'APP_ENV'
+    $qaEnabled = Get-EnvValue $envFile 'QA_LOGIN_ENABLED'
+    if ($appEnv -eq 'local' -and $qaEnabled -and ($qaEnabled -ine 'true') -and ($qaEnabled -ne '1')) {
+        Write-Warn "APP_ENV=local but QA_LOGIN_ENABLED=$qaEnabled. The Developer sign-in panel and role switcher stay off until it is true."
     }
 
     # 4. Dependencies -----------------------------------------------------------
