@@ -10,12 +10,14 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
 
 ## Animals and care
 
-- **Animals:** admin and staff manage animal records at `/animals` (free-text species, primary photo, enclosure, CITES and DWA details, find and filter, a shelter view by location). Public photos use `public/storage` when a symlink is available, or the `/storage/{path}` route on hosts that block `symlink()`.
+- **Animals:** admin and staff manage animal records at `/animals` (free-text species, primary photo, enclosure, CITES and DWA details, find and filter). Public photos use `public/storage` when a symlink is available, or the `/storage/{path}` route on hosts that block `symlink()`.
   - Colour, breed/type, entry reason, death reason and flags use **lookup lists** (select / multi-select). Species and location stay free text.
   - When lookups first ship, existing free-text values are copied into the lists so records keep their colour, breed, reasons and flags.
-- **Movements:** admin and staff record movements on an animal (intake, hold, quarantine, foster, trial adoption, adoption, reclaim, transfer, deceased), with history on the animal record. A deceased movement updates the animal's deceased date and death reason. Optional contact links use people from `/people`.
-- **Medical care:** admin and staff record vaccinations, tests, treatments and diets from the animal record. **Daily observations** (structured types and free-text notes) can be recorded by admin, staff and volunteers — see [observations.md](observations.md).
+- **Shelter view:** `/animals/shelter` is a photo-tile grid (with a list layout still available) of animals in care. Group by enclosure, location, species or status. Each tile shows photo (or a clear placeholder), name, sex, species, and DWA / CITES / quarantine badges. Empty enclosures show free spaces against capacity. Animals without an enclosure appear under **No enclosure**. This upgrades the location list from the earlier shelter view.
+- **Movements:** admin and staff record movements on an animal (intake, hold, quarantine, foster, trial adoption, adoption, reclaim, transfer, deceased), with history on the animal record. A deceased movement updates the animal's deceased date and death reason. Optional contact links use people from `/people`. Creating, updating and deleting a movement is audited.
+- **Medical care:** admin and staff record vaccinations, tests, treatments and diets from the animal record. **Daily observations** (structured types and free-text notes) can be recorded by admin, staff and volunteers — see [observations.md](observations.md). Creating, updating and deleting an observation is audited.
 - **Media:** admin and staff upload extra photos and PDFs to an animal (Media section), separate from the primary photo.
+- **Audit:** create, update and delete on animals, people, medical records, movements and observations write rows to `audit_logs`. The animal **Audit** tab shows that animal's related entries. Summary text on the change timeline omits personal fields (addresses, emails, phone numbers, dates of birth and similar).
 - **Lookups:** admins manage reusable lists at `/admin/lookups` (colour, breed/type, entry reason, death reason, flags, and any lists used by custom fields). Values are retired, not deleted. Creating, updating and retiring a value is audited. Only admins can open or change lookups; staff, volunteers and read-only users get 403.
 - **Custom fields:** admins define them under `/admin/custom-fields` for **animals** or **people** (text, number, date, yes/no, lookup, multi-lookup). Options include mandatory, tooltip, display order, show-on-new-record, species filter (animals only), and retire-instead-of-delete. Staff fill values on create/edit; animal search also matches animal field values. This enhances the original custom-fields work rather than replacing it.
 - **Diary:** admin and staff create and complete diary tasks from an animal record or the shared inbox at `/diary`.
@@ -61,14 +63,30 @@ Sign in at `/login` with the admin email and password. Roles are admin, staff, v
   - Animals show their current sponsors on the animal record; people show payments and sponsorships on their profile.
   - Read-only users can view the ledger; volunteers cannot see finance. There is no card or online payment processing.
 
+## Dashboard and recent changes
+
+- **Home dashboard** (`/`): every signed-in role sees attention alerts (unchanged), shelter counts (on shelter, in quarantine, available for rehoming, fostered), a compact enclosure photo view, a **recently changed animals** strip, and the usual shortcut cards.
+- **Recent changes** (`/activity`): admin and staff only. Groups `audit_logs` by date (today, yesterday, earlier), with text, record type and user filters. Each entry links to the record when it still exists. A home widget shows the latest 10 events; volunteers and read-only users get 403 on `/activity` and do not see the widget.
+- `/activity` is **not** the care-stay report at `/reports/timeline` (animals' stays in care). Do not confuse the two.
+
 ## Reports, mobile and rota
 
-- **Reports:** admin, staff and read-only users run reports at `/reports`: occupancy on a chosen date (by species and enclosure), intake and outcome counts over a date range, and an animal timeline of stays in care. Each downloads as CSV.
+- **Reports:** admin, staff and read-only users run reports at `/reports`: occupancy on a chosen date (by species and enclosure), intake and outcome counts over a date range, and an animal **care-stay** timeline at `/reports/timeline`. Each downloads as CSV. The change log is at `/activity`, not here.
 - **Mobile tasks:** staff and volunteers on a phone use **Mobile tasks** at `/m`. It shows today's shifts, tasks and medication due (with large Done and Given buttons), a quick log entry or camera photo per animal, documents to sign with a finger, and enclosure pages for environment readings.
   - Print enclosure QR labels from `/enclosures/qr-labels`; scanning one opens that enclosure's page.
   - On HTTPS the app installs to the home screen and keeps visited mobile pages available offline.
   - Changes made without signal are saved on the phone and sent once it is back online, and each is applied only once.
 - **Rota:** the staff and volunteer rota is at `/rota`. Admins and staff plan shifts; everyone sees the week and **My shifts**.
+
+## Shelter view, dashboard and timeline (Herd checks)
+
+Local only (`https://easm.test` / live reload on `:5176`). Sign in as `admin@easm.test` with the fake demo password in [local/demo-data.md](local/demo-data.md). Do not use Laragon.
+
+1. **Photo shelter view:** Animals → Shelter view. Switch Group by (enclosure, location, species, status) and Layout (photo grid / list). Confirm tiles show photo or “No photo”, name, sex, species and badges; empty enclosures show free spaces.
+2. **Dashboard counts:** open Dashboard. Confirm the four Shelter counts, the compact shelter panel, and **Recently changed animals**. Confirm existing alert cards still appear.
+3. **Recent changes (admin/staff):** open Recent changes in the sidebar (`/activity`). Filter by text, type and user. Confirm today / yesterday headings and links into animal records. Confirm the home **Recent changes** widget shows the latest events.
+4. **Permissions:** switch QA role to Volunteer or Read only. Confirm `/activity` returns 403, the widget is hidden, and Shelter view / dashboard counts still work.
+5. **Care-stay report unchanged:** Reports → Timeline still shows stays in care at `/reports/timeline`, separate from `/activity`.
 
 ## Admin: lookups and custom fields (Herd checks)
 

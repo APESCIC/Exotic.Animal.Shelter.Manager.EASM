@@ -1,5 +1,7 @@
 # Reports and issue comments
 
+Product note: `/reports/timeline` remains the **care-stay** report (animals' stays in care). The admin/staff change log is `/activity` — see [features.md](features.md).
+
 One set of templates for everything Cursor (or a person) writes about work: the end of a task, a pull request description, release notes, and the comments on each issue. Write in plain UK English. Link to logs; don't paste them unless asked. Words you may not know are in the [glossary](glossary.md).
 
 ## Report template
