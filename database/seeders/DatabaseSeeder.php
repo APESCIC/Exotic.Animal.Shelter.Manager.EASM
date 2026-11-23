@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(LookupSeeder::class);
+        $this->call(ObservationTypeSeeder::class);
 
         if (app()->environment('local')) {
             $this->call(DevUserSeeder::class);

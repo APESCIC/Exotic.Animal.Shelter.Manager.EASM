@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CustomFieldDefinitionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
 use App\Http\Controllers\Admin\LookupController;
+use App\Http\Controllers\Admin\ObservationTypeController;
 use App\Http\Controllers\Admin\PublishingController;
 use App\Http\Controllers\Admin\ReleaseUploadController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\AnimalMediaController;
 use App\Http\Controllers\AnimalObservationController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BulkAnimalObservationController;
 use App\Http\Controllers\CitesCertificateController;
 use App\Http\Controllers\CitesRegisterController;
 use App\Http\Controllers\DevLoginController;
@@ -171,8 +173,14 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
     Route::get('/diets/{diet}/edit', [DietController::class, 'edit'])->name('diets.edit');
     Route::put('/diets/{diet}', [DietController::class, 'update'])->name('diets.update');
 
+    Route::get('/observations/bulk', [BulkAnimalObservationController::class, 'create'])->name('observations.bulk');
+    Route::post('/observations/bulk', [BulkAnimalObservationController::class, 'store'])->name('observations.bulk.store');
+
     Route::get('/animals/{animal}/observations/create', [AnimalObservationController::class, 'create'])->name('animals.observations.create');
     Route::post('/animals/{animal}/observations', [AnimalObservationController::class, 'store'])->name('animals.observations.store');
+    Route::get('/animals/{animal}/observations/{observation}/edit', [AnimalObservationController::class, 'edit'])->name('animals.observations.edit');
+    Route::put('/animals/{animal}/observations/{observation}', [AnimalObservationController::class, 'update'])->name('animals.observations.update');
+    Route::delete('/animals/{animal}/observations/{observation}', [AnimalObservationController::class, 'destroy'])->name('animals.observations.destroy');
 
     Route::get('/animals/{animal}/diary/create', [DiaryTaskController::class, 'create'])->name('animals.diary.create');
     Route::post('/animals/{animal}/diary', [DiaryTaskController::class, 'store'])->name('animals.diary.store');
@@ -255,6 +263,12 @@ Route::middleware(['auth', DeduplicateClientRequests::class])->group(function ()
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/observation-types', [ObservationTypeController::class, 'index'])->name('observation-types.index');
+        Route::get('/observation-types/create', [ObservationTypeController::class, 'create'])->name('observation-types.create');
+        Route::post('/observation-types', [ObservationTypeController::class, 'store'])->name('observation-types.store');
+        Route::get('/observation-types/{observationType}/edit', [ObservationTypeController::class, 'edit'])->name('observation-types.edit');
+        Route::put('/observation-types/{observationType}', [ObservationTypeController::class, 'update'])->name('observation-types.update');
+
         Route::get('/custom-fields', [CustomFieldDefinitionController::class, 'index'])->name('custom-fields.index');
         Route::get('/custom-fields/create', [CustomFieldDefinitionController::class, 'create'])->name('custom-fields.create');
         Route::post('/custom-fields', [CustomFieldDefinitionController::class, 'store'])->name('custom-fields.store');

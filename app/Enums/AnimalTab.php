@@ -49,7 +49,7 @@ enum AnimalTab: string
             self::Media => ['media.uploader'],
             self::Documents => ['documents.person'],
             self::Diary => ['diaryTasks.assignee'],
-            self::Log => ['observations.user'],
+            self::Log => ['observations.user', 'observations.observationType', 'observations.lookupValue'],
             self::Audit => [],
         };
     }

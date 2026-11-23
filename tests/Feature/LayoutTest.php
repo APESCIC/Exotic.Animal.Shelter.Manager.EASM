@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\MovementType;
 use App\Models\Animal;
 use App\Models\AnimalControlCase;
+use App\Models\AnimalObservation;
 use App\Models\Application;
 use App\Models\CustomFieldDefinition;
 use App\Models\Diet;
@@ -18,6 +19,7 @@ use App\Models\LookupValue;
 use App\Models\LostFoundReport;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
+use App\Models\ObservationType;
 use App\Models\Payment;
 use App\Models\Person;
 use App\Models\RotaShift;
@@ -41,6 +43,8 @@ class LayoutTest extends TestCase
         $parameters = [
             'animal' => $animal,
             'medicalRecord' => MedicalRecord::factory()->for($animal)->create(),
+            'observation' => AnimalObservation::factory()->for($animal)->create(),
+            'observationType' => ObservationType::factory()->create(),
             'diet' => Diet::factory()->for($animal)->create(),
             'person' => Person::factory()->create(),
             'application' => Application::factory()->create(),

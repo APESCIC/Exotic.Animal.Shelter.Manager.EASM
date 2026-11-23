@@ -132,6 +132,17 @@ enum UserRole: string
     }
 
     /**
+     * Daily structured observations and free-text log entries.
+     */
+    public function canRecordObservations(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff, self::Volunteer => true,
+            self::Readonly => false,
+        };
+    }
+
+    /**
      * The CITES register and certificate files: legal paperwork, not shown to volunteers.
      */
     public function canViewCompliance(): bool

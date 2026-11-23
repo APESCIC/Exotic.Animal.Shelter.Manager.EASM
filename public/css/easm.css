@@ -1683,3 +1683,22 @@ button.m-button {
     color: #fde68a;
     border-color: #b45309;
 }
+
+.bulk-obs-scroll {
+    margin: var(--space-4) 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+.bulk-obs-table {
+    min-width: 20rem;
+}
+
+.bulk-obs-table select,
+.bulk-obs-table input[type="text"] {
+    width: 100%;
+    min-width: 5.5rem;
+    max-width: 9rem;
+    font-size: 0.9rem;
+}
