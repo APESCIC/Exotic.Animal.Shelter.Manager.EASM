@@ -32,6 +32,9 @@
     @endif
 
     <h2>Animals in care here</h2>
+    @if (auth()->user()?->role?->canRecordObservations())
+        <p><a class="button" href="{{ route('observations.bulk', ['enclosure_id' => $enclosure->id]) }}">Bulk daily observations</a></p>
+    @endif
     @if ($enclosure->occupants->isEmpty())
         <p class="hint">No animals in care are placed here.</p>
     @else

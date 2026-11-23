@@ -12,6 +12,7 @@ use App\Models\Animal;
 use App\Models\AuditLog;
 use App\Models\CustomFieldDefinition;
 use App\Models\Enclosure;
+use App\Models\ObservationType;
 use App\Services\CustomFieldSync;
 use App\Support\LookupField;
 use Illuminate\Database\Eloquent\Collection;
@@ -135,10 +136,26 @@ class AnimalController extends Controller
             array_map(fn (AnimalTab $t): ?string => $t->countedRelation(), AnimalTab::cases()),
         )));
 
+        $observationTypeFilters = collect();
+        if ($activeTab === AnimalTab::Log) {
+            $typeFilter = request()->integer('observation_type') ?: null;
+            $query = $animal->observations()
+                ->with(['user', 'observationType', 'lookupValue'])
+                ->orderByDesc('observed_on')
+                ->orderByDesc('id');
+            if ($typeFilter !== null) {
+                $query->where('observation_type_id', $typeFilter)
+                    ->whereDate('observed_on', '>=', now()->subDays(30));
+            }
+            $animal->setRelation('observations', $query->get());
+            $observationTypeFilters = ObservationType::query()->active()->ordered()->get();
+        }
+
         return view('animals.show', [
             'animal' => $animal,
             'activeTab' => $activeTab,
             'tabs' => AnimalTab::cases(),
+            'observationTypeFilters' => $observationTypeFilters,
             'customFieldDefinitions' => $activeTab === AnimalTab::Overview
                 ? $this->customFields->overviewDefinitions(
                     CustomFieldEntity::Animal,

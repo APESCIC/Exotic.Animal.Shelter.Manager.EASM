@@ -19,15 +19,24 @@
         </p>
         @include('animals._badges', ['animal' => $animal])
 
-        @if ($role->canManageMedical())
+        @if ($role->canRecordObservations())
             <section aria-labelledby="m-log">
                 <h2 id="m-log">Add to the log</h2>
                 <form method="post" action="{{ route('animals.observations.store', $animal) }}" data-offline-queue data-offline-done="reset"
                       data-offline-label="Log entry for {{ $animal->name }}">
                     @csrf
                     <input type="hidden" name="observed_on" value="{{ today()->toDateString() }}" data-offline-today>
+                    @if (isset($observationTypes) && $observationTypes->isNotEmpty())
+                        <label for="m-observation_type_id">Observation type</label>
+                        <select id="m-observation_type_id" name="observation_type_id">
+                            <option value="">Legacy note only</option>
+                            @foreach ($observationTypes as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
                     <label for="m-body">What did you see or do?</label>
-                    <textarea id="m-body" name="body" rows="3" required maxlength="5000" placeholder="Ate two locusts, shed complete"></textarea>
+                    <textarea id="m-body" name="body" rows="3" @if (!isset($observationTypes) || $observationTypes->isEmpty()) required @endif maxlength="5000" placeholder="Ate two locusts, shed complete"></textarea>
                     <button type="submit" class="m-button">Save log entry</button>
                 </form>
             </section>

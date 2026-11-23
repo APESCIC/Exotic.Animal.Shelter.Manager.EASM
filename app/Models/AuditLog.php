@@ -67,6 +67,9 @@ class AuditLog extends Model
                 })->orWhere(function (Builder $inner) use ($animal): void {
                     $inner->where('auditable_type', (new MedicalRecord)->getMorphClass())
                         ->whereIn('auditable_id', MedicalRecord::query()->where('animal_id', $animal->id)->select('id'));
+                })->orWhere(function (Builder $inner) use ($animal): void {
+                    $inner->where('auditable_type', (new AnimalObservation)->getMorphClass())
+                        ->whereIn('auditable_id', AnimalObservation::query()->where('animal_id', $animal->id)->select('id'));
                 });
             })
             ->orderByDesc('id');
@@ -95,6 +98,7 @@ class AuditLog extends Model
             Animal::class, (new Animal)->getMorphClass() => 'Animal',
             Person::class, (new Person)->getMorphClass() => 'Person',
             MedicalRecord::class, (new MedicalRecord)->getMorphClass() => 'Medical record',
+            AnimalObservation::class, (new AnimalObservation)->getMorphClass() => 'Observation',
             default => class_basename($this->auditable_type),
         };
     }

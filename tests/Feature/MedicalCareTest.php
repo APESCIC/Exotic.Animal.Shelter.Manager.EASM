@@ -187,6 +187,6 @@ class MedicalCareTest extends TestCase
 
         $this->actingAs($volunteer)
             ->get(route('animals.observations.create', $animal))
-            ->assertForbidden();
+            ->assertOk();
     }
 }

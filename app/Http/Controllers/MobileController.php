@@ -6,6 +6,7 @@ use App\Models\Animal;
 use App\Models\DiaryTask;
 use App\Models\Enclosure;
 use App\Models\MedicalRecord;
+use App\Models\ObservationType;
 use App\Models\RotaShift;
 use App\Services\ReminderSync;
 use Illuminate\Database\Eloquent\Builder;
@@ -72,6 +73,7 @@ class MobileController extends Controller
             'tasks' => $animal->diaryTasks()->open()->orderByRaw('due_on is null')->orderBy('due_on')->get(),
             'medical' => $this->dueMedical()->where('animal_id', $animal->id)->get(),
             'unsigned' => $animal->documents()->whereNull('signed_at')->latest()->get(),
+            'observationTypes' => ObservationType::activeForSpecies($animal->species),
         ]);
     }
 
