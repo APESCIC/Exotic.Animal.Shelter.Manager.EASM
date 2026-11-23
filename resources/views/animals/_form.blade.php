@@ -12,7 +12,14 @@
     <input id="species" name="species" type="text" value="{{ old('species', $animal->species) }}" required placeholder="e.g. Bearded dragon">
 
     <label for="breed_type">Breed / type</label>
-    <input id="breed_type" name="breed_type" type="text" value="{{ old('breed_type', $animal->breed_type) }}">
+    <select id="breed_type" name="breed_type">
+        <option value="">— Not set —</option>
+        @foreach (($lookupOptions['breed_type'] ?? collect()) as $option)
+            <option value="{{ $option->name }}" @selected(old('breed_type', $animal->breed_type) === $option->name)>
+                {{ $option->name }}@if (! $option->active) (retired)@endif
+            </option>
+        @endforeach
+    </select>
 
     <label for="sex">Sex</label>
     <select id="sex" name="sex" required>
@@ -28,7 +35,14 @@
     <input id="age_years" name="age_years" type="number" min="0" max="200" value="{{ old('age_years', $animal->age_years) }}">
 
     <label for="colour">Colour</label>
-    <input id="colour" name="colour" type="text" value="{{ old('colour', $animal->colour) }}">
+    <select id="colour" name="colour">
+        <option value="">— Not set —</option>
+        @foreach (($lookupOptions['colour'] ?? collect()) as $option)
+            <option value="{{ $option->name }}" @selected(old('colour', $animal->colour) === $option->name)>
+                {{ $option->name }}@if (! $option->active) (retired)@endif
+            </option>
+        @endforeach
+    </select>
 
     <label for="identifying_code">Identifying code</label>
     <input id="identifying_code" name="identifying_code" type="text" value="{{ old('identifying_code', $animal->identifying_code) }}">
@@ -78,10 +92,30 @@
     <input id="bonded_animals" name="bonded_animals" type="text" value="{{ old('bonded_animals', $animal->bonded_animals) }}" placeholder="Names or codes of bonded animals">
 
     <label for="entry_reason">Entry reason</label>
-    <input id="entry_reason" name="entry_reason" type="text" value="{{ old('entry_reason', $animal->entry_reason) }}">
+    <select id="entry_reason" name="entry_reason">
+        <option value="">— Not set —</option>
+        @foreach (($lookupOptions['entry_reason'] ?? collect()) as $option)
+            <option value="{{ $option->name }}" @selected(old('entry_reason', $animal->entry_reason) === $option->name)>
+                {{ $option->name }}@if (! $option->active) (retired)@endif
+            </option>
+        @endforeach
+    </select>
 
     <label for="flags">Flags</label>
-    <input id="flags" name="flags" type="text" value="{{ old('flags', $animal->flags) }}">
+    @php
+        $selectedFlags = old('flags', $animal->flags ?? []);
+        if (! is_array($selectedFlags)) {
+            $selectedFlags = $selectedFlags ? [$selectedFlags] : [];
+        }
+    @endphp
+    <select id="flags" name="flags[]" multiple size="5" aria-describedby="flags-hint">
+        @foreach (($lookupOptions['flags'] ?? collect()) as $option)
+            <option value="{{ $option->name }}" @selected(in_array($option->name, $selectedFlags, true))>
+                {{ $option->name }}@if (! $option->active) (retired)@endif
+            </option>
+        @endforeach
+    </select>
+    <p id="flags-hint" class="hint">Hold Ctrl (or Cmd) to select more than one. Clear the selection to remove all flags.</p>
 
     <label class="check" for="non_shelter">
         <input id="non_shelter" name="non_shelter" type="checkbox" value="1" @checked(old('non_shelter', $animal->non_shelter))>
@@ -100,7 +134,14 @@
     <input id="deceased_at" name="deceased_at" type="date" value="{{ old('deceased_at', optional($animal->deceased_at)->format('Y-m-d')) }}">
 
     <label for="death_reason">Death reason</label>
-    <input id="death_reason" name="death_reason" type="text" value="{{ old('death_reason', $animal->death_reason) }}">
+    <select id="death_reason" name="death_reason">
+        <option value="">— Not set —</option>
+        @foreach (($lookupOptions['death_reason'] ?? collect()) as $option)
+            <option value="{{ $option->name }}" @selected(old('death_reason', $animal->death_reason) === $option->name)>
+                {{ $option->name }}@if (! $option->active) (retired)@endif
+            </option>
+        @endforeach
+    </select>
 </fieldset>
 
 <fieldset>
@@ -112,37 +153,7 @@
     <input id="primary_photo" name="primary_photo" type="file" accept="image/*">
 </fieldset>
 
-@php
-    use App\Enums\CustomFieldType;
-    $definitions = $customFieldDefinitions ?? collect();
-    $valueMap = $animal->relationLoaded('customFieldValues')
-        ? $animal->customFieldValues->keyBy('definition_id')
-        : collect();
-@endphp
-@if ($definitions->isNotEmpty())
-    <fieldset>
-        <legend>Custom fields</legend>
-        @foreach ($definitions as $definition)
-            @php
-                $fieldName = 'custom_fields['.$definition->id.']';
-                $current = old('custom_fields.'.$definition->id, $valueMap->get($definition->id)?->value);
-                $inputId = 'custom_field_'.$definition->id;
-            @endphp
-            @if ($definition->type === CustomFieldType::Boolean)
-                <label class="check" for="{{ $inputId }}">
-                    <input id="{{ $inputId }}" name="{{ $fieldName }}" type="checkbox" value="1" @checked((string) $current === '1')>
-                    {{ $definition->label }}
-                </label>
-            @elseif ($definition->type === CustomFieldType::Number)
-                <label for="{{ $inputId }}">{{ $definition->label }}</label>
-                <input id="{{ $inputId }}" name="{{ $fieldName }}" type="number" step="any" value="{{ $current }}">
-            @elseif ($definition->type === CustomFieldType::Date)
-                <label for="{{ $inputId }}">{{ $definition->label }}</label>
-                <input id="{{ $inputId }}" name="{{ $fieldName }}" type="date" value="{{ $current }}">
-            @else
-                <label for="{{ $inputId }}">{{ $definition->label }}</label>
-                <input id="{{ $inputId }}" name="{{ $fieldName }}" type="text" value="{{ $current }}">
-            @endif
-        @endforeach
-    </fieldset>
-@endif
+@include('partials.custom-fields-fieldset', [
+    'customFieldDefinitions' => $customFieldDefinitions ?? collect(),
+    'owner' => $animal,
+])

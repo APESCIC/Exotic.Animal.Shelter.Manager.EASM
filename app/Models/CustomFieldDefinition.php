@@ -9,6 +9,7 @@ use Database\Factories\CustomFieldDefinitionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -27,6 +28,11 @@ class CustomFieldDefinition extends Model
         'type',
         'sort_order',
         'active',
+        'is_mandatory',
+        'tooltip',
+        'show_on_new_record',
+        'species_filter',
+        'lookup_list_id',
     ];
 
     /**
@@ -39,6 +45,9 @@ class CustomFieldDefinition extends Model
             'type' => CustomFieldType::class,
             'sort_order' => 'integer',
             'active' => 'boolean',
+            'is_mandatory' => 'boolean',
+            'show_on_new_record' => 'boolean',
+            'lookup_list_id' => 'integer',
         ];
     }
 
@@ -48,6 +57,14 @@ class CustomFieldDefinition extends Model
     public function values(): HasMany
     {
         return $this->hasMany(CustomFieldValue::class, 'definition_id');
+    }
+
+    /**
+     * @return BelongsTo<LookupList, $this>
+     */
+    public function lookupList(): BelongsTo
+    {
+        return $this->belongsTo(LookupList::class);
     }
 
     /**
@@ -72,6 +89,15 @@ class CustomFieldDefinition extends Model
      * @param  Builder<CustomFieldDefinition>  $query
      * @return Builder<CustomFieldDefinition>
      */
+    public function scopeForPerson(Builder $query): Builder
+    {
+        return $query->where('entity', CustomFieldEntity::Person->value);
+    }
+
+    /**
+     * @param  Builder<CustomFieldDefinition>  $query
+     * @return Builder<CustomFieldDefinition>
+     */
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('label');
@@ -84,6 +110,16 @@ class CustomFieldDefinition extends Model
         return $slug !== '' ? $slug : 'field';
     }
 
+    public function appliesToSpecies(?string $species): bool
+    {
+        $filter = trim((string) $this->species_filter);
+        if ($filter === '') {
+            return true;
+        }
+
+        return strcasecmp(trim((string) $species), $filter) === 0;
+    }
+
     public function normalizeStoredValue(mixed $rawValue): ?string
     {
         if ($this->type === CustomFieldType::Boolean) {
@@ -92,6 +128,19 @@ class CustomFieldDefinition extends Model
             }
 
             return '0';
+        }
+
+        if ($this->type === CustomFieldType::MultiLookup) {
+            if (! is_array($rawValue)) {
+                $rawValue = $rawValue === null || $rawValue === '' ? [] : [$rawValue];
+            }
+
+            $names = array_values(array_filter(array_map(
+                static fn ($item): string => trim((string) $item),
+                $rawValue,
+            ), static fn (string $item): bool => $item !== ''));
+
+            return $names === [] ? null : json_encode($names, JSON_UNESCAPED_UNICODE);
         }
 
         if ($rawValue === null) {
@@ -112,7 +161,31 @@ class CustomFieldDefinition extends Model
         return match ($this->type) {
             CustomFieldType::Boolean => $stored === '1' ? 'Yes' : 'No',
             CustomFieldType::Date => UkDate::format($stored) ?: $stored,
+            CustomFieldType::MultiLookup => $this->decodeMultiLookup($stored),
             default => $stored,
         };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function decodedMultiLookup(?string $stored): array
+    {
+        if ($stored === null || $stored === '') {
+            return [];
+        }
+
+        $decoded = json_decode($stored, true);
+
+        return is_array($decoded)
+            ? array_values(array_filter(array_map('strval', $decoded)))
+            : [$stored];
+    }
+
+    private function decodeMultiLookup(string $stored): string
+    {
+        $names = $this->decodedMultiLookup($stored);
+
+        return $names === [] ? '—' : implode(', ', $names);
     }
 }

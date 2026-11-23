@@ -26,6 +26,11 @@ class CustomFieldDefinitionFactory extends Factory
             'type' => CustomFieldType::Text,
             'sort_order' => 0,
             'active' => true,
+            'is_mandatory' => false,
+            'tooltip' => null,
+            'show_on_new_record' => true,
+            'species_filter' => null,
+            'lookup_list_id' => null,
         ];
     }
 

@@ -13,6 +13,8 @@ use App\Models\DocumentTemplate;
 use App\Models\DwaLicence;
 use App\Models\Enclosure;
 use App\Models\EnclosureEquipment;
+use App\Models\LookupList;
+use App\Models\LookupValue;
 use App\Models\LostFoundReport;
 use App\Models\MedicalRecord;
 use App\Models\Movement;
@@ -45,6 +47,8 @@ class LayoutTest extends TestCase
             'lostFoundReport' => LostFoundReport::factory()->create(),
             'animalControlCase' => AnimalControlCase::factory()->create(),
             'customField' => CustomFieldDefinition::factory()->create(),
+            'lookupList' => ($lookupList = LookupList::factory()->create()),
+            'lookupValue' => LookupValue::factory()->for($lookupList, 'list')->create(),
             'documentTemplate' => DocumentTemplate::factory()->create(),
             'document' => Document::factory()->for($animal)->create(),
             'payment' => Payment::factory()->create(),

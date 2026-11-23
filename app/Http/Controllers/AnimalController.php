@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Enums\AnimalListFilter;
 use App\Enums\AnimalSex;
 use App\Enums\AnimalTab;
-use App\Enums\CustomFieldType;
+use App\Enums\CustomFieldEntity;
 use App\Http\Requests\StoreAnimalRequest;
 use App\Http\Requests\UpdateAnimalRequest;
 use App\Models\Animal;
 use App\Models\AuditLog;
 use App\Models\CustomFieldDefinition;
 use App\Models\Enclosure;
+use App\Services\CustomFieldSync;
+use App\Support\LookupField;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +22,8 @@ use Illuminate\View\View;
 
 class AnimalController extends Controller
 {
+    public function __construct(private CustomFieldSync $customFields) {}
+
     public function index(Request $request): View
     {
         $q = $request->string('q')->toString();
@@ -95,14 +99,13 @@ class AnimalController extends Controller
     {
         $this->authorizeManage();
 
+        $animal = new Animal(['sex' => AnimalSex::Unknown]);
+
         return view('animals.create', [
-            'animal' => new Animal(['sex' => AnimalSex::Unknown]),
+            'animal' => $animal,
             'enclosures' => $this->enclosureOptions(),
-            'customFieldDefinitions' => CustomFieldDefinition::query()
-                ->active()
-                ->forAnimal()
-                ->ordered()
-                ->get(),
+            'lookupOptions' => $this->lookupOptionsFor($animal),
+            'customFieldDefinitions' => $this->customFields->formDefinitions(CustomFieldEntity::Animal, newRecord: true),
         ]);
     }
 
@@ -115,7 +118,7 @@ class AnimalController extends Controller
         }
 
         $animal = Animal::query()->create($data);
-        $this->syncCustomFieldValues($request, $animal);
+        $this->customFields->syncForAnimal($request, $animal, $data['species'] ?? null);
 
         return $this->withCapacityWarning(
             redirect()->route('animals.show', $animal)->with('status', 'Animal record created.'),
@@ -137,7 +140,11 @@ class AnimalController extends Controller
             'activeTab' => $activeTab,
             'tabs' => AnimalTab::cases(),
             'customFieldDefinitions' => $activeTab === AnimalTab::Overview
-                ? CustomFieldDefinition::query()->active()->forAnimal()->ordered()->get()
+                ? $this->customFields->overviewDefinitions(
+                    CustomFieldEntity::Animal,
+                    $animal->customFieldValues->pluck('definition_id'),
+                    $animal->species,
+                )
                 : collect(),
             'auditEntries' => $activeTab === AnimalTab::Audit
                 ? AuditLog::forAnimalRecord($animal)->with('user')->limit(200)->get()
@@ -154,11 +161,10 @@ class AnimalController extends Controller
         return view('animals.edit', [
             'animal' => $animal,
             'enclosures' => $this->enclosureOptions($animal->enclosure_id),
-            'customFieldDefinitions' => CustomFieldDefinition::query()
-                ->active()
-                ->forAnimal()
-                ->ordered()
-                ->get(),
+            'lookupOptions' => $this->lookupOptionsFor($animal),
+            'customFieldDefinitions' => $this->customFields->formDefinitions(CustomFieldEntity::Animal, newRecord: false)
+                ->filter(fn (CustomFieldDefinition $definition): bool => $definition->appliesToSpecies($animal->species))
+                ->values(),
         ]);
     }
 
@@ -174,7 +180,7 @@ class AnimalController extends Controller
         }
 
         $animal->update($data);
-        $this->syncCustomFieldValues($request, $animal);
+        $this->customFields->syncForAnimal($request, $animal, $data['species'] ?? $animal->species);
 
         return $this->withCapacityWarning(
             redirect()->route('animals.show', $animal)->with('status', 'Animal record updated.'),
@@ -220,46 +226,23 @@ class AnimalController extends Controller
         $data['non_shelter'] = $request->boolean('non_shelter');
         $data['is_adoptable'] = $request->boolean('is_adoptable');
         $data['cites_exempt_annex_x'] = $request->boolean('cites_exempt_annex_x');
+        $data['flags'] = array_values($request->input('flags', []) ?: []);
 
         return $data;
     }
 
-    private function syncCustomFieldValues(StoreAnimalRequest $request, Animal $animal): void
+    /**
+     * @return array<string, \Illuminate\Support\Collection<int, LookupValue>>
+     */
+    private function lookupOptionsFor(Animal $animal): array
     {
-        $submitted = $request->input('custom_fields', []);
-
-        if (! is_array($submitted)) {
-            $submitted = [];
-        }
-
-        $definitions = CustomFieldDefinition::query()
-            ->active()
-            ->forAnimal()
-            ->get();
-
-        foreach ($definitions as $definition) {
-            $rawValue = $submitted[$definition->id] ?? ($definition->type === CustomFieldType::Boolean ? '0' : null);
-            $value = $definition->normalizeStoredValue($rawValue);
-
-            $existing = $animal->customFieldValues()
-                ->where('definition_id', $definition->id)
-                ->first();
-
-            if ($value === null || $value === '') {
-                $existing?->delete();
-
-                continue;
-            }
-
-            if ($existing !== null) {
-                $existing->update(['value' => $value]);
-            } else {
-                $animal->customFieldValues()->create([
-                    'definition_id' => $definition->id,
-                    'value' => $value,
-                ]);
-            }
-        }
+        return [
+            'colour' => LookupField::options('colour', $animal->colour),
+            'breed_type' => LookupField::options('breed_type', $animal->breed_type),
+            'entry_reason' => LookupField::options('entry_reason', $animal->entry_reason),
+            'death_reason' => LookupField::options('death_reason', $animal->death_reason),
+            'flags' => LookupField::options('flags', $animal->flags),
+        ];
     }
 
     private function authorizeManage(): void

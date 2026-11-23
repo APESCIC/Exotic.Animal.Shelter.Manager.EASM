@@ -31,6 +31,21 @@
         <tr><th>Notes</th><td>{{ $person->notes ?: '—' }}</td></tr>
     </table>
 
+    @php
+        $customValues = $person->customFieldValues->keyBy('definition_id');
+    @endphp
+    @if (($customFieldDefinitions ?? collect())->isNotEmpty())
+        <h2>Custom fields</h2>
+        <table>
+            @foreach ($customFieldDefinitions as $definition)
+                <tr>
+                    <th>{{ $definition->label }}</th>
+                    <td>{{ $definition->displayValue($customValues->get($definition->id)?->value) }}</td>
+                </tr>
+            @endforeach
+        </table>
+    @endif
+
     @if (auth()->user()?->role?->canManagePeople())
         <p><a class="button" href="{{ route('people.edit', $person) }}">Edit</a></p>
     @endif

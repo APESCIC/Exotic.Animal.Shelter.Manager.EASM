@@ -8,6 +8,8 @@ enum CustomFieldType: string
     case Number = 'number';
     case Date = 'date';
     case Boolean = 'boolean';
+    case Lookup = 'lookup';
+    case MultiLookup = 'multi_lookup';
 
     public function label(): string
     {
@@ -16,6 +18,16 @@ enum CustomFieldType: string
             self::Number => 'Number',
             self::Date => 'Date',
             self::Boolean => 'Yes / no',
+            self::Lookup => 'Lookup',
+            self::MultiLookup => 'Multi-lookup',
+        };
+    }
+
+    public function usesLookupList(): bool
+    {
+        return match ($this) {
+            self::Lookup, self::MultiLookup => true,
+            default => false,
         };
     }
 }

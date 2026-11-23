@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Custom fields</h1>
-    <p class="hint">Define extra husbandry fields for animal records. Values are filled on create/edit animal — no core schema change.</p>
+    <p class="hint">Define extra fields for animal or people records. Values are filled on create/edit — no core schema change.</p>
 
     @if ($definitions->isEmpty())
         <p class="hint">No custom fields yet.</p>
@@ -13,9 +13,11 @@
             <thead>
                 <tr>
                     <th>Label</th>
+                    <th>Entity</th>
                     <th>Slug</th>
                     <th>Type</th>
                     <th>Order</th>
+                    <th>Mandatory</th>
                     <th>Active</th>
                     <th></th>
                 </tr>
@@ -24,10 +26,17 @@
                 @foreach ($definitions as $definition)
                     <tr>
                         <td>{{ $definition->label }}</td>
+                        <td>{{ $definition->entity->label() }}</td>
                         <td><code>{{ $definition->slug }}</code></td>
-                        <td>{{ $definition->type->label() }}</td>
+                        <td>
+                            {{ $definition->type->label() }}
+                            @if ($definition->lookupList)
+                                <span class="hint">({{ $definition->lookupList->name }})</span>
+                            @endif
+                        </td>
                         <td>{{ $definition->sort_order }}</td>
-                        <td>{{ $definition->active ? 'Yes' : 'No' }}</td>
+                        <td>{{ $definition->is_mandatory ? 'Yes' : 'No' }}</td>
+                        <td>{{ $definition->active ? 'Yes' : 'Retired' }}</td>
                         <td><a href="{{ route('admin.custom-fields.edit', $definition) }}">Edit</a></td>
                     </tr>
                 @endforeach

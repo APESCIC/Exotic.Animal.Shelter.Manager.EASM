@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Animal;
 use App\Models\Enclosure;
 use App\Models\User;
+use Database\Seeders\LookupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,7 @@ class AnimalTest extends TestCase
     public function test_staff_can_create_animal_with_photo_and_exotic_fields(): void
     {
         Storage::fake('public');
+        $this->seed(LookupSeeder::class);
 
         $staff = User::factory()->staff()->create();
         $enclosure = Enclosure::factory()->create(['name' => 'ENC-12']);
@@ -25,16 +27,16 @@ class AnimalTest extends TestCase
         $response = $this->actingAs($staff)->post(route('animals.store'), [
             'name' => 'Spike',
             'species' => 'Bearded dragon',
-            'breed_type' => 'Pogona vitticeps',
+            'breed_type' => 'Morph',
             'sex' => 'male',
             'date_of_birth' => '2020-05-01',
             'age_years' => 6,
-            'colour' => 'Sand',
+            'colour' => 'Yellow',
             'identifying_code' => 'EX-1001',
-            'flags' => 'special-diet',
+            'flags' => ['Special diet'],
             'location' => 'Reptile House',
             'bonded_animals' => 'Dot',
-            'entry_reason' => 'Surrender',
+            'entry_reason' => 'Owner surrender',
             'non_shelter' => '0',
             'enclosure_id' => $enclosure->id,
             'cites' => 'Appendix II',

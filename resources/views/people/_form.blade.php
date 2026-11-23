@@ -60,3 +60,8 @@
     <label for="notes">Notes</label>
     <textarea id="notes" name="notes">{{ old('notes', $person->notes) }}</textarea>
 </fieldset>
+
+@include('partials.custom-fields-fieldset', [
+    'customFieldDefinitions' => $customFieldDefinitions ?? collect(),
+    'owner' => $person,
+])

@@ -18,6 +18,7 @@ class CustomFieldValue extends Model
     protected $fillable = [
         'definition_id',
         'animal_id',
+        'person_id',
         'value',
     ];
 
@@ -35,5 +36,13 @@ class CustomFieldValue extends Model
     public function animal(): BelongsTo
     {
         return $this->belongsTo(Animal::class);
+    }
+
+    /**
+     * @return BelongsTo<Person, $this>
+     */
+    public function person(): BelongsTo
+    {
+        return $this->belongsTo(Person::class);
     }
 }
