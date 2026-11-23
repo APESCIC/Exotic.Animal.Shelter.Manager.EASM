@@ -106,6 +106,18 @@ class Enclosure extends Model
             : $this->occupantCount().' / '.$this->capacity;
     }
 
+    /**
+     * Spaces left under capacity, or null when no limit is set.
+     */
+    public function freeSpaces(): ?int
+    {
+        if ($this->capacity === null) {
+            return null;
+        }
+
+        return max(0, $this->capacity - $this->occupantCount());
+    }
+
     public function label(): string
     {
         return $this->zone ? $this->zone.' · '.$this->name : $this->name;

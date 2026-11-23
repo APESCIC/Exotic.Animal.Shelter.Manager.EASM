@@ -30,6 +30,10 @@ trait RecordsAudit
 
             AuditLog::record($model, 'updated', self::stringifyAudit($old), self::stringifyAudit($new));
         });
+
+        static::deleted(function (Model $model): void {
+            AuditLog::record($model, 'deleted', self::auditAttributes($model), null);
+        });
     }
 
     /**

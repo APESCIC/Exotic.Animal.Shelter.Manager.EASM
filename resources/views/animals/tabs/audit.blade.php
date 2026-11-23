@@ -1,4 +1,4 @@
-<p class="hint">Who changed this animal or its medical records, and when.</p>
+<p class="hint">Who changed this animal, its medical records, observations or movements, and when.</p>
 @if ($auditEntries->isEmpty())
     <p class="hint">No audit entries yet.</p>
 @else

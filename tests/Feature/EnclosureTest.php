@@ -173,6 +173,7 @@ class EnclosureTest extends TestCase
             ->assertOk()
             ->assertSee('Reptile House · Viv 3', false)
             ->assertSee('1 / 2', false)
+            ->assertSee('1 free', false)
             ->assertSee('Kaa', false)
             ->assertSee('No enclosure', false)
             ->assertSee('Uno', false)

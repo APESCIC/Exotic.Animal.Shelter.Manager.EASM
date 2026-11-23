@@ -12,6 +12,7 @@ enum AnimalListFilter: string
     case Cites = 'cites';
     case MissingArticleTen = 'missing_article_10';
     case Dwa = 'dwa';
+    case Available = 'available';
 
     public function label(): string
     {
@@ -21,6 +22,7 @@ enum AnimalListFilter: string
             self::Cites => 'CITES-listed in care',
             self::MissingArticleTen => 'No Article 10 (Annex A)',
             self::Dwa => 'DWA-licensed in care',
+            self::Available => 'Available for rehoming',
         };
     }
 
@@ -36,6 +38,7 @@ enum AnimalListFilter: string
             self::Cites => $query->citesListed(),
             self::MissingArticleTen => $query->missingArticleTen(),
             self::Dwa => $query->dwaListed(),
+            self::Available => $query->inCare()->adoptable(),
         };
     }
 }

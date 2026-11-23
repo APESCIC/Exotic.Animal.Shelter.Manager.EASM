@@ -15,6 +15,36 @@
         @endif
     </div>
 
+    <section aria-labelledby="shelter-counts-heading">
+        <h2 id="shelter-counts-heading">Shelter</h2>
+        <ul class="stat-grid">
+            <li>
+                <a class="stat-card" href="{{ route('animals.shelter') }}" data-shelter-count="on_shelter">
+                    <span class="stat">{{ $shelter['on_shelter'] }}</span>
+                    <span class="stat-label">On shelter</span>
+                </a>
+            </li>
+            <li>
+                <a class="stat-card" href="{{ route('animals.index', ['filter' => 'quarantine']) }}" data-shelter-count="quarantine">
+                    <span class="stat">{{ $shelter['quarantine'] }}</span>
+                    <span class="stat-label">In quarantine</span>
+                </a>
+            </li>
+            <li>
+                <a class="stat-card" href="{{ route('animals.index', ['filter' => 'available']) }}" data-shelter-count="available">
+                    <span class="stat">{{ $shelter['available'] }}</span>
+                    <span class="stat-label">Available for rehoming</span>
+                </a>
+            </li>
+            <li>
+                <a class="stat-card" href="{{ route('animals.shelter', ['group' => 'status']) }}" data-shelter-count="fostered">
+                    <span class="stat">{{ $shelter['fostered'] }}</span>
+                    <span class="stat-label">Fostered</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+
     <section aria-labelledby="alerts-heading">
         <h2 id="alerts-heading" class="visually-hidden">Alerts</h2>
         <ul class="alert-grid">
@@ -31,6 +61,94 @@
             @endforeach
         </ul>
     </section>
+
+    @if ($canViewActivity)
+        <section class="card" aria-labelledby="recent-activity-heading" data-activity-widget>
+            <div class="card-header-row">
+                <h2 id="recent-activity-heading">Recent changes</h2>
+                <a href="{{ route('activity') }}">All changes</a>
+            </div>
+            @if ($recentActivity->isEmpty())
+                <p class="hint">No changes logged yet.</p>
+            @else
+                <ul class="activity-list">
+                    @foreach ($recentActivity as $entry)
+                        <li class="activity-item">
+                            <time datetime="{{ $entry->created_at?->toIso8601String() }}">
+                                {{ $entry->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') }}
+                            </time>
+                            <div>
+                                @if ($entry->recordUrl())
+                                    <a href="{{ $entry->recordUrl() }}">{{ $entry->summary() }}</a>
+                                @else
+                                    {{ $entry->summary() }}
+                                @endif
+                                <span class="hint">{{ $entry->user?->name ?: 'System' }}</span>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+    @endif
+
+    <div class="dashboard-columns">
+        <section class="card" aria-labelledby="compact-shelter-heading">
+            <div class="card-header-row">
+                <h2 id="compact-shelter-heading">Shelter view</h2>
+                <a href="{{ route('animals.shelter', ['group' => 'enclosure']) }}">Full shelter view</a>
+            </div>
+            @forelse ($shelter['compact_sections'] as $section)
+                <div class="compact-shelter-group">
+                    <h3>
+                        @if ($section['url'])
+                            <a href="{{ $section['url'] }}">{{ $section['title'] }}</a>
+                        @else
+                            {{ $section['title'] }}
+                        @endif
+                    </h3>
+                    @if ($section['hint'])
+                        <p class="hint">{{ $section['hint'] }}</p>
+                    @endif
+                    @if ($section['animals']->isEmpty())
+                        <p class="hint">Empty.</p>
+                    @else
+                        <div class="shelter-grid shelter-grid-compact">
+                            @foreach ($section['animals'] as $animal)
+                                @include('animals._shelter_tile')
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <p class="hint">No animals in care yet.</p>
+            @endforelse
+        </section>
+
+        <section class="card" aria-labelledby="recent-animals-heading">
+            <h2 id="recent-animals-heading">Recently changed animals</h2>
+            @if ($shelter['recent']->isEmpty())
+                <p class="hint">No recent animal updates.</p>
+            @else
+                <ul class="link-list shelter-list">
+                    @foreach ($shelter['recent'] as $animal)
+                        <li class="shelter-list-item">
+                            @if ($animal->primaryPhotoUrl())
+                                <img class="thumb" src="{{ $animal->primaryPhotoUrl() }}" alt="Primary photo of {{ $animal->name }}" width="56" height="56" loading="lazy">
+                            @else
+                                <span class="thumb thumb-empty" role="img" aria-label="No photo for {{ $animal->name }}">No photo</span>
+                            @endif
+                            <div class="shelter-list-body">
+                                <a href="{{ route('animals.show', $animal) }}">{{ $animal->name }}</a>
+                                — {{ $animal->species }}
+                                <span class="hint">Updated {{ \App\Support\UkDate::format($animal->updated_at) }}</span>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+    </div>
 
     <div class="card-grid">
         <section class="card">

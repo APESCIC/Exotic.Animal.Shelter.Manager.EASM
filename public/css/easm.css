@@ -700,6 +700,98 @@ form.is-dirty .save-bar-status {
     line-height: 1.2;
 }
 
+.stat-grid {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    list-style: none;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    color: inherit;
+    text-decoration: none;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.stat-card:hover,
+.stat-card:focus-visible {
+    border-color: var(--color-accent);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.dashboard-columns {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    margin-bottom: var(--space-4);
+}
+
+.card-header-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.card-header-row h2 {
+    margin: 0;
+}
+
+.compact-shelter-group + .compact-shelter-group {
+    margin-top: var(--space-4);
+}
+
+.compact-shelter-group h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-md);
+}
+
+.shelter-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+}
+
+.activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.activity-item {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.activity-item:last-child {
+    border-bottom: 0;
+}
+
+.activity-item time {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.activity-day + .activity-day {
+    margin-top: var(--space-4);
+}
+
 .alert-card.is-active .alert-count,
 .alert-card.is-active .alert-label {
     color: var(--alert-text);
@@ -910,6 +1002,118 @@ tbody tr:last-child th {
     max-width: 3.5rem;
     height: auto;
     border-radius: var(--radius-sm);
+}
+
+.thumb-empty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-sm);
+}
+
+/* Shelter photo view */
+
+.shelter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.shelter-toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.shelter-toolbar-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.shelter-section + .shelter-section {
+    margin-top: var(--space-4);
+}
+
+.shelter-grid {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+
+.shelter-tile {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.shelter-tile:hover,
+.shelter-tile:focus-visible {
+    border-color: var(--color-accent);
+    outline: 2px solid transparent;
+}
+
+.shelter-tile:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.shelter-tile-photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--color-surface);
+}
+
+.shelter-tile-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.shelter-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+.shelter-tile-name {
+    font-weight: 600;
+}
+
+.shelter-tile-meta {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.shelter-tile-badges .badges {
+    margin-top: var(--space-1);
+}
+
+.shelter-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.shelter-list-body {
+    min-width: 0;
 }
 
 /* Forms */

@@ -175,6 +175,18 @@ enum UserRole: string
         };
     }
 
+    /**
+     * Recent change timeline at /activity and its dashboard widget.
+     * Admin and staff only (UK GDPR caution: the log can mention people's records).
+     */
+    public function canViewActivity(): bool
+    {
+        return match ($this) {
+            self::Admin, self::Staff => true,
+            self::Volunteer, self::Readonly => false,
+        };
+    }
+
     public function canViewFinance(): bool
     {
         return match ($this) {

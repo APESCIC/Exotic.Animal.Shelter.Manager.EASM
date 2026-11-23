@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MovementType;
+use App\Models\Concerns\RecordsAudit;
 use Database\Factories\MovementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,8 @@ class Movement extends Model
 {
     /** @use HasFactory<MovementFactory> */
     use HasFactory;
+
+    use RecordsAudit;
 
     /**
      * @var list<string>

@@ -121,7 +121,8 @@ class DashboardAlertsTest extends TestCase
                 ->assertSee($alert->label);
         }
 
-        $response->assertSee('is-active', false);
+        $response->assertSee('is-active', false)
+            ->assertSee('data-shelter-count="on_shelter"', false);
     }
 
     public function test_unknown_filters_are_ignored(): void

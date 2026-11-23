@@ -82,16 +82,19 @@ class AnimalTest extends TestCase
     public function test_shelter_view_groups_animals_by_location(): void
     {
         $staff = User::factory()->staff()->create();
-        Animal::factory()->create(['name' => 'Tess', 'location' => 'Outdoor Pad']);
-        Animal::factory()->create(['name' => 'Uno', 'location' => null]);
+        Animal::factory()->create(['name' => 'Tess', 'location' => 'Outdoor Pad', 'sex' => 'female']);
+        Animal::factory()->create(['name' => 'Uno', 'location' => null, 'sex' => 'male']);
 
         $this->actingAs($staff)
             ->get(route('animals.shelter'))
             ->assertOk()
             ->assertSee('Outdoor Pad', false)
             ->assertSee('Tess', false)
+            ->assertSee('Female', false)
             ->assertSee('Unassigned', false)
-            ->assertSee('Uno', false);
+            ->assertSee('Uno', false)
+            ->assertSee('Photo grid', false)
+            ->assertSee('List', false);
     }
 
     public function test_readonly_cannot_create_animals_but_can_view(): void
