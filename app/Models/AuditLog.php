@@ -76,6 +76,7 @@ class AuditLog extends Model
 
     /**
      * Entries for an animal record: the animal itself, medical records, observations and movements.
+     * Child rows keep matching after delete via animal_id stored in old/new values.
      *
      * @return Builder<static>
      */
@@ -87,17 +88,30 @@ class AuditLog extends Model
                     $inner->where('auditable_type', $animal->getMorphClass())
                         ->where('auditable_id', $animal->getKey());
                 })->orWhere(function (Builder $inner) use ($animal): void {
-                    $inner->where('auditable_type', (new MedicalRecord)->getMorphClass())
-                        ->whereIn('auditable_id', MedicalRecord::query()->where('animal_id', $animal->id)->select('id'));
+                    self::whereRelatedToAnimal($inner, (new MedicalRecord)->getMorphClass(), MedicalRecord::class, $animal->id);
                 })->orWhere(function (Builder $inner) use ($animal): void {
-                    $inner->where('auditable_type', (new AnimalObservation)->getMorphClass())
-                        ->whereIn('auditable_id', AnimalObservation::query()->where('animal_id', $animal->id)->select('id'));
+                    self::whereRelatedToAnimal($inner, (new AnimalObservation)->getMorphClass(), AnimalObservation::class, $animal->id);
                 })->orWhere(function (Builder $inner) use ($animal): void {
-                    $inner->where('auditable_type', (new Movement)->getMorphClass())
-                        ->whereIn('auditable_id', Movement::query()->where('animal_id', $animal->id)->select('id'));
+                    self::whereRelatedToAnimal($inner, (new Movement)->getMorphClass(), Movement::class, $animal->id);
                 });
             })
             ->orderByDesc('id');
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     * @param  class-string<Model>  $relatedClass
+     */
+    private static function whereRelatedToAnimal(Builder $query, string $morphClass, string $relatedClass, int $animalId): void
+    {
+        $query->where('auditable_type', $morphClass)
+            ->where(function (Builder $inner) use ($relatedClass, $animalId): void {
+                $inner->whereIn('auditable_id', $relatedClass::query()->where('animal_id', $animalId)->select('id'))
+                    ->orWhere('old_values->animal_id', $animalId)
+                    ->orWhere('new_values->animal_id', $animalId)
+                    ->orWhere('old_values->animal_id', (string) $animalId)
+                    ->orWhere('new_values->animal_id', (string) $animalId);
+            });
     }
 
     /**
@@ -125,6 +139,7 @@ class AuditLog extends Model
             MedicalRecord::class, (new MedicalRecord)->getMorphClass() => 'Medical record',
             AnimalObservation::class, (new AnimalObservation)->getMorphClass() => 'Observation',
             Movement::class, (new Movement)->getMorphClass() => 'Movement',
+            LookupValue::class, (new LookupValue)->getMorphClass() => 'Lookup value',
             default => class_basename($this->auditable_type),
         };
     }
@@ -215,6 +230,7 @@ class AuditLog extends Model
             (new MedicalRecord)->getMorphClass() => 'Medical record',
             (new AnimalObservation)->getMorphClass() => 'Observation',
             (new Movement)->getMorphClass() => 'Movement',
+            (new LookupValue)->getMorphClass() => 'Lookup value',
         ];
     }
 }

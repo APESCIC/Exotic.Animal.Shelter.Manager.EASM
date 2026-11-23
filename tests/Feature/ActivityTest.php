@@ -78,6 +78,11 @@ class ActivityTest extends TestCase
             ->assertSee('Animal', false);
 
         $this->actingAs($staff)
+            ->get(route('activity'))
+            ->assertOk()
+            ->assertSee('Lookup value', false);
+
+        $this->actingAs($staff)
             ->get(route('activity', ['user_id' => $staff->id]))
             ->assertOk()
             ->assertSee('Alex Staff', false)

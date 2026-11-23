@@ -89,7 +89,8 @@ class AuditLogTest extends TestCase
         $this->actingAs($staff)
             ->get(AnimalTab::Audit->url($animal))
             ->assertOk()
-            ->assertSee('Movement', false);
+            ->assertSee('Movement', false)
+            ->assertSee('deleted', false);
     }
 
     public function test_observation_create_update_and_delete_write_audit_rows(): void

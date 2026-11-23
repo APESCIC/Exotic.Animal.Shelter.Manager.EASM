@@ -52,6 +52,7 @@ class DashboardShelterTest extends TestCase
             ->assertSee('data-shelter-count="on_shelter"', false)
             ->assertSee('data-shelter-count="quarantine"', false)
             ->assertSee('data-shelter-count="available"', false)
+            ->assertSee('filter=available', false)
             ->assertSee('data-shelter-count="fostered"', false)
             ->assertSee('Shelter view', false)
             ->assertSee('Full shelter view', false)

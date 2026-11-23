@@ -31,7 +31,7 @@
                 </a>
             </li>
             <li>
-                <a class="stat-card" href="{{ route('animals.index') }}" data-shelter-count="available">
+                <a class="stat-card" href="{{ route('animals.index', ['filter' => 'available']) }}" data-shelter-count="available">
                     <span class="stat">{{ $shelter['available'] }}</span>
                     <span class="stat-label">Available for rehoming</span>
                 </a>
