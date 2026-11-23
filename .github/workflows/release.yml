@@ -77,5 +77,6 @@ jobs:
           fi
           {
             echo "## Release $RELEASE_TITLE"
+            echo "- \`release-package.yml\` must attach \`easm-${VERSION}.zip\` and \`.minisig\` (it fails if either is missing)."
             echo "- Deploy next: \`gh workflow run deploy-cloudron.yml --ref $GITHUB_REF_NAME -f tag=$GITHUB_REF_NAME\`"
           } >> "$GITHUB_STEP_SUMMARY"
