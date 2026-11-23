@@ -40,16 +40,6 @@ class AnimalObservation extends Model
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::deleted(function (AnimalObservation $observation): void {
-            $attrs = $observation->attributesToArray();
-            unset($attrs['created_at'], $attrs['updated_at']);
-
-            AuditLog::record($observation, 'deleted', $attrs, null);
-        });
-    }
-
     /**
      * @return BelongsTo<Animal, $this>
      */

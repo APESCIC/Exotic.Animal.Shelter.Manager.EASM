@@ -53,7 +53,28 @@ class AuditLog extends Model
     }
 
     /**
-     * Entries for an animal record: the animal itself and its medical records.
+     * Fields that must never appear in a one-line summary (UK GDPR caution).
+     *
+     * @var list<string>
+     */
+    private const SUMMARY_HIDDEN = [
+        'email',
+        'phone',
+        'mobile',
+        'address',
+        'address_line_1',
+        'address_line_2',
+        'postcode',
+        'postal_code',
+        'date_of_birth',
+        'dob',
+        'notes',
+        'body',
+        'reason',
+    ];
+
+    /**
+     * Entries for an animal record: the animal itself, medical records, observations and movements.
      *
      * @return Builder<static>
      */
@@ -70,6 +91,9 @@ class AuditLog extends Model
                 })->orWhere(function (Builder $inner) use ($animal): void {
                     $inner->where('auditable_type', (new AnimalObservation)->getMorphClass())
                         ->whereIn('auditable_id', AnimalObservation::query()->where('animal_id', $animal->id)->select('id'));
+                })->orWhere(function (Builder $inner) use ($animal): void {
+                    $inner->where('auditable_type', (new Movement)->getMorphClass())
+                        ->whereIn('auditable_id', Movement::query()->where('animal_id', $animal->id)->select('id'));
                 });
             })
             ->orderByDesc('id');
@@ -99,7 +123,40 @@ class AuditLog extends Model
             Person::class, (new Person)->getMorphClass() => 'Person',
             MedicalRecord::class, (new MedicalRecord)->getMorphClass() => 'Medical record',
             AnimalObservation::class, (new AnimalObservation)->getMorphClass() => 'Observation',
+            Movement::class, (new Movement)->getMorphClass() => 'Movement',
             default => class_basename($this->auditable_type),
         };
+    }
+
+    /**
+     * One-line description for feeds. Omits personal data fields.
+     */
+    public function summary(): string
+    {
+        if ($this->action === 'created') {
+            return $this->subjectLabel().' created';
+        }
+
+        if ($this->action === 'deleted') {
+            return $this->subjectLabel().' deleted';
+        }
+
+        $values = is_array($this->new_values) ? $this->new_values : [];
+        $fields = array_values(array_filter(
+            array_keys($values),
+            fn (string $field): bool => ! in_array($field, self::SUMMARY_HIDDEN, true),
+        ));
+
+        if ($fields === []) {
+            return $this->subjectLabel().' updated';
+        }
+
+        $shown = array_slice($fields, 0, 3);
+        $label = $this->subjectLabel().' updated ('.implode(', ', $shown);
+        if (count($fields) > 3) {
+            $label .= ', …';
+        }
+
+        return $label.')';
     }
 }
