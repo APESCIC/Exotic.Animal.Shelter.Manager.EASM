@@ -69,6 +69,13 @@ class CustomFieldDefinitionController extends Controller
     {
         $data = $this->validatedData($request);
 
+        if ($customField->entity !== $data['entity'] && $customField->values()->exists()) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['entity' => 'Cannot change the entity while this field has saved values.']);
+        }
+
         if ($customField->label !== $data['label'] || $customField->entity !== $data['entity']) {
             $data['slug'] = $this->uniqueSlug($data['label'], $data['entity'], $customField->id);
         }
@@ -101,7 +108,7 @@ class CustomFieldDefinitionController extends Controller
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
         $data['active'] = $request->boolean('active');
         $data['is_mandatory'] = $request->boolean('is_mandatory');
-        $data['show_on_new_record'] = $request->boolean('show_on_new_record', true);
+        $data['show_on_new_record'] = $request->boolean('show_on_new_record');
 
         if ($data['entity'] === CustomFieldEntity::Person) {
             $data['species_filter'] = null;

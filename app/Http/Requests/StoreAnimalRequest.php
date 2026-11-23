@@ -86,8 +86,10 @@ class StoreAnimalRequest extends FormRequest
                     $definition->type === CustomFieldType::Boolean ? ($raw ?? '0') : $raw,
                 );
 
-                $empty = $normalized === null || $normalized === ''
-                    || ($definition->type === CustomFieldType::Boolean && $normalized === '0');
+                // Boolean "No" (0) is a completed answer, not empty.
+                $empty = $definition->type === CustomFieldType::Boolean
+                    ? ($normalized !== '0' && $normalized !== '1')
+                    : ($normalized === null || $normalized === '');
 
                 if ($empty) {
                     $validator->errors()->add(

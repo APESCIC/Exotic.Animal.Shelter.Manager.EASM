@@ -143,6 +143,7 @@ class AnimalController extends Controller
                 ? $this->customFields->overviewDefinitions(
                     CustomFieldEntity::Animal,
                     $animal->customFieldValues->pluck('definition_id'),
+                    $animal->species,
                 )
                 : collect(),
             'auditEntries' => $activeTab === AnimalTab::Audit

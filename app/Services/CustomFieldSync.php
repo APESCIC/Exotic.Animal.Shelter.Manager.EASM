@@ -7,8 +7,10 @@ use App\Enums\CustomFieldType;
 use App\Models\Animal;
 use App\Models\CustomFieldDefinition;
 use App\Models\Person;
+use App\Support\LookupField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class CustomFieldSync
 {
@@ -30,8 +32,11 @@ class CustomFieldSync
     /**
      * @return Collection<int, CustomFieldDefinition>
      */
-    public function overviewDefinitions(CustomFieldEntity $entity, Collection $valueDefinitionIds): Collection
-    {
+    public function overviewDefinitions(
+        CustomFieldEntity $entity,
+        Collection $valueDefinitionIds,
+        ?string $species = null,
+    ): Collection {
         return CustomFieldDefinition::query()
             ->where('entity', $entity->value)
             ->where(function ($query) use ($valueDefinitionIds): void {
@@ -39,7 +44,15 @@ class CustomFieldSync
                     ->orWhereIn('id', $valueDefinitionIds);
             })
             ->ordered()
-            ->get();
+            ->get()
+            ->filter(function (CustomFieldDefinition $definition) use ($species, $valueDefinitionIds): bool {
+                if ($valueDefinitionIds->contains($definition->id)) {
+                    return true;
+                }
+
+                return $definition->appliesToSpecies($species);
+            })
+            ->values();
     }
 
     public function syncForAnimal(Request $request, Animal $animal, ?string $species): void
@@ -47,6 +60,7 @@ class CustomFieldSync
         $definitions = CustomFieldDefinition::query()
             ->active()
             ->forAnimal()
+            ->with('lookupList')
             ->get()
             ->filter(fn (CustomFieldDefinition $definition): bool => $definition->appliesToSpecies($species));
 
@@ -58,6 +72,7 @@ class CustomFieldSync
         $definitions = CustomFieldDefinition::query()
             ->active()
             ->forPerson()
+            ->with('lookupList')
             ->get();
 
         $this->sync($request, $definitions, person: $person);
@@ -77,8 +92,20 @@ class CustomFieldSync
             $submitted = [];
         }
 
+        $errors = [];
+
         foreach ($definitions as $definition) {
             $rawValue = $submitted[$definition->id] ?? ($definition->type === CustomFieldType::Boolean ? '0' : null);
+
+            if ($definition->type->usesLookupList()) {
+                $invalid = $this->invalidLookupNames($definition, $rawValue);
+                if ($invalid !== []) {
+                    $errors['custom_fields.'.$definition->id] = $definition->label.' must use values from its lookup list.';
+
+                    continue;
+                }
+            }
+
             $value = $definition->normalizeStoredValue($rawValue);
 
             $query = $definition->values();
@@ -110,5 +137,35 @@ class CustomFieldSync
                 ]);
             }
         }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function invalidLookupNames(CustomFieldDefinition $definition, mixed $rawValue): array
+    {
+        $key = $definition->lookupList?->key;
+        if ($key === null) {
+            return ['missing-list'];
+        }
+
+        $names = $definition->type === CustomFieldType::MultiLookup
+            ? (is_array($rawValue) ? $rawValue : ($rawValue === null || $rawValue === '' ? [] : [$rawValue]))
+            : ($rawValue === null || $rawValue === '' ? [] : [$rawValue]);
+
+        $allowed = LookupField::allowedNames($key, $names);
+        $invalid = [];
+        foreach ($names as $name) {
+            $name = trim((string) $name);
+            if ($name !== '' && ! in_array($name, $allowed, true)) {
+                $invalid[] = $name;
+            }
+        }
+
+        return $invalid;
     }
 }

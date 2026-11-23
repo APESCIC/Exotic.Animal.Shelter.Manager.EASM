@@ -49,7 +49,7 @@ class UpdateCustomFieldDefinitionRequest extends FormRequest
         $this->merge([
             'active' => $this->boolean('active'),
             'is_mandatory' => $this->boolean('is_mandatory'),
-            'show_on_new_record' => $this->boolean('show_on_new_record', true),
+            'show_on_new_record' => $this->boolean('show_on_new_record'),
             'species_filter' => $this->filled('species_filter') ? trim((string) $this->input('species_filter')) : null,
             'lookup_list_id' => $this->filled('lookup_list_id') ? (int) $this->input('lookup_list_id') : null,
         ]);

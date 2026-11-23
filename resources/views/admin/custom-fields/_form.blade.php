@@ -48,6 +48,7 @@
     Mandatory (blocks save when empty)
 </label>
 
+<input type="hidden" name="show_on_new_record" value="0">
 <label class="check" for="show_on_new_record">
     <input id="show_on_new_record" name="show_on_new_record" type="checkbox" value="1" @checked(old('show_on_new_record', $definition->show_on_new_record ?? true))>
     Show on new record form

@@ -64,8 +64,9 @@ class StorePersonRequest extends FormRequest
                     $definition->type === CustomFieldType::Boolean ? ($raw ?? '0') : $raw,
                 );
 
-                $empty = $normalized === null || $normalized === ''
-                    || ($definition->type === CustomFieldType::Boolean && $normalized === '0');
+                $empty = $definition->type === CustomFieldType::Boolean
+                    ? ($normalized !== '0' && $normalized !== '1')
+                    : ($normalized === null || $normalized === '');
 
                 if ($empty) {
                     $validator->errors()->add(
