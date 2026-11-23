@@ -102,6 +102,43 @@ class StructuredObservationTest extends TestCase
         $this->assertGreaterThan(0, $second);
     }
 
+    public function test_starter_types_match_royal_python_on_fresh_seed(): void
+    {
+        $this->seed(ObservationTypeSeeder::class);
+
+        $staff = User::factory()->staff()->create();
+        $animal = Animal::factory()->create(['species' => 'Royal python']);
+
+        $this->actingAs($staff)
+            ->get(route('animals.observations.create', $animal))
+            ->assertOk()
+            ->assertSee('Eaten')
+            ->assertSee('Shedding')
+            ->assertSee('Basking')
+            ->assertDontSee('Vocalisation');
+    }
+
+    public function test_seeder_upgrades_legacy_demo_filters_but_skips_admin_edits(): void
+    {
+        $legacy = ObservationType::factory()->create([
+            'name' => 'Eaten',
+            'kind' => ObservationTypeKind::ValueList,
+            'species_filter' => ObservationTypeSeeder::LEGACY_REPTILE_SPECIES,
+            'sort_order' => 10,
+        ]);
+        $edited = ObservationType::factory()->create([
+            'name' => 'Shedding',
+            'kind' => ObservationTypeKind::ValueList,
+            'species_filter' => ['Corn snake'],
+            'sort_order' => 40,
+        ]);
+
+        $this->seed(ObservationTypeSeeder::class);
+
+        $this->assertSame(ObservationTypeSeeder::REPTILE_SPECIES, $legacy->fresh()->species_filter);
+        $this->assertSame(['Corn snake'], $edited->fresh()->species_filter);
+    }
+
     public function test_volunteer_can_store_readonly_forbidden(): void
     {
         $volunteer = User::factory()->volunteer()->create();

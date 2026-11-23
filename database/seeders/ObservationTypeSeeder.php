@@ -11,6 +11,48 @@ use Illuminate\Database\Seeder;
 class ObservationTypeSeeder extends Seeder
 {
     /**
+     * Previous demo-labelled filters from v1.3.0. Untouched rows matching these exactly are upgraded.
+     *
+     * @var list<string>
+     */
+    public const LEGACY_REPTILE_SPECIES = [
+        'Bearded dragon (demo)',
+        'Corn snake (demo)',
+        'Sulcata tortoise (demo)',
+        'Royal python (demo)',
+        'Leopard gecko (demo)',
+    ];
+
+    /**
+     * @var list<string>
+     */
+    public const LEGACY_BIRD_SPECIES = [
+        'African grey parrot (demo)',
+        'Eclectus parrot (demo)',
+        'Budgerigar (demo)',
+    ];
+
+    /**
+     * @var list<string>
+     */
+    public const REPTILE_SPECIES = [
+        'Bearded dragon',
+        'Corn snake',
+        'Sulcata tortoise',
+        'Royal python',
+        'Leopard gecko',
+    ];
+
+    /**
+     * @var list<string>
+     */
+    public const BIRD_SPECIES = [
+        'African grey parrot',
+        'Eclectus parrot',
+        'Budgerigar',
+    ];
+
+    /**
      * Starter daily observation types for reptiles and birds. Safe to re-run.
      */
     public function run(): void
@@ -21,38 +63,24 @@ class ObservationTypeSeeder extends Seeder
             ['Yes', 'No', 'Partial'],
         );
 
-        $reptileSpecies = [
-            'Bearded dragon (demo)',
-            'Corn snake (demo)',
-            'Sulcata tortoise (demo)',
-            'Royal python (demo)',
-            'Leopard gecko (demo)',
-        ];
-
-        $birdSpecies = [
-            'African grey parrot (demo)',
-            'Eclectus parrot (demo)',
-            'Budgerigar (demo)',
-        ];
-
-        $this->ensureType('Eaten', ObservationTypeKind::ValueList, $yesNoPartial->id, 10, $reptileSpecies);
-        $this->ensureType('Drunk', ObservationTypeKind::ValueList, $yesNoPartial->id, 20, $reptileSpecies);
+        $this->ensureType('Eaten', ObservationTypeKind::ValueList, $yesNoPartial->id, 10, self::REPTILE_SPECIES, self::LEGACY_REPTILE_SPECIES);
+        $this->ensureType('Drunk', ObservationTypeKind::ValueList, $yesNoPartial->id, 20, self::REPTILE_SPECIES, self::LEGACY_REPTILE_SPECIES);
         $this->ensureType('Faeces', ObservationTypeKind::ValueList, $this->ensureList(
             'observation_faeces',
             'Observation: Faeces',
             ['Normal', 'Soft', 'None seen', 'Not checked'],
-        )->id, 30, $reptileSpecies);
-        $this->ensureType('Shedding', ObservationTypeKind::ValueList, $yesNoPartial->id, 40, $reptileSpecies);
-        $this->ensureType('Basking', ObservationTypeKind::ValueList, $yesNoPartial->id, 50, $reptileSpecies);
+        )->id, 30, self::REPTILE_SPECIES, self::LEGACY_REPTILE_SPECIES);
+        $this->ensureType('Shedding', ObservationTypeKind::ValueList, $yesNoPartial->id, 40, self::REPTILE_SPECIES, self::LEGACY_REPTILE_SPECIES);
+        $this->ensureType('Basking', ObservationTypeKind::ValueList, $yesNoPartial->id, 50, self::REPTILE_SPECIES, self::LEGACY_REPTILE_SPECIES);
 
-        $this->ensureType('Eaten', ObservationTypeKind::ValueList, $yesNoPartial->id, 10, $birdSpecies);
-        $this->ensureType('Drunk', ObservationTypeKind::ValueList, $yesNoPartial->id, 20, $birdSpecies);
+        $this->ensureType('Eaten', ObservationTypeKind::ValueList, $yesNoPartial->id, 10, self::BIRD_SPECIES, self::LEGACY_BIRD_SPECIES);
+        $this->ensureType('Drunk', ObservationTypeKind::ValueList, $yesNoPartial->id, 20, self::BIRD_SPECIES, self::LEGACY_BIRD_SPECIES);
         $this->ensureType('Droppings', ObservationTypeKind::ValueList, $this->ensureList(
             'observation_droppings',
             'Observation: Droppings',
             ['Normal', 'Soft', 'None seen', 'Not checked'],
-        )->id, 30, $birdSpecies);
-        $this->ensureType('Vocalisation', ObservationTypeKind::FreeText, null, 40, $birdSpecies);
+        )->id, 30, self::BIRD_SPECIES, self::LEGACY_BIRD_SPECIES);
+        $this->ensureType('Vocalisation', ObservationTypeKind::FreeText, null, 40, self::BIRD_SPECIES, self::LEGACY_BIRD_SPECIES);
     }
 
     /**
@@ -83,6 +111,7 @@ class ObservationTypeSeeder extends Seeder
 
     /**
      * @param  list<string>|null  $speciesFilter
+     * @param  list<string>|null  $legacySpeciesFilter
      */
     private function ensureType(
         string $name,
@@ -90,6 +119,7 @@ class ObservationTypeSeeder extends Seeder
         ?int $lookupListId,
         int $sortOrder,
         ?array $speciesFilter,
+        ?array $legacySpeciesFilter = null,
     ): void {
         $attributes = [
             'kind' => $kind,
@@ -102,7 +132,14 @@ class ObservationTypeSeeder extends Seeder
         $existing = ObservationType::query()
             ->where('name', $name)
             ->get()
-            ->first(fn (ObservationType $type): bool => $type->species_filter === $speciesFilter);
+            ->first(function (ObservationType $type) use ($speciesFilter, $legacySpeciesFilter): bool {
+                if ($type->species_filter === $speciesFilter) {
+                    return true;
+                }
+
+                return $legacySpeciesFilter !== null && $type->species_filter === $legacySpeciesFilter;
+            });
+
         if ($existing !== null) {
             $existing->update($attributes);
 

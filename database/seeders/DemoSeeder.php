@@ -47,16 +47,16 @@ class DemoSeeder extends Seeder
      * @var list<string>
      */
     public const SPECIES = [
-        'Bearded dragon (demo)',
-        'Corn snake (demo)',
-        'Sulcata tortoise (demo)',
-        'Royal python (demo)',
-        'Leopard gecko (demo)',
-        'Common marmoset (demo)',
-        'Capuchin monkey (demo)',
-        'African grey parrot (demo)',
-        'Eclectus parrot (demo)',
-        'Budgerigar (demo)',
+        'Bearded dragon',
+        'Corn snake',
+        'Sulcata tortoise',
+        'Royal python',
+        'Leopard gecko',
+        'Common marmoset',
+        'Capuchin monkey',
+        'African grey parrot',
+        'Eclectus parrot',
+        'Budgerigar',
     ];
 
     public function run(): void
