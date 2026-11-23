@@ -102,6 +102,43 @@ class StructuredObservationTest extends TestCase
         $this->assertGreaterThan(0, $second);
     }
 
+    public function test_starter_types_match_royal_python_on_fresh_seed(): void
+    {
+        $this->seed(ObservationTypeSeeder::class);
+
+        $staff = User::factory()->staff()->create();
+        $animal = Animal::factory()->create(['species' => 'Royal python']);
+
+        $this->actingAs($staff)
+            ->get(route('animals.observations.create', $animal))
+            ->assertOk()
+            ->assertSee('Eaten')
+            ->assertSee('Shedding')
+            ->assertSee('Basking')
+            ->assertDontSee('Vocalisation');
+    }
+
+    public function test_seeder_upgrades_legacy_demo_filters_but_skips_admin_edits(): void
+    {
+        $legacy = ObservationType::factory()->create([
+            'name' => 'Eaten',
+            'kind' => ObservationTypeKind::ValueList,
+            'species_filter' => ObservationTypeSeeder::LEGACY_REPTILE_SPECIES,
+            'sort_order' => 10,
+        ]);
+        $edited = ObservationType::factory()->create([
+            'name' => 'Shedding',
+            'kind' => ObservationTypeKind::ValueList,
+            'species_filter' => ['Corn snake'],
+            'sort_order' => 40,
+        ]);
+
+        $this->seed(ObservationTypeSeeder::class);
+
+        $this->assertSame(ObservationTypeSeeder::REPTILE_SPECIES, $legacy->fresh()->species_filter);
+        $this->assertSame(['Corn snake'], $edited->fresh()->species_filter);
+    }
+
     public function test_volunteer_can_store_readonly_forbidden(): void
     {
         $volunteer = User::factory()->volunteer()->create();
@@ -156,6 +193,55 @@ class StructuredObservationTest extends TestCase
 
         $this->assertSame(3, AnimalObservation::query()->count());
         $this->assertSame(0, $skipped->observations()->count());
+    }
+
+    public function test_bulk_save_same_animal_type_date_updates_instead_of_duplicating(): void
+    {
+        $staff = User::factory()->staff()->create();
+        $enclosure = Enclosure::factory()->create();
+        $list = LookupList::factory()->create();
+        $yes = LookupValue::factory()->create(['lookup_list_id' => $list->id, 'name' => 'Yes']);
+        $no = LookupValue::factory()->create(['lookup_list_id' => $list->id, 'name' => 'No']);
+        $type = ObservationType::factory()->create([
+            'name' => 'Eaten',
+            'kind' => ObservationTypeKind::ValueList,
+            'lookup_list_id' => $list->id,
+        ]);
+        $animal = Animal::factory()->create(['enclosure_id' => $enclosure->id]);
+
+        $payload = [
+            'observed_on' => '2026-11-21',
+            'enclosure_id' => $enclosure->id,
+            'rows' => [
+                $animal->id => [
+                    'include' => '1',
+                    'types' => [$type->id => (string) $yes->id],
+                ],
+            ],
+        ];
+
+        $this->actingAs($staff)
+            ->post(route('observations.bulk.store'), $payload)
+            ->assertRedirect();
+
+        $this->actingAs($staff)
+            ->post(route('observations.bulk.store'), [
+                ...$payload,
+                'rows' => [
+                    $animal->id => [
+                        'include' => '1',
+                        'types' => [$type->id => (string) $no->id],
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertSame(1, AnimalObservation::query()->count());
+        $saved = AnimalObservation::query()->sole();
+        $this->assertSame($animal->id, $saved->animal_id);
+        $this->assertSame($type->id, $saved->observation_type_id);
+        $this->assertTrue($saved->observed_on->isSameDay('2026-11-21'));
+        $this->assertSame($no->id, $saved->lookup_value_id);
     }
 
     public function test_author_edit_within_24_hours_after_forbidden_admin_always(): void

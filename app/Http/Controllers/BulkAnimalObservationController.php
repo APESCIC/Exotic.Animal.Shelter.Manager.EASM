@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBulkAnimalObservationRequest;
 use App\Models\Animal;
+use App\Models\AnimalObservation;
 use App\Models\Enclosure;
 use App\Models\ObservationType;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,24 +38,39 @@ class BulkAnimalObservationController extends Controller
     {
         $userId = $request->user()?->id;
         $observedOn = $request->validated('observed_on');
-        $created = 0;
+        $saved = 0;
 
         foreach ($request->resolvedEntries() as $entry) {
-            $entry['animal']->observations()->create([
-                'observation_type_id' => $entry['type']->id,
-                'lookup_value_id' => $entry['lookup_value_id'],
-                'value_text' => $entry['value_text'],
-                'observed_on' => $observedOn,
-                'user_id' => $userId,
-            ]);
-            $created++;
+            $observation = AnimalObservation::query()
+                ->where('animal_id', $entry['animal']->id)
+                ->where('observation_type_id', $entry['type']->id)
+                ->whereDate('observed_on', $observedOn)
+                ->first();
+
+            if ($observation === null) {
+                AnimalObservation::query()->create([
+                    'animal_id' => $entry['animal']->id,
+                    'observation_type_id' => $entry['type']->id,
+                    'lookup_value_id' => $entry['lookup_value_id'],
+                    'value_text' => $entry['value_text'],
+                    'observed_on' => $observedOn,
+                    'user_id' => $userId,
+                ]);
+            } else {
+                $observation->update([
+                    'lookup_value_id' => $entry['lookup_value_id'],
+                    'value_text' => $entry['value_text'],
+                    'user_id' => $userId,
+                ]);
+            }
+            $saved++;
         }
 
         return redirect()
             ->route('observations.bulk', $request->only(['enclosure_id', 'location']))
-            ->with('status', $created === 0
+            ->with('status', $saved === 0
                 ? 'No observations were saved — tick animals and enter at least one value.'
-                : ($created === 1 ? 'One observation recorded.' : $created.' observations recorded.'));
+                : ($saved === 1 ? 'One observation saved.' : $saved.' observations saved.'));
     }
 
     /**

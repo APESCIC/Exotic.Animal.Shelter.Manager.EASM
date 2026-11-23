@@ -14,6 +14,7 @@
                 max-width: 42rem;
                 line-height: 1.5;
                 color: #1b1b18;
+                background: #fff;
             }
             h1 { margin-bottom: 0.5rem; }
             fieldset {
@@ -28,12 +29,18 @@
                 box-sizing: border-box;
                 padding: 0.45rem 0.5rem;
                 font: inherit;
+                color: #1b1b18;
+                background: #fff;
+                border: 1px solid #888;
             }
             button, .button {
                 margin-top: 0.75rem;
                 padding: 0.55rem 1rem;
                 font: inherit;
                 cursor: pointer;
+                color: #1b1b18;
+                background: #f0f0ee;
+                border: 1px solid #888;
             }
             .errors, .status-fail {
                 background: #fde8e8;
@@ -66,6 +73,26 @@
             .checks li { margin: 0.35rem 0; }
             .progress { font-variant-numeric: tabular-nums; }
             .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+            @media (prefers-color-scheme: dark) {
+                body { color: #ededec; background: #121212; }
+                fieldset { border-color: #555; }
+                input, select {
+                    color: #ededec;
+                    background: #1e1e1e;
+                    border-color: #777;
+                }
+                button, .button {
+                    color: #ededec;
+                    background: #2a2a2a;
+                    border-color: #777;
+                }
+                .errors, .status-fail { background: #3b1515; color: #fecaca; }
+                .status-ok { background: #14301a; color: #bbf7d0; }
+                .hint { color: #b0b0a8; }
+                .steps li { border-color: #555; }
+                .steps li.active { background: #ededec; color: #121212; border-color: #ededec; }
+                .steps li.done { background: #14301a; border-color: #3d7a4a; color: #bbf7d0; }
+            }
         </style>
     </head>
     <body>
